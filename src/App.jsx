@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useParams } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
-import { Search, X, Disc, Star, ShoppingCart, MessageSquare, User, Lock } from 'lucide-react';
+import { Search, X, Disc, Star, ShoppingCart, ShoppingBag, MessageSquare, User, Lock } from 'lucide-react';
 
 // --- ÜRÜN DETAY SAYFASI (App'in DIŞINDA olmalı) ---
 const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn }) => {
@@ -150,7 +150,7 @@ const CheckoutPage = ({ total }) => (
 const AppContent = ({ 
   cart, setActiveCategory, activeCategory, isSidebarOpen, setIsSidebarOpen, isNavOpen, setIsNavOpen,
   kampanyalar, currentSlide, setSelectedKampanya, selectedPlak, setSelectedPlak, filtrelenmisPlaklar,
-  sepeteEkle, sepetiBosalt, adetGuncelle, urunCikar, toplamTutar, selectedKampanya, plaklar
+  sepeteEkle, sepetiBosalt, adetGuncelle, urunCikar, toplamTutar, selectedKampanya, plaklar, bildirim
 }) => {
   
   const location = useLocation(); // ✅ Beyaz ekran hatasını bu satır ve bu yapı çözer.
@@ -431,6 +431,27 @@ const AppContent = ({
         </div>
         <div style={{ borderTop: '1px solid #333', paddingTop: '20px', fontSize: '0.7rem' }}>© 2026 Vintage Vinyls - Tüm Hakları Plakların İçinde Saklıdır.</div>
       </footer>
+      {bildirim && (
+  <div style={{
+    position: 'fixed',
+    bottom: '30px',
+    right: '30px',
+    backgroundColor: '#ff9e00',
+    color: '#1a1a1a',
+    padding: '15px 25px',
+    border: '4px solid #1a1a1a',
+    boxShadow: '8px 8px 0px #1a1a1a',
+    fontWeight: 'bold',
+    fontSize: '1.1rem',
+    zIndex: 9999,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px'
+  }}>
+    <ShoppingBag size={24} />
+    <span>{bildirim}</span>
+  </div>
+)}
     </div>
   );
 }
@@ -445,6 +466,7 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [aramaMetni, setAramaMetni] = useState('');
+  const [bildirim, setBildirim] = useState(null); // Bildirim mesajı tutar
 
   const kampanyalar = [
     { id: 1, baslik: "Yaz Sonu İndirimi", detay: "Tüm Rock plaklarında %20 indirim!", renk: "#ff9e00", tarih: "15 Mart" },
@@ -465,6 +487,10 @@ function App() {
     } else {
       setCart([...cart, { ...plak, adet: 1 }]);
     }
+    setBildirim(`${plak.ad} sepete eklendi! 📦`);
+  setTimeout(() => {
+    setBildirim(null); // 3 saniye sonra otomatik kapanır
+  }, 3000);
   };
 
   const adetGuncelle = (id, miktar) => {
@@ -500,6 +526,7 @@ function App() {
         filtrelenmisPlaklar={filtrelenmisPlaklar} sepeteEkle={sepeteEkle}
         sepetiBosalt={sepetiBosalt} adetGuncelle={adetGuncelle} urunCikar={urunCikar}
         toplamTutar={toplamTutar}
+        bildirim={bildirim}
       />
     </Router>
   )
