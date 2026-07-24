@@ -150,10 +150,13 @@ const CheckoutPage = ({ total }) => (
 const AppContent = ({ 
   cart, setActiveCategory, activeCategory, isSidebarOpen, setIsSidebarOpen, isNavOpen, setIsNavOpen,
   kampanyalar, currentSlide, setSelectedKampanya, selectedPlak, setSelectedPlak, filtrelenmisPlaklar,
-  sepeteEkle, sepetiBosalt, adetGuncelle, urunCikar, toplamTutar, selectedKampanya, plaklar, bildirim
+  sepeteEkle, sepetiBosalt, adetGuncelle, urunCikar, toplamTutar, selectedKampanya, plaklar, bildirim, kuponKodu, kuponMesaji, kuponKullan, uygulananIndirim, indirimTutari, odenecekTutar, DEFAULT_KUPONLAR,
 }) => {
   
   const location = useLocation(); // ✅ Beyaz ekran hatasını bu satır ve bu yapı çözer.
+  const guvenliToplam = Number(toplamTutar) || 0;
+  const guvenliIndirim = Number(indirimTutari) || 0;
+  const guvenliOdenecek = Number(odenecekTutar) || guvenliToplam;
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
@@ -291,48 +294,113 @@ const AppContent = ({
             {/* AppContent içindeki Routes kısmında bunu düzelt */}
 <Route path="/product/:id" element={<ProductDetail plaklar={plaklar} sepeteEkle={sepeteEkle} />} />
             
-            <Route path="/cart" element={
-              <div style={{ padding: '20px', border: '4px solid #1a1a1a', backgroundColor: 'white', boxShadow: '10px 10px 0px #1a1a1a' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #1a1a1a', paddingBottom: '10px' }}>
-                  <h2>SEPETİNİZ ({cart.length})</h2>
-                  {cart.length > 0 && <button onClick={sepetiBosalt} style={{ backgroundColor: '#ff4d4d', border: '2px solid #1a1a1a', color: 'white', padding: '5px 10px', cursor: 'pointer' }}>BOŞALT 🗑️</button>}
-                </div>
-                {cart.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '40px' }}>
-                    <Disc size={80} color="#1a1a1a" strokeWidth={2.5} />
-                    <p>Sepetiniz şu an bomboş... </p>
-                    <Link to="/"><button style={{ backgroundColor: '#ff9e00', border: '3px solid #1a1a1a', padding: '15px 30px', fontWeight: 'bold', cursor: 'pointer' }}>ALIŞVERİŞE BAŞLA</button></Link>
-                  </div>
-                ) : (
-                  <>
-                    {cart.map((item, index) => (
-                      <div key={item.id} style={{ borderBottom: '2px solid #1a1a1a', padding: '15px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ flex: 1 }}>
-                          <span style={{ fontWeight: 'bold' }}>{item.ad}</span>
-                          <p style={{ margin: 0, fontSize: '0.8rem' }}>{item.fiyat} TL x {item.adet || 1}</p>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <button onClick={() => adetGuncelle(item.id, -1)} style={{ width: '30px', height: '30px', border: '2px solid #1a1a1a', cursor: 'pointer', backgroundColor: '#e2f0cb' }}>-</button>
-                          <span style={{ fontWeight: 'bold' }}>{item.adet || 1}</span>
-                          <button onClick={() => adetGuncelle(item.id, 1)} style={{ width: '30px', height: '30px', border: '2px solid #1a1a1a', cursor: 'pointer', backgroundColor: '#ff9e00' }}>+</button>
-                        </div>
-                        <div style={{ flex: 1, textAlign: 'right', fontWeight: 'bold' }}>
-                          {item.fiyat * (item.adet || 1)} TL
-                          <button onClick={() => urunCikar(index)} style={{ marginLeft: '15px', color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>X</button>
-                        </div>
+          <Route path="/cart" element={
+  <div style={{ padding: '20px', border: '4px solid #1a1a1a', backgroundColor: 'white', boxShadow: '10px 10px 0px #1a1a1a' }}>
+    
+    {/* ÜST BAŞLIK & BOŞALT BUTONU */}
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #1a1a1a', paddingBottom: '10px' }}>
+      <h2>SEPETİNİZ ({(cart || []).length})</h2>
+      {(cart || []).length > 0 && (
+        <button onClick={sepetiBosalt} style={{ backgroundColor: '#ff4d4d', border: '2px solid #1a1a1a', color: 'white', padding: '5px 10px', cursor: 'pointer', fontWeight: 'bold' }}>
+          BOŞALT 🗑️
+        </button>
+      )}
+    </div>
+
+    {/* SEPET BOŞ DURUMU */}
+    {(!cart || cart.length === 0) ? (
+      <div style={{ textAlign: 'center', padding: '40px' }}>
+        <Disc size={80} color="#1a1a1a" strokeWidth={2.5} />
+        <p style={{ fontWeight: 'bold', margin: '20px 0' }}>Sepetiniz şu an bomboş...</p>
+        <Link to="/">
+          <button style={{ backgroundColor: '#ff9e00', border: '3px solid #1a1a1a', padding: '15px 30px', fontWeight: 'bold', cursor: 'pointer' }}>
+            ALIŞVERİŞE BAŞLA
+          </button>
+        </Link>
+      </div>
+    ) : (
+      <>
+        {/* ÜRÜN LİSTESİ */}
+        {cart.map((item, index) => (
+          <div key={item.id || index} style={{ borderBottom: '2px solid #1a1a1a', padding: '15px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ flex: 1 }}>
+              <span style={{ fontWeight: 'bold' }}>{item.ad}</span>
+              <p style={{ margin: 0, fontSize: '0.8rem' }}>{item.fiyat} TL x {item.adet || 1}</p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <button onClick={() => adetGuncelle(item.id, -1)} style={{ width: '30px', height: '30px', border: '2px solid #1a1a1a', cursor: 'pointer', backgroundColor: '#e2f0cb', fontWeight: 'bold' }}>-</button>
+              <span style={{ fontWeight: 'bold' }}>{item.adet || 1}</span>
+              <button onClick={() => adetGuncelle(item.id, 1)} style={{ width: '30px', height: '30px', border: '2px solid #1a1a1a', cursor: 'pointer', backgroundColor: '#ff9e00', fontWeight: 'bold' }}>+</button>
+            </div>
+            <div style={{ flex: 1, textAlign: 'right', fontWeight: 'bold' }}>
+              {(item.fiyat * (item.adet || 1)).toFixed(2)} TL
+              <button onClick={() => urunCikar(index)} style={{ marginLeft: '15px', color: 'red', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 'bold' }}>X</button>
+            </div>
+          </div>
+        ))}
+
+       {/* İNDİRİM KUPONU ALANI */}
+<div style={{ margin: '20px 0', padding: '15px', border: '3px solid #1a1a1a', backgroundColor: '#f9f9f9' }}>
+  <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px' }}>İNDİRİM KUPONU</label>
+  <div style={{ display: 'flex', gap: '10px' }}>
+    <input 
+      id="kuponInputAlani"
+      type="text" 
+      placeholder="Örn: VINTAGE10" 
+      style={{ flex: 1, padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', textTransform: 'uppercase', outline: 'none' }}
+    />
+    <button 
+      type="button"
+      onClick={() => {
+        const girilenMetin = document.getElementById('kuponInputAlani')?.value;
+        kuponKullan(girilenMetin);
+      }}
+      style={{ padding: '10px 20px', backgroundColor: '#1a1a1a', color: 'white', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}
+    >
+      UYGULA
+    </button>
+  </div>
+  
+  {kuponMesaji && (
+    <p style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '0.9rem', color: kuponMesaji.includes('❌') ? '#cc0000' : '#008000' }}>
+      {kuponMesaji}
+    </p>
+  )}
+</div>
+
+        {/* FİYAT DÖKÜMÜ */}
+<div style={{ marginTop: '20px', borderTop: '3px solid #1a1a1a', paddingTop: '15px' }}>
+  <p style={{ display: 'flex', justifyContent: 'space-between', margin: '5px 0' }}>
+    <span>Ara Toplam:</span>
+    <span>{guvenliToplam.toFixed(2)}</span>
+  </p>
+
+  {uygulananIndirim > 0 && (
+    <p style={{ display: 'flex', justifyContent: 'space-between', margin: '5px 0', color: 'green', fontWeight: 'bold' }}>
+      <span>İndirim:</span>
+      <span>-{guvenliIndirim.toFixed(2)} TL</span>
+    </p>
+  )}
+
+  <h3 style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.3rem', borderTop: '2px solid #1a1a1a', paddingTop: '10px', marginTop: '10px' }}>
+    <span>ÖDENECEK TUTAR:</span>
+    <span>{guvenliOdenecek.toFixed(2)}</span>
+  </h3>
                       </div>
-                    ))}
-                    <div style={{ marginTop: '30px', textAlign: 'right', borderTop: '3px solid #1a1a1a', paddingTop: '20px' }}>
-                      <h3>TOPLAM TUTAR: {toplamTutar} TL</h3>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-                        <Link to="/" style={{ color: '#1a1a1a', fontWeight: 'bold' }}>← ALIŞVERİŞE DÖN</Link>
-                        <Link to="/checkout"><button style={{ backgroundColor: '#ff9e00', border: '3px solid #1a1a1a', padding: '10px 25px', fontWeight: 'bold', cursor: 'pointer' }}>ÖDEMEYE GEÇ →</button></Link>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            } />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px', alignItems: 'center' }}>
+            <Link to="/" style={{ color: '#1a1a1a', fontWeight: 'bold', textDecoration: 'none' }}>← ALIŞVERİŞE DÖN</Link>
+            <Link to="/checkout">
+              <button style={{ backgroundColor: '#ff9e00', border: '3px solid #1a1a1a', padding: '12px 25px', fontWeight: 'bold', cursor: 'pointer' }}>
+                ÖDEMEYE GEÇ →
+              </button>
+            </Link>
+          </div>
+      </>
+    )}
+  </div>
+} />
+            
+
             <Route path="/checkout" element={<CheckoutPage total={toplamTutar} />} />
             <Route path="/campaigns" element={
               <div style={{ padding: '20px', border: '4px solid #1a1a1a', backgroundColor: 'white', boxShadow: '10px 10px 0px #1a1a1a' }}>
@@ -467,6 +535,62 @@ function App() {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [aramaMetni, setAramaMetni] = useState('');
   const [bildirim, setBildirim] = useState(null); // Bildirim mesajı tutar
+  // Varsayılan Kupon Tanımları (Frontend)
+
+  // STATE'LER
+  // 1. KUPON STATE'LERİ
+ 
+
+const [uygulananIndirim, setUygulananIndirim] = useState(0);
+const [kuponMesaji, setKuponMesaji] = useState('');
+
+ // 1. TOPLAM TUTAR HESAPLAMASI (Metin/String Fiyatları Temizleyen Güvenli Yapı)
+const toplamTutar = (cart || []).reduce((acc, item) => {
+  // Fiyat nesne içinde 'fiyat', 'price' veya 'ucret' olarak gelebilir:
+  const gelenFiyat = item.fiyat || item.price || item.ucret || 0;
+  
+  // Metin geldiyse (örn: "250 TL") rakam dışındaki her şeyi temizle:
+  const temizFiyat = typeof gelenFiyat === 'string' 
+    ? gelenFiyat.replace(/[^0-9.-]+/g, "") 
+    : gelenFiyat;
+
+  const fiyat = parseFloat(temizFiyat) || 0;
+  const adet = parseInt(item.adet || item.quantity || 1) || 1;
+
+  return acc + (fiyat * adet);
+}, 0);
+
+  
+// 3. İNDİRİM VE ÖDENECEK TUTAR (toplamTutar hesaplandıktan SONRA gelir)
+const indirimTutari = toplamTutar * (uygulananIndirim || 0);
+const odenecekTutar = uygulananIndirim > 0 
+  ? Math.max(0, toplamTutar - indirimTutari) 
+  : toplamTutar;
+
+  const DEFAULT_KUPONLAR = {
+  'VINTAGE10': { oran: 0.10, mesaj: '🎉 %10 İndirim Kuponu Uygulandı!' },
+  'VINVIN20': { oran: 0.20, mesaj: '🔥 %20 Özel VinVin Kuponu Uygulandı!' }
+};
+// 4. KUPON UYGULAMA FONKSİYONU
+const kuponKullan = (kod) => {
+  if (!kod) {
+    setKuponMesaji('❌ Lütfen bir kupon kodu girin');
+    return;
+  }
+  
+  const temizKod = kod.trim().toUpperCase();
+
+  // DEFAULT_KUPONLAR objesini burada okuyoruz (Never read uyarısı kalkıyor!)
+  if (DEFAULT_KUPONLAR[temizKod]) {
+    const kupon = DEFAULT_KUPONLAR[temizKod];
+    setUygulananIndirim(kupon.oran);
+    setKuponMesaji(kupon.mesaj);
+  } else {
+    setUygulananIndirim(0);
+    setKuponMesaji('❌ Geçersiz Kupon Kodu');
+  }
+};
+
 
   const kampanyalar = [
     { id: 1, baslik: "Yaz Sonu İndirimi", detay: "Tüm Rock plaklarında %20 indirim!", renk: "#ff9e00", tarih: "15 Mart" },
@@ -511,7 +635,6 @@ function App() {
     return () => clearInterval(timer)
   }, [kampanyalar.length])
 
-  const toplamTutar = cart.reduce((acc, curr) => acc + (curr.fiyat * (curr.adet || 1)), 0);
   const filtrelenmisPlaklar = activeCategory === "Hepsi" ? plaklar : plaklar.filter(p => p.kategori === activeCategory)
 
   return (
