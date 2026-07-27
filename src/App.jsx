@@ -1,6 +1,76 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, useParams } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
+
+// --- ÜRÜN DETAY SAYFASI (App'in DIŞINDA olmalı) ---
+const ProductDetail = ({ plaklar, sepeteEkle }) => {
+  const { id } = useParams(); 
+  const plak = plaklar.find(p => p.id === parseInt(id));
+  const [yorumlar, setYorumlar] = useState(["Harika bir baskı!", "Ses kalitesi çok net."]);
+  const [yeniYorum, setYeniYorum] = useState("");
+
+  const yorumEkle = () => {
+    if(yeniYorum) {
+      setYorumlar([...yorumlar, yeniYorum]);
+      setYeniYorum("");
+    }
+  };
+
+  if (!plak) return <div style={{ padding: '100px', textAlign: 'center' }}>Ürün bulunamadı! 💿</div>;
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <div style={{ display: 'flex', gap: '50px', flexWrap: 'wrap' }}>
+        {/* SOL: RESİM */}
+        <div style={{ flex: '1', minWidth: '300px', border: '5px solid #1a1a1a', boxShadow: '15px 15px 0px #ff9e00', backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '5rem', aspectRatio: '1/1' }}>
+           💿
+        </div>
+        
+        {/* SAĞ: DETAY VE YORUM */}
+        <div style={{ flex: '1', minWidth: '300px' }}>
+          <h2 style={{ fontSize: '3rem', margin: 0 }}>{plak.ad}</h2>
+          <p style={{ fontSize: '1.5rem', color: '#666' }}>{plak.sanatci}</p>
+          <div style={{ padding: '15px', backgroundColor: '#e2f0cb', border: '3px solid #1a1a1a', display: 'inline-block', margin: '20px 0', fontWeight: 'bold', fontSize: '1.5rem' }}>
+            {plak.fiyat} TL
+          </div>
+          
+          <button onClick={() => sepeteEkle(plak)} style={{ display: 'block', width: '100%', padding: '20px', backgroundColor: '#1a1a1a', color: 'white', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '1.2rem', marginBottom: '30px' }}>
+            SEPETE EKLE +
+          </button>
+
+          <div style={{ marginTop: '30px', border: '3px solid #1a1a1a', padding: '20px', backgroundColor: 'white' }}>
+            <h4 style={{ margin: '0 0 15px 0' }}>YORUMLAR</h4>
+            {yorumlar.map((y, i) => <p key={i} style={{ borderBottom: '1px solid #eee', padding: '5px 0' }}>• {y}</p>)}
+            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                <input 
+                value={yeniYorum} 
+                onChange={(e) => setYeniYorum(e.target.value)}
+                placeholder="Yorumunuzu yazın..." 
+                style={{ flex: 1, padding: '10px', border: '2px solid #1a1a1a' }}
+                />
+                <button onClick={yorumEkle} style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '10px 20px', fontWeight: 'bold', cursor: 'pointer' }}>GÖNDER</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* BENZER ÜRÜNLER ALANI (Slider buraya gelecek) */}
+      <div style={{ marginTop: '60px', borderTop: '4px solid #1a1a1a', paddingTop: '30px' }}>
+         <h3>AYNI KATEGORİDEN DİĞER PLAKLAR</h3>
+        {/* 2. HATALI SATIRI (RelatedProducts) SİL, YERİNE BU DİNAMİK LİSTEYİ KOY */}
+          <div style={{ display: 'flex', gap: '20px', overflowX: 'auto', padding: '10px 0' }}>
+            {plaklar.filter(p => p.kategori === plak.kategori && p.id !== plak.id).map(p => (
+              <Link key={p.id} to={`/product/${p.id}`} style={{ textDecoration: 'none', color: 'inherit', minWidth: '180px', border: '3px solid #1a1a1a', padding: '15px', backgroundColor: 'white', boxShadow: '5px 5px 0px #1a1a1a' }}>
+                <div style={{ textAlign: 'center', fontSize: '2rem' }}>💿</div>
+                <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{p.ad}</div>
+                <div style={{ fontSize: '0.8rem' }}>{p.fiyat} TL</div>
+              </Link>
+            ))}
+          </div>
+      </div>
+    </div>
+  );
+};
 
 // --- BİLEŞENLER ---
 const CheckoutPage = ({ total }) => (
@@ -22,7 +92,7 @@ const CheckoutPage = ({ total }) => (
 const AppContent = ({ 
   cart, setActiveCategory, activeCategory, isSidebarOpen, setIsSidebarOpen, isNavOpen, setIsNavOpen,
   kampanyalar, currentSlide, setSelectedKampanya, selectedPlak, setSelectedPlak, filtrelenmisPlaklar,
-  sepeteEkle, sepetiBosalt, adetGuncelle, urunCikar, toplamTutar, selectedKampanya
+  sepeteEkle, sepetiBosalt, adetGuncelle, urunCikar, toplamTutar, selectedKampanya, plaklar
 }) => {
   
   const location = useLocation(); // ✅ Beyaz ekran hatasını bu satır ve bu yapı çözer.
@@ -61,6 +131,34 @@ const AppContent = ({
           boxShadow: window.innerWidth < 768 ? '8px 8px 0px #1a1a1a' : 'none'
         }}>
           <Link to="/" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>VİTRİN</Link>
+          {/* Navbar içinde, logonun hemen yanına veya uygun bir yere */}
+{location.pathname.includes('/product/') && (
+  <div style={{ position: 'relative', display: 'inline-block' }}>
+    <button 
+      onMouseOver={() => setIsNavOpen(true)} 
+      style={{ backgroundColor: 'white', border: '2px solid #1a1a1a', padding: '5px 15px', fontWeight: 'bold', cursor: 'pointer' }}
+    >
+      KATEGORİLER ▼
+    </button>
+    {isNavOpen && (
+      <div 
+        onMouseLeave={() => setIsNavOpen(false)}
+        style={{ position: 'absolute', top: '100%', left: 0, backgroundColor: 'white', border: '3px solid #1a1a1a', zIndex: 5000, minWidth: '150px', boxShadow: '5px 5px 0px #1a1a1a' }}
+      >
+        {["Rock", "Jazz", "Pop", "Hepsi"].map(cat => (
+          <Link 
+            key={cat} 
+            to="/" 
+            onClick={() => {setActiveCategory(cat); setIsNavOpen(false);}} 
+            style={{ display: 'block', padding: '10px', textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', borderBottom: '1px solid #eee' }}
+          >
+            {cat}
+          </Link>
+        ))}
+      </div>
+    )}
+  </div>
+)}
           <Link to="/campaigns" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>KAMPANYALAR</Link>
           <Link to="/about" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>HAKKIMIZDA</Link>
           <Link to="/login" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>GİRİŞ YAP</Link>
@@ -73,7 +171,7 @@ const AppContent = ({
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px', marginTop: '20px' }}>
         {/* SİDEBAR KONTROLÜ - Sidebar'ın geç gelme sorununu anlık location.pathname takibi çözer */}
-        {!["/login", "/register", "/checkout", "/campaigns", "/about"].includes(location.pathname) && (
+        {!['/product',"/login", "/register", "/checkout", "/campaigns", "/about"].includes(location.pathname) && (
           <div style={{ flexBasis: '250px' }}>
             <button 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -105,20 +203,34 @@ const AppContent = ({
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '30px' }}>
                   {filtrelenmisPlaklar.map(plak => (
                     <div key={plak.id} style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '20px', boxShadow: '8px 8px 0px #1a1a1a', display: 'flex', flexDirection: 'column' }}>
-                      <div onClick={() => setSelectedPlak(plak)} style={{ cursor: 'pointer' }}>
-                        <div style={{ width: '100%', aspectRatio: '1/1', backgroundColor: '#eee', marginBottom: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', transition: 'transform 0.5s ease-in-out', cursor: 'pointer' }} onMouseOver={(e) => e.currentTarget.style.transform = 'rotate(20deg) scale(1.1)'} onMouseOut={(e) => e.currentTarget.style.transform = 'rotate(0deg) scale(1)'} >💿</div>
-                        <h3 style={{ margin: 0 }}>{plak.ad}</h3>
-                        <p style={{ color: '#666' }}>{plak.sanatci}</p>
-                      </div>
-                      <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontWeight: 'bold' }}>{plak.fiyat} TL</span>
-                        <button onClick={() => sepeteEkle(plak)} style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px 12px', fontWeight: 'bold', cursor: 'pointer' }}>EKLE +</button>
-                      </div>
+                     {/* 🔗 BURASI DEĞİŞTİ: Resim ve başlığı Link içine aldık */}
+    <Link to={`/product/${plak.id}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
+      <div 
+        style={{ width: '100%', aspectRatio: '1/1', backgroundColor: '#eee', marginBottom: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', transition: 'transform 0.3s' }}
+        onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+        onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+      >
+        💿
+      </div>
+      <h3 style={{ margin: 0 }}>{plak.ad}</h3>
+      <p style={{ color: '#666' }}>{plak.sanatci}</p>
+    </Link>
+
+    <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <span style={{ fontWeight: 'bold' }}>{plak.fiyat} TL</span>
+      <button onClick={() => sepeteEkle(plak)} style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px 12px', fontWeight: 'bold', cursor: 'pointer' }}>
+        EKLE +
+      </button>
+    </div>
                     </div>
                   ))}
                 </div>
               </div>
             } />
+
+            {/* AppContent içindeki Routes kısmında bunu düzelt */}
+<Route path="/product/:id" element={<ProductDetail plaklar={plaklar} sepeteEkle={sepeteEkle} />} />
+            
             <Route path="/cart" element={
               <div style={{ padding: '20px', border: '4px solid #1a1a1a', backgroundColor: 'white', boxShadow: '10px 10px 0px #1a1a1a' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #1a1a1a', paddingBottom: '10px' }}>
@@ -212,6 +324,7 @@ const AppContent = ({
                 <Link to="/" style={{ display: 'inline-block', marginTop: '40px', textDecoration: 'none' }}><button style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '15px 30px', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>PLAKLARA GERİ DÖN</button></Link>
               </div>
             } />
+            
             <Route path="/register" element={
               <div style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '40px', boxShadow: '12px 12px 0px #ff9e00', maxWidth: '400px', margin: '40px auto' }}>
                 <h2 style={{ textTransform: 'uppercase', marginBottom: '30px', borderBottom: '4px solid #1a1a1a', paddingBottom: '10px' }}>Kayıt Ol</h2>
@@ -235,17 +348,7 @@ const AppContent = ({
       </div>
 
       {/* MODALLAR */}
-      {selectedPlak && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
-          <div style={{ backgroundColor: 'white', padding: '40px', border: '5px solid #1a1a1a', boxShadow: '15px 15px 0px #ff9e00', maxWidth: '450px', position: 'relative' }}>
-            <button onClick={() => setSelectedPlak(null)} style={{ position: 'absolute', right: '15px', top: '15px', cursor: 'pointer', border: 'none', background: 'none', fontWeight: 'bold' }}>[X] KAPAT</button>
-            <h2 style={{ fontSize: '2rem', margin: 0 }}>{selectedPlak.ad}</h2>
-            <p style={{ fontStyle: 'italic', marginBottom: '20px' }}>{selectedPlak.sanatci}</p>
-            <h3 style={{ fontSize: '1.8rem' }}>{selectedPlak.fiyat} TL</h3>
-            <button onClick={() => { sepeteEkle(selectedPlak); setSelectedPlak(null); }} style={{ width: '100%', backgroundColor: '#ff9e00', border: '3px solid #1a1a1a', padding: '15px', fontWeight: 'bold', marginTop: '10px', cursor: 'pointer' }}>SEPETE EKLE</button>
-          </div>
-        </div>
-      )}
+    
 
       {selectedKampanya && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100 }}>
@@ -327,6 +430,7 @@ function App() {
     <Router>
       <AppContent 
         cart={cart} activeCategory={activeCategory} setActiveCategory={setActiveCategory}
+        plaklar={plaklar}
         selectedPlak={selectedPlak} setSelectedPlak={setSelectedPlak}
         selectedKampanya={selectedKampanya} setSelectedKampanya={setSelectedKampanya}
         currentSlide={currentSlide} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}
