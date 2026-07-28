@@ -3,16 +3,25 @@ import { BrowserRouter as Router, Routes, Route, Link, useLocation, useParams } 
 import Sidebar from './components/Sidebar'
 
 // --- ÜRÜN DETAY SAYFASI (App'in DIŞINDA olmalı) ---
-const ProductDetail = ({ plaklar, sepeteEkle }) => {
-  const { id } = useParams(); 
+const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn }) => {
+  const { id } = useParams();
   const plak = plaklar.find(p => p.id === parseInt(id));
-  const [yorumlar, setYorumlar] = useState(["Harika bir baskı!", "Ses kalitesi çok net."]);
-  const [yeniYorum, setYeniYorum] = useState("");
 
-  const yorumEkle = () => {
-    if(yeniYorum) {
-      setYorumlar([...yorumlar, yeniYorum]);
+  // 1. STATE'LER (Bunlar eksik olunca sayfa patlıyordu)
+  const [yorumlar, setYorumlar] = useState([
+    { isim: "Ahmet Yılmaz", yıldız: 5, metin: "Harika bir baskı! Ses kalitesi çok net." },
+    { isim: "Zeynep K.", yıldız: 4, metin: "Kargo hızlıydı, plak çok temiz geldi." }
+  ]);
+  const [yeniYorum, setYeniYorum] = useState("");
+  const [yeniIsim, setYeniIsim] = useState("");
+  const [yeniYıldız, setYeniYıldız] = useState(5);
+
+  const yorumGonder = () => {
+    if (yeniYorum && yeniIsim) {
+      setYorumlar([{ isim: yeniIsim, yıldız: yeniYıldız, metin: yeniYorum }, ...yorumlar]);
       setYeniYorum("");
+      setYeniIsim("");
+      setYeniYıldız(5);
     }
   };
 
@@ -20,44 +29,41 @@ const ProductDetail = ({ plaklar, sepeteEkle }) => {
 
   return (
     <div style={{ padding: '20px' }}>
+      {/* A) EN ÜST: ÜRÜN BİLGİLERİ */}
       <div style={{ display: 'flex', gap: '50px', flexWrap: 'wrap' }}>
-        {/* SOL: RESİM */}
         <div style={{ flex: '1', minWidth: '300px', border: '5px solid #1a1a1a', boxShadow: '15px 15px 0px #ff9e00', backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '5rem', aspectRatio: '1/1' }}>
-           💿
+            💿
         </div>
         
-        {/* SAĞ: DETAY VE YORUM */}
-        <div style={{ flex: '1', minWidth: '300px' }}>
+       <div style={{ flex: '1', minWidth: '300px' }}>
           <h2 style={{ fontSize: '3rem', margin: 0 }}>{plak.ad}</h2>
-          <p style={{ fontSize: '1.5rem', color: '#666' }}>{plak.sanatci}</p>
-          <div style={{ padding: '15px', backgroundColor: '#e2f0cb', border: '3px solid #1a1a1a', display: 'inline-block', margin: '20px 0', fontWeight: 'bold', fontSize: '1.5rem' }}>
+          <p style={{ fontSize: '1.5rem', color: '#666', margin: '5px 0 15px 0' }}>{plak.sanatci}</p>
+          
+          <div style={{ padding: '15px', backgroundColor: '#e2f0cb', border: '3px solid #1a1a1a', display: 'inline-block', fontWeight: 'bold', fontSize: '1.5rem' }}>
             {plak.fiyat} TL
           </div>
-          
-          <button onClick={() => sepeteEkle(plak)} style={{ display: 'block', width: '100%', padding: '20px', backgroundColor: '#1a1a1a', color: 'white', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '1.2rem', marginBottom: '30px' }}>
+
+          {/* 🌟 YENİ EKLENEN PLAK DETAY KUTUSU (Fiyat ile Buton Arası) */}
+          <div style={{ margin: '25px 0', padding: '20px', border: '3px solid #1a1a1a', backgroundColor: '#white', boxShadow: '5px 5px 0px #1a1a1a' }}>
+            <h4 style={{ margin: '0 0 10px 0', textTransform: 'uppercase', borderBottom: '2px dashed #1a1a1a', paddingBottom: '5px' }}>PLAK ÖZELLİKLERİ 💿</h4>
+            <ul style={{ margin: 0, paddingLeft: '20px', lineHeight: '1.8', fontSize: '0.95rem', fontWeight: 'bold' }}>
+              <li>Kategori: <span style={{ backgroundColor: '#ff9e00', padding: '2px 6px' }}>{plak.kategori}</span></li>
+              <li>Kondisyon: <span style={{ color: '#2b9348' }}>Pırıl Pırıl (NM / 9/10)</span></li>
+              <li>Devir: 33 RPM (12" LP)</li>
+              <li>Baskı Yılı: Orijinal Retro Baskı</li>
+              <li>Kargo: Aynı Gün Korunaklı Kutuda Kargo 📦</li>
+            </ul>
+          </div>
+
+          <button onClick={() => sepeteEkle(plak)} style={{ display: 'block', width: '100%', padding: '20px', backgroundColor: '#1a1a1a', color: 'white', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '1.2rem', boxShadow: '5px 5px 0px #ff9e00' }}>
             SEPETE EKLE +
           </button>
-
-          <div style={{ marginTop: '30px', border: '3px solid #1a1a1a', padding: '20px', backgroundColor: 'white' }}>
-            <h4 style={{ margin: '0 0 15px 0' }}>YORUMLAR</h4>
-            {yorumlar.map((y, i) => <p key={i} style={{ borderBottom: '1px solid #eee', padding: '5px 0' }}>• {y}</p>)}
-            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                <input 
-                value={yeniYorum} 
-                onChange={(e) => setYeniYorum(e.target.value)}
-                placeholder="Yorumunuzu yazın..." 
-                style={{ flex: 1, padding: '10px', border: '2px solid #1a1a1a' }}
-                />
-                <button onClick={yorumEkle} style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '10px 20px', fontWeight: 'bold', cursor: 'pointer' }}>GÖNDER</button>
-            </div>
-          </div>
         </div>
       </div>
       
-      {/* BENZER ÜRÜNLER ALANI (Slider buraya gelecek) */}
+      {/* B) ORTA: BENZER ÜRÜNLER ALANI */}
       <div style={{ marginTop: '60px', borderTop: '4px solid #1a1a1a', paddingTop: '30px' }}>
          <h3>AYNI KATEGORİDEN DİĞER PLAKLAR</h3>
-        {/* 2. HATALI SATIRI (RelatedProducts) SİL, YERİNE BU DİNAMİK LİSTEYİ KOY */}
           <div style={{ display: 'flex', gap: '20px', overflowX: 'auto', padding: '10px 0' }}>
             {plaklar.filter(p => p.kategori === plak.kategori && p.id !== plak.id).map(p => (
               <Link key={p.id} to={`/product/${p.id}`} style={{ textDecoration: 'none', color: 'inherit', minWidth: '180px', border: '3px solid #1a1a1a', padding: '15px', backgroundColor: 'white', boxShadow: '5px 5px 0px #1a1a1a' }}>
@@ -67,6 +73,49 @@ const ProductDetail = ({ plaklar, sepeteEkle }) => {
               </Link>
             ))}
           </div>
+      </div>
+
+      {/* C) EN ALT: YORUMLAR (BENZER ÜRÜNLERDEN SONRA GELİYOR) */}
+      <div style={{ marginTop: '60px', borderTop: '4px solid #1a1a1a', paddingTop: '30px' }}>
+        <h3 style={{ textTransform: 'uppercase' }}>Kullanıcı Değerlendirmeleri 💬</h3>
+
+        {/* YORUM FORMU (GİRİŞ ŞARTLI) */}
+        <div style={{ border: '3px solid #1a1a1a', padding: '20px', backgroundColor: '#f9f9f9', marginBottom: '30px', boxShadow: '5px 5px 0px #1a1a1a' }}>
+          {isLoggedIn ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div style={{ display: 'flex', gap: '15px' }}>
+                <input value={yeniIsim} onChange={(e) => setYeniIsim(e.target.value)} placeholder="Adınız Soyadınız" style={{ flex: 2, padding: '10px', border: '2px solid #1a1a1a' }} />
+                <select value={yeniYıldız} onChange={(e) => setYeniYıldız(parseInt(e.target.value))} style={{ flex: 1, padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold' }}>
+                  <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
+                  <option value="4">⭐⭐⭐⭐ (4/5)</option>
+                  <option value="3">⭐⭐⭐ (3/5)</option>
+                  <option value="2">⭐⭐ (2/5)</option>
+                  <option value="1">⭐ (1/5)</option>
+                </select>
+              </div>
+              <textarea value={yeniYorum} onChange={(e) => setYeniYorum(e.target.value)} placeholder="Yorumunuzu buraya yazın..." style={{ padding: '10px', border: '2px solid #1a1a1a', minHeight: '80px' }} />
+              <button onClick={yorumGonder} style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '12px', fontWeight: 'bold', cursor: 'pointer' }}>YORUMU GÖNDER</button>
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '10px' }}>
+              <p style={{ margin: 0, fontWeight: 'bold' }}>🔒 Yorum yapabilmek ve puan verebilmek için giriş yapmalısınız.</p>
+              <Link to="/login"><button style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px 15px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}>GİRİŞ YAP</button></Link>
+            </div>
+          )}
+        </div>
+
+        {/* MEVCUT YORUM KARTLARI (İSİM, YILDIZ VE METİN) */}
+        <div style={{ display: 'grid', gap: '15px' }}>
+          {yorumlar.map((y, i) => (
+            <div key={i} style={{ border: '3px solid #1a1a1a', padding: '15px', backgroundColor: 'white', boxShadow: '4px 4px 0px #1a1a1a' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontWeight: 'bold', textTransform: 'uppercase' }}>👤 {y.isim}</span>
+                <span style={{ color: '#ff9e00' }}>{"⭐".repeat(y.yıldız)}</span>
+              </div>
+              <p style={{ margin: 0 }}>{y.metin}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -171,7 +220,7 @@ const AppContent = ({
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px', marginTop: '20px' }}>
         {/* SİDEBAR KONTROLÜ - Sidebar'ın geç gelme sorununu anlık location.pathname takibi çözer */}
-        {!['/product',"/login", "/register", "/checkout", "/campaigns", "/about"].includes(location.pathname) && (
+        {!location.pathname.startsWith('/product') && !["/login", "/register", "/checkout", "/campaigns", "/about"].includes(location.pathname) && (
           <div style={{ flexBasis: '250px' }}>
             <button 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
