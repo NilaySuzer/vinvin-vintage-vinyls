@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useParams } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
+import { Disc, Star, ShoppingCart, MessageSquare, User, Lock } from 'lucide-react';
 
 // --- ÜRÜN DETAY SAYFASI (App'in DIŞINDA olmalı) ---
 const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn }) => {
@@ -32,7 +33,7 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn }) => {
       {/* A) EN ÜST: ÜRÜN BİLGİLERİ */}
       <div style={{ display: 'flex', gap: '50px', flexWrap: 'wrap' }}>
         <div style={{ flex: '1', minWidth: '300px', border: '5px solid #1a1a1a', boxShadow: '15px 15px 0px #ff9e00', backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '5rem', aspectRatio: '1/1' }}>
-            💿
+            <Disc size={80} color="#1a1a1a" strokeWidth={2.5} />
         </div>
         
        <div style={{ flex: '1', minWidth: '300px' }}>
@@ -45,7 +46,7 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn }) => {
 
           {/* 🌟 YENİ EKLENEN PLAK DETAY KUTUSU (Fiyat ile Buton Arası) */}
           <div style={{ margin: '25px 0', padding: '20px', border: '3px solid #1a1a1a', backgroundColor: '#white', boxShadow: '5px 5px 0px #1a1a1a' }}>
-            <h4 style={{ margin: '0 0 10px 0', textTransform: 'uppercase', borderBottom: '2px dashed #1a1a1a', paddingBottom: '5px' }}>PLAK ÖZELLİKLERİ 💿</h4>
+            <h3 style={{ margin: '0 0 10px 0', textTransform: 'uppercase', borderBottom: '2px dashed #1a1a1a', paddingBottom: '5px' }}>PLAK ÖZELLİKLERİ</h3>
             <ul style={{ margin: 0, paddingLeft: '20px', lineHeight: '1.8', fontSize: '0.95rem', fontWeight: 'bold' }}>
               <li>Kategori: <span style={{ backgroundColor: '#ff9e00', padding: '2px 6px' }}>{plak.kategori}</span></li>
               <li>Kondisyon: <span style={{ color: '#2b9348' }}>Pırıl Pırıl (NM / 9/10)</span></li>
@@ -55,9 +56,9 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn }) => {
             </ul>
           </div>
 
-          <button onClick={() => sepeteEkle(plak)} style={{ display: 'block', width: '100%', padding: '20px', backgroundColor: '#1a1a1a', color: 'white', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '1.2rem', boxShadow: '5px 5px 0px #ff9e00' }}>
-            SEPETE EKLE +
-          </button>
+          <button onClick={() => sepeteEkle(plak)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%', padding: '20px', backgroundColor: '#1a1a1a', color: 'white', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}>
+  <ShoppingCart size={22} color="white" /> SEPETE EKLE +
+</button>
         </div>
       </div>
       
@@ -67,7 +68,7 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn }) => {
           <div style={{ display: 'flex', gap: '20px', overflowX: 'auto', padding: '10px 0' }}>
             {plaklar.filter(p => p.kategori === plak.kategori && p.id !== plak.id).map(p => (
               <Link key={p.id} to={`/product/${p.id}`} style={{ textDecoration: 'none', color: 'inherit', minWidth: '180px', border: '3px solid #1a1a1a', padding: '15px', backgroundColor: 'white', boxShadow: '5px 5px 0px #1a1a1a' }}>
-                <div style={{ textAlign: 'center', fontSize: '2rem' }}>💿</div>
+                <div style={{ textAlign: 'center', fontSize: '2rem' }}><Disc size={80} color="#1a1a1a" strokeWidth={2.5} /></div>
                 <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{p.ad}</div>
                 <div style={{ fontSize: '0.8rem' }}>{p.fiyat} TL</div>
               </Link>
@@ -85,13 +86,17 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn }) => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <div style={{ display: 'flex', gap: '15px' }}>
                 <input value={yeniIsim} onChange={(e) => setYeniIsim(e.target.value)} placeholder="Adınız Soyadınız" style={{ flex: 2, padding: '10px', border: '2px solid #1a1a1a' }} />
-                <select value={yeniYıldız} onChange={(e) => setYeniYıldız(parseInt(e.target.value))} style={{ flex: 1, padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold' }}>
-                  <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
-                  <option value="4">⭐⭐⭐⭐ (4/5)</option>
-                  <option value="3">⭐⭐⭐ (3/5)</option>
-                  <option value="2">⭐⭐ (2/5)</option>
-                  <option value="1">⭐ (1/5)</option>
-                </select>
+                <select 
+  value={yeniYıldız} 
+  onChange={(e) => setYeniYıldız(parseInt(e.target.value))} 
+  style={{ flex: 1, padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', backgroundColor: 'white', cursor: 'pointer' }}
+>
+  <option value="5">★ 5 / 5 - Mükemmel</option>
+  <option value="4">★ 4 / 5 - Çok İyi</option>
+  <option value="3">★ 3 / 5 - Ortalama</option>
+  <option value="2">★ 2 / 5 - Zayıf</option>
+  <option value="1">★ 1 / 5 - Çok Kötü</option>
+</select>
               </div>
               <textarea value={yeniYorum} onChange={(e) => setYeniYorum(e.target.value)} placeholder="Yorumunuzu buraya yazın..." style={{ padding: '10px', border: '2px solid #1a1a1a', minHeight: '80px' }} />
               <button onClick={yorumGonder} style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '12px', fontWeight: 'bold', cursor: 'pointer' }}>YORUMU GÖNDER</button>
@@ -110,7 +115,11 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn }) => {
             <div key={i} style={{ border: '3px solid #1a1a1a', padding: '15px', backgroundColor: 'white', boxShadow: '4px 4px 0px #1a1a1a' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <span style={{ fontWeight: 'bold', textTransform: 'uppercase' }}>👤 {y.isim}</span>
-                <span style={{ color: '#ff9e00' }}>{"⭐".repeat(y.yıldız)}</span>
+                <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
+  {[...Array(y.yıldız)].map((_, index) => (
+    <Star key={index} size={18} fill="#ff9e00" color="#ff9e00" />
+  ))}
+</div>
               </div>
               <p style={{ margin: 0 }}>{y.metin}</p>
             </div>
@@ -131,7 +140,7 @@ const CheckoutPage = ({ total }) => (
       <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#e2f0cb', border: '2px dashed #1a1a1a', textAlign: 'center' }}>
         <h3 style={{ margin: 0 }}>TOPLAM: {total} TL</h3>
       </div>
-      <button type="button" onClick={() => alert('Siparişiniz alındı! 💿')} style={{ backgroundColor: '#ff9e00', border: '3px solid #1a1a1a', padding: '15px', fontWeight: 'bold', cursor: 'pointer' }}>ÖDEMEYİ TAMAMLA</button>
+      <button type="button" onClick={() => alert('Siparişiniz alındı! <Disc size={80} color="#1a1a1a" strokeWidth={2.5} />')} style={{ backgroundColor: '#ff9e00', border: '3px solid #1a1a1a', padding: '15px', fontWeight: 'bold', cursor: 'pointer' }}>ÖDEMEYİ TAMAMLA</button>
       <Link to="/cart" style={{ marginTop: '10px', textAlign: 'center', color: '#1a1a1a', display: 'block' }}>← Sepete Geri Dön</Link>
     </form>
   </div>
@@ -155,8 +164,8 @@ const AppContent = ({
         boxShadow: '8px 8px 0px #1a1a1a', marginBottom: '40px', position: 'relative' 
       }}>
         <Link to="/" style={{ textDecoration: 'none', color: '#1a1a1a' }}>
-          <h1 style={{ margin: 0, fontSize: window.innerWidth < 768 ? '1.2rem' : '2rem' }}>VINtage VINyls 💿</h1>
-        </Link>
+          <h1 style={{ margin: 0, fontSize: window.innerWidth < 768 ? '1.2rem' : '2rem' }}>VINtage  VINyls </h1> 
+       </Link>
 
         {window.innerWidth < 768 && (
           <button 
@@ -259,7 +268,7 @@ const AppContent = ({
         onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
         onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
       >
-        💿
+        <Disc size={80} color="#1a1a1a" strokeWidth={2.5} />
       </div>
       <h3 style={{ margin: 0 }}>{plak.ad}</h3>
       <p style={{ color: '#666' }}>{plak.sanatci}</p>
@@ -270,6 +279,7 @@ const AppContent = ({
       <button onClick={() => sepeteEkle(plak)} style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px 12px', fontWeight: 'bold', cursor: 'pointer' }}>
         EKLE +
       </button>
+      
     </div>
                     </div>
                   ))}
@@ -288,7 +298,8 @@ const AppContent = ({
                 </div>
                 {cart.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '40px' }}>
-                    <p>Sepetiniz şu an bomboş... 💿</p>
+                    <Disc size={80} color="#1a1a1a" strokeWidth={2.5} />
+                    <p>Sepetiniz şu an bomboş... </p>
                     <Link to="/"><button style={{ backgroundColor: '#ff9e00', border: '3px solid #1a1a1a', padding: '15px 30px', fontWeight: 'bold', cursor: 'pointer' }}>ALIŞVERİŞE BAŞLA</button></Link>
                   </div>
                 ) : (

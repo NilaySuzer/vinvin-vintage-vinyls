@@ -1,3 +1,4 @@
+import { Disc, Star, ShoppingCart, MessageSquare, User, Lock } from 'lucide-react';
 export default function Sidebar({ onSelectCategory, activeCategory }) {
   const kategoriler = ["Hepsi", "Rock", "Jazz"];
 
@@ -20,7 +21,7 @@ export default function Sidebar({ onSelectCategory, activeCategory }) {
               textDecoration: activeCategory === kat ? 'underline' : 'none',
               textTransform: 'uppercase'
             }}>
-            💿 {kat}
+            <Disc size={20} color="#1a1a1a" strokeWidth={2.5} /> {kat}
           </li>
         ))}
       </ul>
