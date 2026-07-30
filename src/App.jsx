@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useParams } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
-import { Disc, Star, ShoppingCart, MessageSquare, User, Lock } from 'lucide-react';
+import { Search, X, Disc, Star, ShoppingCart, MessageSquare, User, Lock } from 'lucide-react';
 
 // --- ÜRÜN DETAY SAYFASI (App'in DIŞINDA olmalı) ---
 const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn }) => {
@@ -195,7 +195,8 @@ const AppContent = ({
     <button 
       onMouseOver={() => setIsNavOpen(true)} 
       style={{ backgroundColor: 'white', border: '2px solid #1a1a1a', padding: '5px 15px', fontWeight: 'bold', cursor: 'pointer' }}
-    >
+              >
+      
       KATEGORİLER ▼
     </button>
     {isNavOpen && (
@@ -443,6 +444,7 @@ function App() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const [aramaMetni, setAramaMetni] = useState('');
 
   const kampanyalar = [
     { id: 1, baslik: "Yaz Sonu İndirimi", detay: "Tüm Rock plaklarında %20 indirim!", renk: "#ff9e00", tarih: "15 Mart" },
