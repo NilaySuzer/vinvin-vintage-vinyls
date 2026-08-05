@@ -611,18 +611,39 @@ const AppContent = ({
             } />
 
             <Route path="/login" element={
-              <div style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '40px', boxShadow: '12px 12px 0px #ff9e00', maxWidth: '400px', margin: '40px auto' }}>
-                <h2 style={{ textTransform: 'uppercase', marginBottom: '30px', borderBottom: '4px solid #1a1a1a', paddingBottom: '10px' }}>Giriş Yap</h2>
-                <form onSubmit={(e) => { e.preventDefault(); setIsLoggedIn(true); window.location.href = "/"; }} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <label style={{ fontWeight: 'bold' }}>E-POSTA</label>
-                  <input required type="email" placeholder="ornek@mail.com" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
-                  <label style={{ fontWeight: 'bold' }}>ŞİFRE</label>
-                  <input required type="password" placeholder="******" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
-                  <button type="submit" style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '15px', fontWeight: 'bold', border: 'none', cursor: 'pointer', marginTop: '10px' }}>DÜKKANA GİRİŞ YAP</button>
-                </form>
-                <p style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.9rem' }}>Hesabın yok mu? <Link to="/register" style={{ color: '#ff9e00', fontWeight: 'bold' }}>Kayıt Ol</Link></p>
-              </div>
-            } />
+  <div style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '40px', boxShadow: '12px 12px 0px #ff9e00', maxWidth: '400px', margin: '40px auto' }}>
+    <h2 style={{ textTransform: 'uppercase', marginBottom: '30px', borderBottom: '4px solid #1a1a1a', paddingBottom: '10px' }}>Giriş Yap</h2>
+    <form onSubmit={async (e) => {
+      e.preventDefault();
+      const email = e.target.email.value;
+      const sifre = e.target.sifre.value;
+
+      try {
+        // Backend API'ye Login İsteği
+        const { data } = await API.post('/auth/login', { email, sifre });
+        
+        // Token ve Kullanıcı Bilgisini Kaydet
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data));
+        
+        setIsLoggedIn(true);
+        alert(`Hoş geldin, ${data.adSoyad}! 💿`);
+        window.location.href = "/";
+      } catch (error) {
+        alert(error.response?.data?.message || "Giriş yapılırken bir hata oluştu!");
+      }
+    }} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <label style={{ fontWeight: 'bold' }}>E-POSTA</label>
+      <input required name="email" type="email" placeholder="ornek@mail.com" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
+      
+      <label style={{ fontWeight: 'bold' }}>ŞİFRE</label>
+      <input required name="sifre" type="password" placeholder="******" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
+      
+      <button type="submit" style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '15px', fontWeight: 'bold', border: 'none', cursor: 'pointer', marginTop: '10px' }}>DÜKKANA GİRİŞ YAP</button>
+    </form>
+    <p style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.9rem' }}>Hesabın yok mu? <Link to="/register" style={{ color: '#ff9e00', fontWeight: 'bold' }}>Kayıt Ol</Link></p>
+  </div>
+} />
 
             <Route path="/about" element={
               <div style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '40px', boxShadow: '12px 12px 0px #e2f0cb' }}>
