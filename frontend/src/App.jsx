@@ -656,20 +656,43 @@ const AppContent = ({
               </div>
             } />
 
-            <Route path="/register" element={
-              <div style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '40px', boxShadow: '12px 12px 0px #ff9e00', maxWidth: '400px', margin: '40px auto' }}>
-                <h2 style={{ textTransform: 'uppercase', marginBottom: '30px', borderBottom: '4px solid #1a1a1a', paddingBottom: '10px' }}>Kayıt Ol</h2>
-                <form onSubmit={(e) => { e.preventDefault(); setIsLoggedIn(true); window.location.href = "/"; }} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <label style={{ fontWeight: 'bold' }}>AD SOYAD</label>
-                  <input required type="text" placeholder="Ahmet Yılmaz" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
-                  <label style={{ fontWeight: 'bold' }}>E-POSTA</label>
-                  <input required type="email" placeholder="ornek@mail.com" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
-                  <label style={{ fontWeight: 'bold' }}>ŞİFRE</label>
-                  <input required type="password" placeholder="******" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
-                  <button type="submit" style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '15px', fontWeight: 'bold', border: '3px solid #1a1a1a', cursor: 'pointer', marginTop: '10px' }}>ÜYELİĞİ TAMAMLA</button>
-                </form>
-              </div>
-            } />
+<Route path="/register" element={
+  <div style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '40px', boxShadow: '12px 12px 0px #ff9e00', maxWidth: '400px', margin: '40px auto' }}>
+    <h2 style={{ textTransform: 'uppercase', marginBottom: '30px', borderBottom: '4px solid #1a1a1a', paddingBottom: '10px' }}>Kayıt Ol</h2>
+    <form onSubmit={async (e) => {
+      e.preventDefault();
+      const adSoyad = e.target.adSoyad.value;
+      const email = e.target.email.value;
+      const sifre = e.target.sifre.value;
+
+      try {
+        // Backend API'ye Register İsteği
+        const { data } = await API.post('/auth/register', { adSoyad, email, sifre });
+        
+        // Token ve Kullanıcı Bilgisini Kaydet
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data));
+
+        setIsLoggedIn(true);
+        alert(`Hesabın başarıyla oluşturuldu, ${data.adSoyad}! 🎉`);
+        window.location.href = "/";
+      } catch (error) {
+        alert(error.response?.data?.message || "Kayıt olunurken bir hata oluştu!");
+      }
+    }} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <label style={{ fontWeight: 'bold' }}>AD SOYAD</label>
+      <input required name="adSoyad" type="text" placeholder="Ahmet Yılmaz" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
+      
+      <label style={{ fontWeight: 'bold' }}>E-POSTA</label>
+      <input required name="email" type="email" placeholder="ornek@mail.com" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
+      
+      <label style={{ fontWeight: 'bold' }}>ŞİFRE</label>
+      <input required name="sifre" type="password" placeholder="******" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
+      
+      <button type="submit" style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '15px', fontWeight: 'bold', border: '3px solid #1a1a1a', cursor: 'pointer', marginTop: '10px' }}>ÜYELİĞİ TAMAMLA</button>
+    </form>
+  </div>
+} />
           </Routes>
         </div>
       </div>
