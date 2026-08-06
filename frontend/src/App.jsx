@@ -760,8 +760,16 @@ function App() {
   const [aramaMetni, setAramaMetni] = useState('');
   const [sirallama, setSirallama] = useState('varsayilan');
   const [favorites, setFavorites] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+  return !!localStorage.getItem('token');
+});
+const handleLogout = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  setIsLoggedIn(false);
+  window.location.href = "/";
+};
+  
   const [uygulananIndirim, setUygulananIndirim] = useState(0);
   const [kuponMesaji, setKuponMesaji] = useState('');
 
@@ -898,6 +906,7 @@ function App() {
         sirallama={sirallama} setSirallama={setSirallama}
         favorites={favorites} toggleFavorite={toggleFavorite}
         isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}
+        handleLogout={handleLogout}
       />
     </Router>
   )
