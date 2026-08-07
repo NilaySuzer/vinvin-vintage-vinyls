@@ -7,7 +7,8 @@ import API from './services/api';
 // --- ÜRÜN DETAY SAYFASI ---
 const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavorite }) => {
   const { id } = useParams();
-  const plak = plaklar.find(p => p.id === parseInt(id));
+  // MongoDB _id veya normal id kontrolü
+  const plak = plaklar.find(p => (p._id || p.id) === id || (p.id && p.id === parseInt(id)));
 
   const [yorumlar, setYorumlar] = useState([
     { isim: "Ahmet Yılmaz", yıldız: 5, metin: "Harika bir baskı! Ses kalitesi çok net." },
@@ -26,13 +27,13 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavor
     }
   };
 
-  if (!plak) return <div style={{ padding: '100px', textAlign: 'center', fontWeight: 'bold', fontSize: '1.5rem' }}>Ürün bulunamadı! 💿</div>;
+  if (!plak) return <div style={{ padding: '100px', textAlign: 'center', fontWeight: 'bold', fontSize: '1.5rem' }}>Ürün bulunamadı veya yükleniyor... 💿</div>;
 
-  const isFav = favorites.some(fav => fav.id === plak.id);
+  const plakId = plak._id || plak.id;
+  const isFav = favorites.some(fav => (fav._id || fav.id) === plakId);
 
   return (
     <div style={{ padding: '20px' }}>
-      {/* A) EN ÜST: ÜRÜN BİLGİLERİ */}
       <div style={{ display: 'flex', gap: '50px', flexWrap: 'wrap' }}>
         <div style={{ flex: '1', minWidth: '300px', border: '5px solid #1a1a1a', boxShadow: '15px 15px 0px #ff9e00', backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '5rem', aspectRatio: '1/1', position: 'relative' }}>
             <Disc size={120} color="#1a1a1a" strokeWidth={2.5} />
@@ -53,15 +54,14 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavor
           </div>
 
           <div style={{ marginTop: '15px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <span style={{ backgroundColor: plak.stok > 0 ? '#d4edda' : '#f8d7da', color: plak.stok > 0 ? '#155724' : '#721c24', padding: '5px 10px', border: '2px solid #1a1a1a', fontWeight: 'bold', fontSize: '0.85rem' }}>
-              {plak.stok > 0 ? `STOKTA VAR (${plak.stok} Adet)` : 'STOK TÜKENDİ'}
+            <span style={{ backgroundColor: (plak.stok ?? 5) > 0 ? '#d4edda' : '#f8d7da', color: (plak.stok ?? 5) > 0 ? '#155724' : '#721c24', padding: '5px 10px', border: '2px solid #1a1a1a', fontWeight: 'bold', fontSize: '0.85rem' }}>
+              {(plak.stok ?? 5) > 0 ? `STOKTA VAR (${plak.stok ?? 5} Adet)` : 'STOK TÜKENDİ'}
             </span>
             <span style={{ backgroundColor: '#fff3cd', color: '#856404', padding: '5px 10px', border: '2px solid #1a1a1a', fontWeight: 'bold', fontSize: '0.85rem' }}>
               ORİJİNAL BASKI
             </span>
           </div>
 
-          {/* PLAK DETAY KUTUSU */}
           <div style={{ margin: '25px 0', padding: '20px', border: '3px solid #1a1a1a', backgroundColor: 'white', boxShadow: '5px 5px 0px #1a1a1a' }}>
             <h3 style={{ margin: '0 0 10px 0', textTransform: 'uppercase', borderBottom: '2px dashed #1a1a1a', paddingBottom: '5px' }}>PLAK ÖZELLİKLERİ</h3>
             <ul style={{ margin: 0, paddingLeft: '20px', lineHeight: '1.8', fontSize: '0.95rem', fontWeight: 'bold' }}>
@@ -73,42 +73,39 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavor
             </ul>
           </div>
 
-          <button onClick={() => sepeteEkle(plak)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%', padding: '20px', backgroundColor: '#1a1a1a', color: 'white', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '1.2rem', boxShadow: '5px 5px 0px #ff9e00', transition: '0.2s' }}>
+          <button onClick={() => sepeteEkle(plak)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%', padding: '20px', backgroundColor: '#1a1a1a', color: 'white', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '1.2rem', boxShadow: '5px 5px 0px #ff9e00' }}>
             <ShoppingCart size={22} color="white" /> SEPETE EKLE +
           </button>
         </div>
       </div>
       
-      {/* B) ORTA: BENZER ÜRÜNLER ALANI */}
+      {/* BENZER ÜRÜNLER */}
       <div style={{ marginTop: '60px', borderTop: '4px solid #1a1a1a', paddingTop: '30px' }}>
          <h3 style={{ textTransform: 'uppercase' }}>AYNI KATEGORİDEN DİĞER PLAKLAR</h3>
           <div style={{ display: 'flex', gap: '20px', overflowX: 'auto', padding: '10px 0' }}>
-            {plaklar.filter(p => p.kategori === plak.kategori && p.id !== plak.id).map(p => (
-              <Link key={p.id} to={`/product/${p.id}`} style={{ textDecoration: 'none', color: 'inherit', minWidth: '200px', border: '3px solid #1a1a1a', padding: '15px', backgroundColor: 'white', boxShadow: '5px 5px 0px #1a1a1a' }}>
-                <div style={{ textAlign: 'center', fontSize: '2rem', marginBottom: '10px' }}><Disc size={60} color="#1a1a1a" strokeWidth={2.5} /></div>
-                <div style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>{p.ad}</div>
-                <div style={{ fontSize: '0.85rem', color: '#666' }}>{p.sanatci}</div>
-                <div style={{ fontSize: '1rem', fontWeight: 'bold', marginTop: '8px', color: '#1a1a1a' }}>{p.fiyat} TL</div>
-              </Link>
-            ))}
+            {plaklar.filter(p => p.kategori === plak.kategori && (p._id || p.id) !== plakId).map(p => {
+              const pId = p._id || p.id;
+              return (
+                <Link key={pId} to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', minWidth: '200px', border: '3px solid #1a1a1a', padding: '15px', backgroundColor: 'white', boxShadow: '5px 5px 0px #1a1a1a' }}>
+                  <div style={{ textAlign: 'center', fontSize: '2rem', marginBottom: '10px' }}><Disc size={60} color="#1a1a1a" strokeWidth={2.5} /></div>
+                  <div style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>{p.ad}</div>
+                  <div style={{ fontSize: '0.85rem', color: '#666' }}>{p.sanatci}</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 'bold', marginTop: '8px', color: '#1a1a1a' }}>{p.fiyat} TL</div>
+                </Link>
+              );
+            })}
           </div>
       </div>
 
-      {/* C) EN ALT: YORUMLAR */}
+      {/* YORUMLAR */}
       <div style={{ marginTop: '60px', borderTop: '4px solid #1a1a1a', paddingTop: '30px' }}>
         <h3 style={{ textTransform: 'uppercase' }}>Kullanıcı Değerlendirmeleri 💬</h3>
-
-        {/* YORUM FORMU */}
         <div style={{ border: '3px solid #1a1a1a', padding: '20px', backgroundColor: '#f9f9f9', marginBottom: '30px', boxShadow: '5px 5px 0px #1a1a1a' }}>
           {isLoggedIn ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
                 <input value={yeniIsim} onChange={(e) => setYeniIsim(e.target.value)} placeholder="Adınız Soyadınız" style={{ flex: 2, padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} />
-                <select 
-                  value={yeniYıldız} 
-                  onChange={(e) => setYeniYıldız(parseInt(e.target.value))} 
-                  style={{ flex: 1, padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', backgroundColor: 'white', cursor: 'pointer' }}
-                >
+                <select value={yeniYıldız} onChange={(e) => setYeniYıldız(parseInt(e.target.value))} style={{ flex: 1, padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', backgroundColor: 'white', cursor: 'pointer' }}>
                   <option value="5">★ 5 / 5 - Mükemmel</option>
                   <option value="4">★ 4 / 5 - Çok İyi</option>
                   <option value="3">★ 3 / 5 - Ortalama</option>
@@ -127,7 +124,6 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavor
           )}
         </div>
 
-        {/* MEVCUT YORUM KARTLARI */}
         <div style={{ display: 'grid', gap: '15px' }}>
           {yorumlar.map((y, i) => (
             <div key={i} style={{ border: '3px solid #1a1a1a', padding: '15px', backgroundColor: 'white', boxShadow: '4px 4px 0px #1a1a1a' }}>
@@ -148,37 +144,25 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavor
   );
 };
 
-// --- BİLEŞENLER ---
-// --- BİLEŞENLER ---
+// --- CHECKOUT SAYFASI ---
 const CheckoutPage = ({ total, sepetiBosalt, cart, indirimTutari, odenecekTutar }) => {
   const navigate = useNavigate();
   const [odemeYontemi, setOdemeYontemi] = useState('kart');
   const [siparisTamamlandi, setSiparisTamamlandi] = useState(false);
   const [siparisNo, setSiparisNo] = useState('');
+  const [formData, setFormData] = useState({ adSoyad: '', telefon: '', adres: '' });
 
-  // 1. Form girdilerini state'te topluyoruz
-  const [formData, setFormData] = useState({
-    adSoyad: '',
-    telefon: '',
-    adres: ''
-  });
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  // 2. Form gönderildiğinde Backend API'ye sipariş atıyoruz
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      // Backend /api/orders endpoint'ine POST isteği
       const { data } = await API.post('/orders', {
         siparisKalemleri: (cart || []).map(item => ({
           ad: item.ad,
           fiyat: item.fiyat,
           adet: item.adet || 1,
-          product: item._id || item.id // MongoDB ObjectId veya ID
+          product: item._id || item.id
         })),
         teslimatBilgileri: formData,
         odemeYontemi,
@@ -187,7 +171,6 @@ const CheckoutPage = ({ total, sepetiBosalt, cart, indirimTutari, odenecekTutar 
         odenecekTutar: odenecekTutar || total
       });
 
-      // Sipariş başarılı!
       setSiparisNo(data._id);
       setSiparisTamamlandi(true);
       sepetiBosalt();
@@ -263,14 +246,13 @@ const CheckoutPage = ({ total, sepetiBosalt, cart, indirimTutari, odenecekTutar 
   );
 };
 
-// --- 💿 ANA İÇERİK BİLEŞENİ ---
+// --- ANA İÇERİK BİLEŞENİ ---
 const AppContent = ({ 
   cart, setActiveCategory, activeCategory, isSidebarOpen, setIsSidebarOpen, isNavOpen, setIsNavOpen,
   kampanyalar, currentSlide, setSelectedKampanya, selectedPlak, setSelectedPlak, filtrelenmisPlaklar,
   sepeteEkle, sepetiBosalt, adetGuncelle, urunCikar, toplamTutar, selectedKampanya, plaklar, bildirim, kuponKodu, kuponMesaji, kuponKullan, uygulananIndirim, indirimTutari, odenecekTutar, DEFAULT_KUPONLAR,
-  aramaMetni, setAramaMetni, sirallama, setSirallama, favorites, toggleFavorite, isLoggedIn, setIsLoggedIn
+  aramaMetni, setAramaMetni, sirallama, setSirallama, favorites, toggleFavorite, isLoggedIn, setIsLoggedIn, handleLogout,
 }) => {
-  
   const location = useLocation();
   const guvenliToplam = Number(toplamTutar) || 0;
   const guvenliIndirim = Number(indirimTutari) || 0;
@@ -288,101 +270,37 @@ const AppContent = ({
           <h1 style={{ margin: 0, fontSize: window.innerWidth < 768 ? '1.2rem' : '2rem', letterSpacing: '-1px' }}>VINtage VINyls</h1> 
         </Link>
 
-        {window.innerWidth < 768 && (
-          <button 
-            onClick={() => setIsNavOpen(!isNavOpen)}
-            style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '5px 10px', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            {isNavOpen ? 'KAPAT' : 'MENÜ [≡]'}
-          </button>
-        )}
-
-        <div style={{ 
-          display: (window.innerWidth >= 768 || isNavOpen) ? 'flex' : 'none',
-          flexDirection: window.innerWidth < 768 ? 'column' : 'row',
-          alignItems: 'center', justifyContent: 'center',
-          position: window.innerWidth < 768 ? 'absolute' : 'static',
-          top: '100%', left: 0, width: window.innerWidth < 768 ? '100%' : 'auto',
-          backgroundColor: window.innerWidth < 768 ? '#ff9e00' : 'transparent',
-          border: window.innerWidth < 768 ? '4px solid #1a1a1a' : 'none',
-          padding: window.innerWidth < 768 ? '20px' : '0',
-          gap: '15px', zIndex: 3000,
-          boxShadow: window.innerWidth < 768 ? '8px 8px 0px #1a1a1a' : 'none'
-        }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
           <Link to="/" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>VİTRİN</Link>
-
-          {location.pathname.includes('/product/') && (
-            <div style={{ position: 'relative', display: 'inline-block' }}>
-              <button 
-                onMouseOver={() => setIsNavOpen(true)} 
-                style={{ backgroundColor: 'white', border: '2px solid #1a1a1a', padding: '5px 15px', fontWeight: 'bold', cursor: 'pointer' }}
-              >
-                KATEGORİLER ▼
-              </button>
-              {isNavOpen && (
-                <div 
-                  onMouseLeave={() => setIsNavOpen(false)}
-                  style={{ position: 'absolute', top: '100%', left: 0, backgroundColor: 'white', border: '3px solid #1a1a1a', zIndex: 5000, minWidth: '150px', boxShadow: '5px 5px 0px #1a1a1a' }}
-                >
-                  {["Rock", "Jazz", "Pop", "Hepsi"].map(cat => (
-                    <Link 
-                      key={cat} 
-                      to="/" 
-                      onClick={() => {setActiveCategory(cat); setIsNavOpen(false);}} 
-                      style={{ display: 'block', padding: '10px', textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', borderBottom: '1px solid #eee' }}
-                    >
-                      {cat}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-          
           <Link to="/campaigns" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>KAMPANYALAR</Link>
           <Link to="/about" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>HAKKIMIZDA</Link>
-          
-          <Link to="/favorites" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            ❤️ ({favorites.length})
-          </Link>
+          <Link to="/favorites" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>❤️ ({favorites.length})</Link>
 
           {isLoggedIn ? (
-            <button onClick={() => setIsLoggedIn(false)} style={{ border: '2px solid #1a1a1a', padding: '4px 10px', backgroundColor: '#1a1a1a', color: 'white', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <button onClick={handleLogout} style={{ border: '2px solid #1a1a1a', padding: '6px 12px', backgroundColor: '#1a1a1a', color: 'white', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
               <LogOut size={16} /> ÇIKIŞ
             </button>
           ) : (
             <>
-              <Link to="/login" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>GİRİŞ YAP</Link>
-              <Link to="/register" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>KAYIT OL</Link>
+              <Link to="/login" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>GİRİŞ YAP</Link>
+              <Link to="/register" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>KAYIT OL</Link>
             </>
           )}
 
-          <Link to="/cart" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 12px', backgroundColor: 'white', boxShadow: '3px 3px 0px #1a1a1a' }}>
-            🛒 SEPET ({cart.reduce((acc, curr) => acc + (curr.adet || 1), 0)})
+          <Link to="/cart" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 12px', backgroundColor: 'white', boxShadow: '3px 3px 0px #1a1a1a' }}>
+            🛒 SEPET ({(cart || []).reduce((acc, curr) => acc + (curr.adet || 1), 0)})
           </Link>
         </div>
       </nav>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
-        {/* SİDEBAR KONTROLÜ */}
+        {/* SIDEBAR */}
         {!location.pathname.startsWith('/product') && !["/login", "/register", "/checkout", "/campaigns", "/about", "/favorites"].includes(location.pathname) && (
           <div style={{ flexBasis: '250px' }}>
-            <button 
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              style={{ 
-                display: window.innerWidth < 768 ? 'block' : 'none',
-                width: '100%', padding: '15px', backgroundColor: '#1a1a1a', color: 'white',
-                border: 'none', fontWeight: 'black', cursor: 'pointer', marginBottom: '10px', textTransform: 'uppercase'
-              }}
-            >
-              {isSidebarOpen ? 'KATEGORİLERİ KAPAT [X]' : 'KATEGORİLERİ GÖR [≡]'}
-            </button>
-            {(window.innerWidth >= 768 || isSidebarOpen) && (
-              <Sidebar 
-                onSelectCategory={(cat) => { setActiveCategory(cat); setIsSidebarOpen(false); }} 
-                activeCategory={activeCategory} 
-              />
-            )}
+            <Sidebar 
+              onSelectCategory={(cat) => { setActiveCategory(cat); setIsSidebarOpen(false); }} 
+              activeCategory={activeCategory} 
+            />
           </div>
         )}
 
@@ -390,13 +308,13 @@ const AppContent = ({
           <Routes>
             <Route path="/" element={
               <div>
-                {/* KAMPANYA BANNER */}
+                {/* BANNER */}
                 <div onClick={() => setSelectedKampanya(kampanyalar[currentSlide])} style={{ backgroundColor: kampanyalar[currentSlide].renk, padding: '15px', border: '4px solid #1a1a1a', boxShadow: '8px 8px 0px #1a1a1a', marginBottom: '25px', cursor: 'pointer', textAlign: 'center' }}>
                   <div style={{ fontWeight: 'black', fontSize: '1.2rem' }}>⚡ {kampanyalar[currentSlide].baslik} ⚡</div>
                   <div style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>{kampanyalar[currentSlide].detay} - Detaylar için tıkla!</div>
                 </div>
 
-                {/* ARAMA VE SIRALAMA BAR */}
+                {/* ARAMA BAR */}
                 <div style={{ display: 'flex', gap: '15px', marginBottom: '25px', flexWrap: 'wrap' }}>
                   <div style={{ flex: 2, minWidth: '200px', display: 'flex', alignItems: 'center', border: '3px solid #1a1a1a', backgroundColor: 'white', padding: '0 10px', boxShadow: '4px 4px 0px #1a1a1a' }}>
                     <Search size={20} color="#1a1a1a" />
@@ -425,12 +343,14 @@ const AppContent = ({
                   </div>
                 </div>
 
-                {/* ÜRÜN İZGARASI */}
+                {/* PLAK LİSTESİ */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '25px' }}>
                   {filtrelenmisPlaklar.map(plak => {
-                    const isFav = favorites.some(f => f.id === plak.id);
+                    const pId = plak._id || plak.id;
+                    const isFav = favorites.some(f => (f._id || f.id) === pId);
+
                     return (
-                      <div key={plak.id} style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '15px', boxShadow: '6px 6px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                      <div key={pId} style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '15px', boxShadow: '6px 6px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
                         <button 
                           onClick={() => toggleFavorite(plak)}
                           style={{ position: 'absolute', top: '10px', right: '10px', background: 'white', border: '2px solid #1a1a1a', borderRadius: '50%', padding: '6px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -438,12 +358,8 @@ const AppContent = ({
                           <Heart size={18} fill={isFav ? "#ff4d4d" : "none"} color={isFav ? "#ff4d4d" : "#1a1a1a"} />
                         </button>
 
-                        <Link to={`/product/${plak.id}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
-                          <div 
-                            style={{ width: '100%', aspectRatio: '1/1', backgroundColor: '#eee', marginBottom: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', transition: 'transform 0.2s', border: '2px solid #1a1a1a' }}
-                            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                          >
+                        <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
+                          <div style={{ width: '100%', aspectRatio: '1/1', backgroundColor: '#eee', marginBottom: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', border: '2px solid #1a1a1a' }}>
                             <Disc size={70} color="#1a1a1a" strokeWidth={2.5} />
                           </div>
                           <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem' }}>{plak.ad}</h3>
@@ -465,7 +381,7 @@ const AppContent = ({
 
             <Route path="/product/:id" element={<ProductDetail plaklar={plaklar} sepeteEkle={sepeteEkle} isLoggedIn={isLoggedIn} favorites={favorites} toggleFavorite={toggleFavorite} />} />
             
-            {/* FAVORİLER SAYFASI */}
+            {/* FAVORİLER */}
             <Route path="/favorites" element={
               <div style={{ padding: '20px', border: '4px solid #1a1a1a', backgroundColor: 'white', boxShadow: '10px 10px 0px #1a1a1a' }}>
                 <h2 style={{ borderBottom: '3px solid #1a1a1a', paddingBottom: '10px', textTransform: 'uppercase' }}>FAVORİ PLAKLARIM ({favorites.length})</h2>
@@ -473,22 +389,25 @@ const AppContent = ({
                   <p style={{ fontWeight: 'bold', padding: '20px 0' }}>Henüz favorilere bir plak eklemediniz. ❤️</p>
                 ) : (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px', marginTop: '20px' }}>
-                    {favorites.map(plak => (
-                      <div key={plak.id} style={{ border: '3px solid #1a1a1a', padding: '15px', backgroundColor: 'white', boxShadow: '4px 4px 0px #1a1a1a' }}>
-                        <div style={{ textAlign: 'center', marginBottom: '10px' }}><Disc size={60} color="#1a1a1a" /></div>
-                        <h4 style={{ margin: 0 }}>{plak.ad}</h4>
-                        <p style={{ margin: '5px 0', fontSize: '0.85rem', color: '#666' }}>{plak.sanatci}</p>
-                        <div style={{ fontWeight: 'bold', margin: '10px 0' }}>{plak.fiyat} TL</div>
-                        <button onClick={() => sepeteEkle(plak)} style={{ width: '100%', backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px', fontWeight: 'bold', cursor: 'pointer' }}>SEPETE EKLE</button>
-                      </div>
-                    ))}
+                    {favorites.map(plak => {
+                      const pId = plak._id || plak.id;
+                      return (
+                        <div key={pId} style={{ border: '3px solid #1a1a1a', padding: '15px', backgroundColor: 'white', boxShadow: '4px 4px 0px #1a1a1a' }}>
+                          <div style={{ textAlign: 'center', marginBottom: '10px' }}><Disc size={60} color="#1a1a1a" /></div>
+                          <h4 style={{ margin: 0 }}>{plak.ad}</h4>
+                          <p style={{ margin: '5px 0', fontSize: '0.85rem', color: '#666' }}>{plak.sanatci}</p>
+                          <div style={{ fontWeight: 'bold', margin: '10px 0' }}>{plak.fiyat} TL</div>
+                          <button onClick={() => sepeteEkle(plak)} style={{ width: '100%', backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px', fontWeight: 'bold', cursor: 'pointer' }}>SEPETE EKLE</button>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
                 <Link to="/" style={{ display: 'inline-block', marginTop: '20px', fontWeight: 'bold', color: '#1a1a1a' }}>← Alışverişe Dön</Link>
               </div>
             } />
 
-            {/* SEPET SAYFASI */}
+            {/* SEPET */}
             <Route path="/cart" element={
               <div style={{ padding: '20px', border: '4px solid #1a1a1a', backgroundColor: 'white', boxShadow: '10px 10px 0px #1a1a1a' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #1a1a1a', paddingBottom: '10px' }}>
@@ -512,23 +431,26 @@ const AppContent = ({
                   </div>
                 ) : (
                   <>
-                    {cart.map((item, index) => (
-                      <div key={item.id || index} style={{ borderBottom: '2px solid #1a1a1a', padding: '15px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ flex: 1 }}>
-                          <span style={{ fontWeight: 'bold' }}>{item.ad}</span>
-                          <p style={{ margin: 0, fontSize: '0.8rem', color: '#666' }}>{item.fiyat} TL x {item.adet || 1}</p>
+                    {cart.map((item, index) => {
+                      const itemId = item._id || item.id;
+                      return (
+                        <div key={itemId || index} style={{ borderBottom: '2px solid #1a1a1a', padding: '15px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ flex: 1 }}>
+                            <span style={{ fontWeight: 'bold' }}>{item.ad}</span>
+                            <p style={{ margin: 0, fontSize: '0.8rem', color: '#666' }}>{item.fiyat} TL x {item.adet || 1}</p>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <button onClick={() => adetGuncelle(itemId, -1)} style={{ width: '30px', height: '30px', border: '2px solid #1a1a1a', cursor: 'pointer', backgroundColor: '#e2f0cb', fontWeight: 'bold' }}>-</button>
+                            <span style={{ fontWeight: 'bold' }}>{item.adet || 1}</span>
+                            <button onClick={() => adetGuncelle(itemId, 1)} style={{ width: '30px', height: '30px', border: '2px solid #1a1a1a', cursor: 'pointer', backgroundColor: '#ff9e00', fontWeight: 'bold' }}>+</button>
+                          </div>
+                          <div style={{ flex: 1, textAlign: 'right', fontWeight: 'bold' }}>
+                            {(item.fiyat * (item.adet || 1)).toFixed(2)} TL
+                            <button onClick={() => urunCikar(index)} style={{ marginLeft: '15px', color: 'red', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 'bold' }}>X</button>
+                          </div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <button onClick={() => adetGuncelle(item.id, -1)} style={{ width: '30px', height: '30px', border: '2px solid #1a1a1a', cursor: 'pointer', backgroundColor: '#e2f0cb', fontWeight: 'bold' }}>-</button>
-                          <span style={{ fontWeight: 'bold' }}>{item.adet || 1}</span>
-                          <button onClick={() => adetGuncelle(item.id, 1)} style={{ width: '30px', height: '30px', border: '2px solid #1a1a1a', cursor: 'pointer', backgroundColor: '#ff9e00', fontWeight: 'bold' }}>+</button>
-                        </div>
-                        <div style={{ flex: 1, textAlign: 'right', fontWeight: 'bold' }}>
-                          {(item.fiyat * (item.adet || 1)).toFixed(2)} TL
-                          <button onClick={() => urunCikar(index)} style={{ marginLeft: '15px', color: 'red', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 'bold' }}>X</button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
 
                     <div style={{ margin: '20px 0', padding: '15px', border: '3px solid #1a1a1a', backgroundColor: '#f9f9f9' }}>
                       <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px' }}>İNDİRİM KUPONU</label>
@@ -550,7 +472,6 @@ const AppContent = ({
                           UYGULA
                         </button>
                       </div>
-                      
                       {kuponMesaji && (
                         <p style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '0.9rem', color: kuponMesaji.includes('❌') ? '#cc0000' : '#008000' }}>
                           {kuponMesaji}
@@ -563,14 +484,12 @@ const AppContent = ({
                         <span>Ara Toplam:</span>
                         <span>{guvenliToplam.toFixed(2)} TL</span>
                       </p>
-
                       {uygulananIndirim > 0 && (
                         <p style={{ display: 'flex', justifyContent: 'space-between', margin: '5px 0', color: 'green', fontWeight: 'bold' }}>
                           <span>İndirim:</span>
                           <span>-{guvenliIndirim.toFixed(2)} TL</span>
                         </p>
                       )}
-
                       <h3 style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.3rem', borderTop: '2px solid #1a1a1a', paddingTop: '10px', marginTop: '10px' }}>
                         <span>ÖDENECEK TUTAR:</span>
                         <span>{guvenliOdenecek.toFixed(2)} TL</span>
@@ -590,9 +509,7 @@ const AppContent = ({
               </div>
             } />
 
-            <Route path="/checkout" element={<CheckoutPage total={odenecekTutar} sepetiBosalt={sepetiBosalt} cart={cart} 
-      indirimTutari={indirimTutari} 
-      odenecekTutar={odenecekTutar} />} />
+            <Route path="/checkout" element={<CheckoutPage total={odenecekTutar} sepetiBosalt={sepetiBosalt} cart={cart} indirimTutari={indirimTutari} odenecekTutar={odenecekTutar} />} />
             
             <Route path="/campaigns" element={
               <div style={{ padding: '20px', border: '4px solid #1a1a1a', backgroundColor: 'white', boxShadow: '10px 10px 0px #1a1a1a' }}>
@@ -610,40 +527,43 @@ const AppContent = ({
               </div>
             } />
 
+            {/* LOGIN ROUTE */}
             <Route path="/login" element={
-  <div style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '40px', boxShadow: '12px 12px 0px #ff9e00', maxWidth: '400px', margin: '40px auto' }}>
-    <h2 style={{ textTransform: 'uppercase', marginBottom: '30px', borderBottom: '4px solid #1a1a1a', paddingBottom: '10px' }}>Giriş Yap</h2>
-    <form onSubmit={async (e) => {
-      e.preventDefault();
-      const email = e.target.email.value;
-      const sifre = e.target.sifre.value;
+              <div style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '40px', boxShadow: '12px 12px 0px #ff9e00', maxWidth: '400px', margin: '40px auto' }}>
+                <h2 style={{ textTransform: 'uppercase', marginBottom: '30px', borderBottom: '4px solid #1a1a1a', paddingBottom: '10px' }}>Giriş Yap</h2>
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  const email = e.target.email.value;
+                  const sifre = e.target.sifre.value;
 
-      try {
-        // Backend API'ye Login İsteği
-        const { data } = await API.post('/auth/login', { email, sifre });
-        
-        // Token ve Kullanıcı Bilgisini Kaydet
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data));
-        
-        setIsLoggedIn(true);
-        alert(`Hoş geldin, ${data.adSoyad}! 💿`);
-        window.location.href = "/";
-      } catch (error) {
-        alert(error.response?.data?.message || "Giriş yapılırken bir hata oluştu!");
-      }
-    }} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <label style={{ fontWeight: 'bold' }}>E-POSTA</label>
-      <input required name="email" type="email" placeholder="ornek@mail.com" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
-      
-      <label style={{ fontWeight: 'bold' }}>ŞİFRE</label>
-      <input required name="sifre" type="password" placeholder="******" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
-      
-      <button type="submit" style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '15px', fontWeight: 'bold', border: 'none', cursor: 'pointer', marginTop: '10px' }}>DÜKKANA GİRİŞ YAP</button>
-    </form>
-    <p style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.9rem' }}>Hesabın yok mu? <Link to="/register" style={{ color: '#ff9e00', fontWeight: 'bold' }}>Kayıt Ol</Link></p>
-  </div>
-} />
+                  try {
+                    const { data } = await API.post('/auth/login', { 
+                      email, 
+                      sifre, 
+                      password: sifre 
+                    });
+                    
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data));
+                    
+                    setIsLoggedIn(true);
+                    alert(`Hoş geldin, ${data.adSoyad || 'Kullanıcı'}! 💿`);
+                    window.location.href = "/";
+                  } catch (error) {
+                    alert(error.response?.data?.message || "Giriş hatası! Lütfen bilgilerinizi kontrol edin.");
+                  }
+                }} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <label style={{ fontWeight: 'bold' }}>E-POSTA</label>
+                  <input required name="email" type="email" placeholder="ornek@mail.com" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
+                  
+                  <label style={{ fontWeight: 'bold' }}>ŞİFRE</label>
+                  <input required name="sifre" type="password" placeholder="******" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
+                  
+                  <button type="submit" style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '15px', fontWeight: 'bold', border: 'none', cursor: 'pointer', marginTop: '10px' }}>DÜKKANA GİRİŞ YAP</button>
+                </form>
+                <p style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.9rem' }}>Hesabın yok mu? <Link to="/register" style={{ color: '#ff9e00', fontWeight: 'bold' }}>Kayıt Ol</Link></p>
+              </div>
+            } />
 
             <Route path="/about" element={
               <div style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '40px', boxShadow: '12px 12px 0px #e2f0cb' }}>
@@ -656,58 +576,51 @@ const AppContent = ({
               </div>
             } />
 
-<Route path="/register" element={
-  <div style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '40px', boxShadow: '12px 12px 0px #ff9e00', maxWidth: '400px', margin: '40px auto' }}>
-    <h2 style={{ textTransform: 'uppercase', marginBottom: '30px', borderBottom: '4px solid #1a1a1a', paddingBottom: '10px' }}>Kayıt Ol</h2>
-    <form onSubmit={async (e) => {
-      e.preventDefault();
-      const adSoyad = e.target.adSoyad.value;
-      const email = e.target.email.value;
-      const sifre = e.target.sifre.value;
+            {/* REGISTER ROUTE */}
+            <Route path="/register" element={
+              <div style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '40px', boxShadow: '12px 12px 0px #ff9e00', maxWidth: '400px', margin: '40px auto' }}>
+                <h2 style={{ textTransform: 'uppercase', marginBottom: '30px', borderBottom: '4px solid #1a1a1a', paddingBottom: '10px' }}>Kayıt Ol</h2>
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  const adSoyad = e.target.adSoyad.value;
+                  const email = e.target.email.value;
+                  const sifre = e.target.sifre.value;
 
-      try {
-        // Backend API'ye Register İsteği
-        const { data } = await API.post('/auth/register', { adSoyad, email, sifre });
-        
-        // Token ve Kullanıcı Bilgisini Kaydet
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data));
+                  try {
+                    const { data } = await API.post('/auth/register', { 
+                      adSoyad, 
+                      name: adSoyad, 
+                      email, 
+                      sifre, 
+                      password: sifre 
+                    });
+                    
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data));
 
-        setIsLoggedIn(true);
-        alert(`Hesabın başarıyla oluşturuldu, ${data.adSoyad}! 🎉`);
-        window.location.href = "/";
-      } catch (error) {
-        alert(error.response?.data?.message || "Kayıt olunurken bir hata oluştu!");
-      }
-    }} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <label style={{ fontWeight: 'bold' }}>AD SOYAD</label>
-      <input required name="adSoyad" type="text" placeholder="Ahmet Yılmaz" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
-      
-      <label style={{ fontWeight: 'bold' }}>E-POSTA</label>
-      <input required name="email" type="email" placeholder="ornek@mail.com" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
-      
-      <label style={{ fontWeight: 'bold' }}>ŞİFRE</label>
-      <input required name="sifre" type="password" placeholder="******" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
-      
-      <button type="submit" style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '15px', fontWeight: 'bold', border: '3px solid #1a1a1a', cursor: 'pointer', marginTop: '10px' }}>ÜYELİĞİ TAMAMLA</button>
-    </form>
-  </div>
-} />
+                    setIsLoggedIn(true);
+                    alert(`Hesabın başarıyla oluşturuldu, ${data.adSoyad || adSoyad}! 🎉`);
+                    window.location.href = "/";
+                  } catch (error) {
+                    alert(error.response?.data?.message || "Kayıt olunurken bir hata oluştu!");
+                  }
+                }} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <label style={{ fontWeight: 'bold' }}>AD SOYAD</label>
+                  <input required name="adSoyad" type="text" placeholder="Ahmet Yılmaz" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
+                  
+                  <label style={{ fontWeight: 'bold' }}>E-POSTA</label>
+                  <input required name="email" type="email" placeholder="ornek@mail.com" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
+                  
+                  <label style={{ fontWeight: 'bold' }}>ŞİFRE</label>
+                  <input required name="sifre" type="password" placeholder="******" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
+                  
+                  <button type="submit" style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '15px', fontWeight: 'bold', border: '3px solid #1a1a1a', cursor: 'pointer', marginTop: '10px' }}>ÜYELİĞİ TAMAMLA</button>
+                </form>
+              </div>
+            } />
           </Routes>
         </div>
       </div>
-
-      {/* MODALLAR */}
-      {selectedKampanya && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100 }}>
-          <div style={{ backgroundColor: 'white', padding: '40px', border: '5px solid #1a1a1a', boxShadow: '15px 15px 0px ' + selectedKampanya.renk, maxWidth: '500px', textAlign: 'center', position: 'relative' }}>
-            <button onClick={() => setSelectedKampanya(null)} style={{ position: 'absolute', right: '15px', top: '15px', cursor: 'pointer', border: 'none', background: 'none', fontWeight: 'bold' }}>KAPAT [X]</button>
-            <h2 style={{ fontSize: '2rem', backgroundColor: selectedKampanya.renk, padding: '10px', border: '3px solid #1a1a1a' }}>{selectedKampanya.baslik}</h2>
-            <p style={{ margin: '20px 0', fontWeight: 'bold' }}>{selectedKampanya.detay}</p>
-            <Link to="/campaigns" onClick={() => setSelectedKampanya(null)}><button style={{ width: '100%', padding: '15px', backgroundColor: '#1a1a1a', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'black', marginBottom: '10px' }}>TÜM KAMPANYALARI GÖR →</button></Link>
-          </div>
-        </div>
-      )}
 
       {/* FOOTER */}
       <footer style={{ marginTop: '60px', padding: '40px 20px', borderTop: '5px solid #1a1a1a', backgroundColor: '#1a1a1a', color: 'white', textAlign: 'center' }}>
@@ -720,22 +633,7 @@ const AppContent = ({
       </footer>
 
       {bildirim && (
-        <div style={{
-          position: 'fixed',
-          bottom: '30px',
-          right: '30px',
-          backgroundColor: '#ff9e00',
-          color: '#1a1a1a',
-          padding: '15px 25px',
-          border: '4px solid #1a1a1a',
-          boxShadow: '8px 8px 0px #1a1a1a',
-          fontWeight: 'bold',
-          fontSize: '1.1rem',
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px'
-        }}>
+        <div style={{ position: 'fixed', bottom: '30px', right: '30px', backgroundColor: '#ff9e00', color: '#1a1a1a', padding: '15px 25px', border: '4px solid #1a1a1a', boxShadow: '8px 8px 0px #1a1a1a', fontWeight: 'bold', fontSize: '1.1rem', zIndex: 9999, display: 'flex', alignItems: 'center', gap: '10px' }}>
           <ShoppingBag size={24} />
           <span>{bildirim}</span>
         </div>
@@ -744,66 +642,51 @@ const AppContent = ({
   );
 }
 
-// --- ⚙️ ANA APP BİLEŞENİ ---
+// --- ANA APP BİLEŞENİ ---
 function App() {
-  const [plaklar, setPlaklar] = useState([]); // 👈 Sahte dizi yerine boş state
-  const [cart, setCart] = useState([])
-  const [activeCategory, setActiveCategory] = useState("Hepsi")
-  const [selectedPlak, setSelectedPlak] = useState(null)
-  const [selectedKampanya, setSelectedKampanya] = useState(null)
-  const [currentSlide, setCurrentSlide] = useState(0)
+  const [plaklar, setPlaklar] = useState([]);
+  const [cart, setCart] = useState([]);
+  const [activeCategory, setActiveCategory] = useState("Hepsi");
+  const [selectedPlak, setSelectedPlak] = useState(null);
+  const [selectedKampanya, setSelectedKampanya] = useState(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [bildirim, setBildirim] = useState(null);
   
-  // YENİ EK GELİŞMİŞ STATE'LER
   const [aramaMetni, setAramaMetni] = useState('');
   const [sirallama, setSirallama] = useState('varsayilan');
   const [favorites, setFavorites] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-  return !!localStorage.getItem('token');
-});
-const handleLogout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  setIsLoggedIn(false);
-  window.location.href = "/";
-};
+  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('token'));
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setIsLoggedIn(false);
+    window.location.href = "/";
+  };
   
   const [uygulananIndirim, setUygulananIndirim] = useState(0);
   const [kuponMesaji, setKuponMesaji] = useState('');
 
-
-
   const toggleFavorite = (plak) => {
+    const plakId = plak._id || plak.id;
     setFavorites(prev => {
-      const varMi = prev.some(f => f.id === plak.id);
-      if (varMi) return prev.filter(f => f.id !== plak.id);
+      const varMi = prev.some(f => (f._id || f.id) === plakId);
+      if (varMi) return prev.filter(f => (f._id || f.id) !== plakId);
       return [...prev, plak];
     });
   };
 
   const toplamTutar = (cart || []).reduce((acc, item) => {
-    const gelenFiyat = item.fiyat || item.price || item.ucret || 0;
-    const temizFiyat = typeof gelenFiyat === 'string' 
-      ? gelenFiyat.replace(/[^0-9.-]+/g, "") 
-      : gelenFiyat;
-
-    const fiyat = parseFloat(temizFiyat) || 0;
-    const adet = parseInt(item.adet || item.quantity || 1) || 1;
-
+    const gelenFiyat = item.fiyat || item.price || 0;
+    const fiyat = parseFloat(gelenFiyat) || 0;
+    const adet = parseInt(item.adet || 1) || 1;
     return acc + (fiyat * adet);
   }, 0);
 
   const indirimTutari = toplamTutar * (uygulananIndirim || 0);
-  const odenecekTutar = uygulananIndirim > 0 
-    ? Math.max(0, toplamTutar - indirimTutari) 
-    : toplamTutar;
-
-  const DEFAULT_KUPONLAR = {
-    'VINTAGE10': { oran: 0.10, mesaj: '🎉 %10 İndirim Kuponu Uygulandı!' },
-    'VINVIN20': { oran: 0.20, mesaj: '🔥 %20 Özel VinVin Kuponu Uygulandı!' }
-  };
+  const odenecekTutar = uygulananIndirim > 0 ? Math.max(0, toplamTutar - indirimTutari) : toplamTutar;
 
   const kuponKullan = async (kod) => {
     if (!kod) {
@@ -823,12 +706,13 @@ const handleLogout = () => {
   const kampanyalar = [
     { id: 1, baslik: "Yaz Sonu İndirimi", detay: "Tüm Rock plaklarında %20 indirim!", renk: "#ff9e00", tarih: "15 Mart" },
     { id: 2, baslik: "Ücretsiz Kargo", detay: "500 TL ve üzeri kargo bedava!", renk: "#e2f0cb", tarih: "20 Mart" }
-  ]
+  ];
 
   const sepeteEkle = (plak) => {
-    const urunVarMi = cart.find(item => item.id === plak.id);
+    const plakId = plak._id || plak.id;
+    const urunVarMi = cart.find(item => (item._id || item.id) === plakId);
     if (urunVarMi) {
-      setCart(cart.map(item => item.id === plak.id ? { ...item, adet: (item.adet || 1) + 1 } : item));
+      setCart(cart.map(item => (item._id || item.id) === plakId ? { ...item, adet: (item.adet || 1) + 1 } : item));
     } else {
       setCart([...cart, { ...plak, adet: 1 }]);
     }
@@ -838,7 +722,7 @@ const handleLogout = () => {
 
   const adetGuncelle = (id, miktar) => {
     setCart(cart.map(item => {
-      if (item.id === id) {
+      if ((item._id || item.id) === id) {
         const yeniAdet = (item.adet || 1) + miktar;
         return yeniAdet > 0 ? { ...item, adet: yeniAdet } : item;
       }
@@ -849,17 +733,11 @@ const handleLogout = () => {
   const urunCikar = (index) => setCart(cart.filter((_, i) => i !== index));
   const sepetiBosalt = () => setCart([]);
 
-  // 1. ÜRÜNLERİ BACKEND'DEN ÇEKME (GET)
+  // BACKEND'DEN ÜRÜN ÇEKME
   useEffect(() => {
     const urunleriGetir = async () => {
       try {
-        const { data } = await API.get('/products', {
-          params: {
-            kategori: activeCategory,
-            arama: aramaMetni,
-            sirallama: sirallama
-          }
-        });
+        const { data } = await API.get('/products');
         setPlaklar(data);
       } catch (error) {
         console.error("Ürünler çekilirken hata oluştu:", error);
@@ -867,9 +745,9 @@ const handleLogout = () => {
     };
 
     urunleriGetir();
-  }, [activeCategory, aramaMetni, sirallama]);
+  }, []);
 
-  // ARAMA, KATEGORİ VE SIRALAMA FİLTRESİ
+  // FRONTEND FİLTRELEME
   let filtrelenmisPlaklar = activeCategory === "Hepsi" ? plaklar : plaklar.filter(p => p.kategori === activeCategory);
   
   if (aramaMetni) {
@@ -901,7 +779,7 @@ const handleLogout = () => {
         toplamTutar={toplamTutar}
         bildirim={bildirim}
         kuponMesaji={kuponMesaji} kuponKullan={kuponKullan} uygulananIndirim={uygulananIndirim}
-        indirimTutari={indirimTutari} odenecekTutar={odenecekTutar} DEFAULT_KUPONLAR={DEFAULT_KUPONLAR}
+        indirimTutari={indirimTutari} odenecekTutar={odenecekTutar}
         aramaMetni={aramaMetni} setAramaMetni={setAramaMetni}
         sirallama={sirallama} setSirallama={setSirallama}
         favorites={favorites} toggleFavorite={toggleFavorite}
