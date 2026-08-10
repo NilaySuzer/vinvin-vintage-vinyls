@@ -19,6 +19,10 @@ const orderSchema = new mongoose.Schema({
   toplamTutar: { type: Number, required: true },
   indirimTutari: { type: Number, default: 0 },
   odenecekTutar: { type: Number, required: true },
+  durum: { 
+    type: String, 
+    default: 'Hazırlanıyor' 
+  },
   isPaid: { type: Boolean, default: true },
   paidAt: { type: Date, default: Date.now }
 }, { timestamps: true });
