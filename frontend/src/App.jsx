@@ -278,20 +278,33 @@ const AppContent = ({
           <Link to="/about" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>HAKKIMIZDA</Link>
           <Link to="/favorites" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>❤️ ({favorites.length})</Link>
 
-          {isLoggedIn && (
-  <>
-    <Link to="/profile" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', backgroundColor: 'white', border: '2px solid #1a1a1a', padding: '5px 10px', boxShadow: '2px 2px 0px #1a1a1a' }}>
-      👤 HESABIM
-    </Link>
-    
-    {/* Eğer kullanıcı admin ise göster */}
-    {JSON.parse(localStorage.getItem('user'))?.role === 'admin' && (
-      <Link to="/admin" style={{ textDecoration: 'none', color: 'white', backgroundColor: '#1a1a1a', border: '2px solid #1a1a1a', padding: '5px 10px', fontWeight: 'bold' }}>
-        🔑 ADMIN
-      </Link>
+          {isLoggedIn ? (
+      <>
+        <Link to="/profile" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', backgroundColor: 'white', border: '2px solid #1a1a1a', padding: '5px 10px', boxShadow: '2px 2px 0px #1a1a1a' }}>
+          👤 HESABIM
+        </Link>
+        
+        {/* Eğer kullanıcı admin ise göster */}
+        {JSON.parse(localStorage.getItem('user'))?.role === 'admin' && (
+          <Link to="/admin" style={{ textDecoration: 'none', color: 'white', backgroundColor: '#1a1a1a', border: '2px solid #1a1a1a', padding: '5px 10px', fontWeight: 'bold' }}>
+            🔑 ADMIN
+          </Link>
+        )}
+
+        <button onClick={handleLogout} style={{ border: '2px solid #1a1a1a', padding: '6px 12px', backgroundColor: '#1a1a1a', color: 'white', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <LogOut size={16} /> ÇIKIŞ
+        </button>
+      </>
+    ) : (
+      <>
+        <Link to="/login" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 10px', backgroundColor: 'white' }}>
+          GİRİŞ YAP
+        </Link>
+        <Link to="/register" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 10px', backgroundColor: '#1a1a1a' }}>
+          KAYIT OL
+        </Link>
+      </>
     )}
-  </>
-)}
 
           <Link to="/cart" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 12px', backgroundColor: 'white', boxShadow: '3px 3px 0px #1a1a1a' }}>
             🛒 SEPET ({(cart || []).reduce((acc, curr) => acc + (curr.adet || 1), 0)})
