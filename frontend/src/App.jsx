@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar'
 import { Search, X, Disc, Star, ShoppingCart, ShoppingBag, Heart, CheckCircle, ShieldCheck, Truck, CreditCard, User, LogOut, Filter, ArrowUpDown } from 'lucide-react';
 import API from './services/api';
 import ProfilePage from './pages/ProfilePage';
+import AdminPage from './pages/AdminPage';
 
 // --- ÜRÜN DETAY SAYFASI ---
 const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavorite }) => {
@@ -277,31 +278,20 @@ const AppContent = ({
           <Link to="/about" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>HAKKIMIZDA</Link>
           <Link to="/favorites" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>❤️ ({favorites.length})</Link>
 
-          {isLoggedIn ? (
-    <>
-      {/* Oturum Açıkken Görünecek Kısım */}
-      <Link to="/profile" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', backgroundColor: 'white', border: '2px solid #1a1a1a', padding: '5px 10px', boxShadow: '2px 2px 0px #1a1a1a' }}>
-        👤 HESABIM
+          {isLoggedIn && (
+  <>
+    <Link to="/profile" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', backgroundColor: 'white', border: '2px solid #1a1a1a', padding: '5px 10px', boxShadow: '2px 2px 0px #1a1a1a' }}>
+      👤 HESABIM
+    </Link>
+    
+    {/* Eğer kullanıcı admin ise göster */}
+    {JSON.parse(localStorage.getItem('user'))?.role === 'admin' && (
+      <Link to="/admin" style={{ textDecoration: 'none', color: 'white', backgroundColor: '#1a1a1a', border: '2px solid #1a1a1a', padding: '5px 10px', fontWeight: 'bold' }}>
+        🔑 ADMIN
       </Link>
-      
-      {/* Eğer Giriş Yapan Kullanıcı Admin İse Admin Paneli Butonu Çıkar */}
-      {JSON.parse(localStorage.getItem('user'))?.role === 'admin' && (
-        <Link to="/admin" style={{ textDecoration: 'none', color: 'white', backgroundColor: '#1a1a1a', border: '2px solid #1a1a1a', padding: '5px 10px', fontWeight: 'bold' }}>
-          🔑 ADMIN PANELİ
-        </Link>
-      )}
-
-      <button onClick={handleLogout} style={{ border: '2px solid #1a1a1a', padding: '5px 10px', backgroundColor: '#ff4d4d', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>
-        ÇIKIŞ
-      </button>
-    </>
-  ) : (
-    <>
-      {/* Oturum Kapalıyken Görünecek Kısım */}
-      <Link to="/login" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>GİRİŞ YAP</Link>
-      <Link to="/register" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>KAYIT OL</Link>
-    </>
-  )}
+    )}
+  </>
+)}
 
           <Link to="/cart" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 12px', backgroundColor: 'white', boxShadow: '3px 3px 0px #1a1a1a' }}>
             🛒 SEPET ({(cart || []).reduce((acc, curr) => acc + (curr.adet || 1), 0)})
@@ -398,6 +388,8 @@ const AppContent = ({
             <Route path="/product/:id" element={<ProductDetail plaklar={plaklar} sepeteEkle={sepeteEkle} isLoggedIn={isLoggedIn} favorites={favorites} toggleFavorite={toggleFavorite} />} />
 
             <Route path="/profile" element={<ProfilePage handleLogout={handleLogout} />} />
+            <Route path="/profile" element={<ProfilePage handleLogout={handleLogout} />} />
+<Route path="/admin" element={<AdminPage />} />
             
             {/* FAVORİLER */}
             <Route path="/favorites" element={
