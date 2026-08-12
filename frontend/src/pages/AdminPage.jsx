@@ -43,7 +43,7 @@ const handleAddProduct = async (e) => {
       fiyat: Number(yeniPlak.fiyat),
       stok: Number(yeniPlak.stok || 10),
       kategori: yeniPlak.kategori || 'Rock',
-      resim: yeniPlak.resim || 'https://via.placeholder.com/300',
+      resim: yeniPlak.resim || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=500',
       aciklama: yeniPlak.aciklama || 'Vintage Orijinal Baskı Plak'
     };
 
@@ -114,6 +114,8 @@ const handleAddProduct = async (e) => {
             <input required placeholder="Sanatçı" value={yeniPlak.sanatci} onChange={e => setYeniPlak({ ...yeniPlak, sanatci: e.target.value })} style={{ padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} />
             <input required type="number" placeholder="Fiyat (TL)" value={yeniPlak.fiyat} onChange={e => setYeniPlak({ ...yeniPlak, fiyat: e.target.value })} style={{ padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} />
             
+             <input placeholder="Resim Görsel URL (Örn: https://...)" value={yeniPlak.resim} onChange={e => setYeniPlak({ ...yeniPlak, resim: e.target.value })} style={{ padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} />         
+
             <select value={yeniPlak.kategori} onChange={e => setYeniPlak({ ...yeniPlak, kategori: e.target.value })} style={{ padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', backgroundColor: 'white' }}>
               <option value="Rock">Rock</option>
               <option value="Jazz">Jazz</option>
