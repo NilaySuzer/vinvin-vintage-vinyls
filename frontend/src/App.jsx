@@ -284,12 +284,19 @@ const AppContent = ({
           👤 HESABIM
         </Link>
         
-        {/* Eğer kullanıcı admin ise göster */}
-        {JSON.parse(localStorage.getItem('user'))?.role === 'admin' && (
-          <Link to="/admin" style={{ textDecoration: 'none', color: 'white', backgroundColor: '#1a1a1a', border: '2px solid #1a1a1a', padding: '5px 10px', fontWeight: 'bold' }}>
-            🔑 ADMIN
-          </Link>
-        )}
+       {/* Giriş yapılmış ve rolü 'admin' ise göster */}
+{isLoggedIn && (() => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    return user && user.role === 'admin';
+  } catch (e) {
+    return false;
+  }
+})() && (
+  <Link to="/admin" style={{ textDecoration: 'none', color: 'white', backgroundColor: '#1a1a1a', border: '2px solid #1a1a1a', padding: '5px 10px', fontWeight: 'bold' }}>
+    🔑 ADMIN
+  </Link>
+)}
 
         <button onClick={handleLogout} style={{ border: '2px solid #1a1a1a', padding: '6px 12px', backgroundColor: '#1a1a1a', color: 'white', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
           <LogOut size={16} /> ÇIKIŞ

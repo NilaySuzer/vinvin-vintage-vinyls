@@ -29,6 +29,7 @@ export const loginUser = async (req, res) => {
       _id: user._id,
       adSoyad: user.adSoyad,
       email: user.email,
+      role: user.role,
       token: tokenUret(user._id)
     });
   } else {

@@ -32,17 +32,31 @@ const AdminPage = () => {
   };
 
   // Yeni Plak Ekleme
-  const handleAddProduct = async (e) => {
-    e.preventDefault();
-    try {
-      await API.post('/products', yeniPlak);
-      alert("Yeni plak dükkana eklendi! 💿");
-      setYeniPlak({ ad: '', sanatci: '', fiyat: '', kategori: 'Rock', stok: 10, resim: '' });
-      fetchAdminData();
-    } catch (error) {
-      alert("Ürün eklenirken hata oluştu.");
-    }
-  };
+ // AdminPage.jsx içinde:
+const handleAddProduct = async (e) => {
+  e.preventDefault();
+  try {
+    // Backend'in beklediği veri formatını tam oluşturuyoruz
+    const gonderilecekVeri = {
+      ad: yeniPlak.ad,
+      sanatci: yeniPlak.sanatci,
+      fiyat: Number(yeniPlak.fiyat),
+      stok: Number(yeniPlak.stok || 10),
+      kategori: yeniPlak.kategori || 'Rock',
+      resim: yeniPlak.resim || 'https://via.placeholder.com/300',
+      aciklama: yeniPlak.aciklama || 'Vintage Orijinal Baskı Plak'
+    };
+
+    await API.post('/products', gonderilecekVeri);
+    alert("Yeni plak dükkana başarıyla eklendi! 💿");
+    setYeniPlak({ ad: '', sanatci: '', fiyat: '', kategori: 'Rock', stok: 10, resim: '' });
+    fetchAdminData();
+  } catch (error) {
+    console.error("Ekleme Hatası:", error.response?.data);
+    // Backend'den gelen spesifik hatayı ekranda gösterelim
+    alert(error.response?.data?.message || "Ürün eklenirken hata oluştu! (Console'u kontrol et)");
+  }
+};
 
   // Plak Silme
   const handleDeleteProduct = async (id) => {
