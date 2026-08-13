@@ -297,10 +297,11 @@ const AppContent = ({
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
           <Link to="/" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>VİTRİN</Link>
+         
           <Link to="/campaigns" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>KAMPANYALAR</Link>
           <Link to="/about" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>HAKKIMIZDA</Link>
           <Link to="/favorites" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>❤️ ({favorites.length})</Link>
-
+ 
           {isLoggedIn ? (
       <>
         <Link to="/profile" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', backgroundColor: 'white', border: '2px solid #1a1a1a', padding: '5px 10px', boxShadow: '2px 2px 0px #1a1a1a' }}>
@@ -328,14 +329,84 @@ const AppContent = ({
     ) : (
       <>
         <Link to="/login" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 10px', backgroundColor: 'white' }}>
-          GİRİŞ YAP
+          Giriş
         </Link>
         <Link to="/register" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 10px', backgroundColor: '#1a1a1a' }}>
-          KAYIT OL
+          Kayıt
         </Link>
       </>
     )}
+{/* 📂 KATEGORİLER DROPDOWN (YENİLENMİŞ RETRO BRUTALIST TASARIM) */}
+<div style={{ position: 'relative', display: 'inline-block' }}>
+  <button 
+    onClick={() => setIsNavOpen(!isNavOpen)} 
+    style={{ 
+      backgroundColor: isNavOpen ? '#ff9e00' : 'white', 
+      color: '#1a1a1a', 
+      border: '3px solid #1a1a1a', 
+      padding: '6px 14px', 
+      fontWeight: 'black', 
+      cursor: 'pointer', 
+      fontSize: '0.9rem', 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: '8px',
+      boxShadow: '3px 3px 0px #1a1a1a',
+      transition: 'all 0.1s ease',
+      textTransform: 'uppercase'
+    }}
+  >
+    <span>Kategoriler</span>
+    <span style={{ 
+      fontSize: '0.75rem', 
+      transform: isNavOpen ? 'rotate(180deg)' : 'rotate(0deg)', 
+      transition: 'transform 0.2s' 
+    }}>
+      ▼
+    </span>
+  </button>
 
+  {/* Açılır Kutu */}
+  {isNavOpen && (
+    <div style={{ 
+      position: 'absolute', 
+      top: 'calc(100% + 8px)', 
+      left: 0, 
+      backgroundColor: 'white', 
+      border: '3px solid #1a1a1a', 
+      boxShadow: '6px 6px 0px #1a1a1a', 
+      zIndex: 999, 
+      display: 'flex', 
+      flexDirection: 'column', 
+      minWidth: '180px',
+      padding: '6px'
+    }}>
+      {['Tümü', 'Rock', 'Jazz', 'Pop', 'Klasik'].map((cat) => (
+        <button
+          key={cat}
+          onClick={() => {
+            setActiveCategory(cat);
+            setIsNavOpen(false);
+          }}
+          style={{
+            textAlign: 'left', 
+            padding: '10px 12px', 
+            border: activeCategory === cat ? '2px solid #1a1a1a' : '2px solid transparent', 
+            backgroundColor: activeCategory === cat ? '#ff9e00' : 'transparent',
+            fontWeight: 'black', 
+            cursor: 'pointer', 
+            fontSize: '0.85rem',
+            textTransform: 'uppercase',
+            marginBottom: '4px',
+            boxShadow: activeCategory === cat ? '2px 2px 0px #1a1a1a' : 'none'
+          }}
+        >
+          {cat === 'Tümü' ? '📀 TÜM PLAKLAR' : ` ${cat}`}
+        </button>
+      ))}
+    </div>
+  )}
+</div>
           <Link to="/cart" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 12px', backgroundColor: 'white', boxShadow: '3px 3px 0px #1a1a1a' }}>
             🛒 SEPET ({(cart || []).reduce((acc, curr) => acc + (curr.adet || 1), 0)})
           </Link>
@@ -379,18 +450,64 @@ const AppContent = ({
             </div>
           </div>
 {/* 🔍 3. ARAMA VE SIRALAMA BAR */}
-          <div style={{ display: 'flex', gap: '15px', marginBottom: '25px', flexWrap: 'wrap' }}>
-            <div style={{ flex: 2, minWidth: '200px', display: 'flex', alignItems: 'center', border: '3px solid #1a1a1a', backgroundColor: 'white', padding: '0 10px', boxShadow: '4px 4px 0px #1a1a1a' }}>
-              <Search size={20} color="#1a1a1a" />
-              <input 
-                type="text" 
-                placeholder="Plak veya sanatçı ara..." 
-                value={aramaMetni} 
-                onChange={(e) => setAramaMetni(e.target.value)}
-                style={{ width: '100%', border: 'none', padding: '10px', outline: 'none', fontWeight: 'bold' }}
+          {/* ARAMA BAR (CANLI SONUÇ DROPDOWN'LI) */}
+<div style={{ flex: 2, minWidth: '220px', position: 'relative' }}>
+  <div style={{ display: 'flex', alignItems: 'center', border: '3px solid #1a1a1a', backgroundColor: 'white', padding: '0 10px', boxShadow: '4px 4px 0px #1a1a1a' }}>
+    <Search size={20} color="#1a1a1a" />
+    <input 
+      type="text" 
+      placeholder="Plak veya sanatçı ara..." 
+      value={aramaMetni} 
+      onChange={(e) => setAramaMetni(e.target.value)}
+      style={{ width: '100%', border: 'none', padding: '10px', outline: 'none', fontWeight: 'bold' }}
+    />
+    {aramaMetni && <X size={18} style={{ cursor: 'pointer' }} onClick={() => setAramaMetni('')} />}
+  </div>
+
+  {/* 🎯 CANLI ARAMA DROPDOWN SONUÇLARI */}
+  {aramaMetni.trim() !== '' && (
+    <div style={{ 
+      position: 'absolute', top: '100%', left: 0, right: 0, 
+      backgroundColor: 'white', border: '3px solid #1a1a1a', 
+      boxShadow: '6px 6px 0px #1a1a1a', zIndex: 100, 
+      maxHeight: '300px', overflowY: 'auto', marginTop: '5px' 
+    }}>
+      {filtrelenmisPlaklar.length > 0 ? (
+        filtrelenmisPlaklar.map((plak) => {
+          const pId = plak._id || plak.id;
+          return (
+            <Link 
+              key={`search-${pId}`}
+              to={`/product/${pId}`}
+              onClick={() => setAramaMetni('')} // Tıklayınca aramayı temizler ve detay sayfasına gider
+              style={{ 
+                display: 'flex', alignItems: 'center', gap: '12px', 
+                padding: '10px', borderBottom: '2px solid #1a1a1a', 
+                textDecoration: 'none', color: '#1a1a1a', backgroundColor: 'white' 
+              }}
+            >
+              <img 
+                src={plak.resim || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=100'} 
+                alt={plak.ad} 
+                style={{ width: '40px', height: '40px', objectFit: 'cover', border: '1px solid #1a1a1a' }} 
               />
-              {aramaMetni && <X size={18} style={{ cursor: 'pointer' }} onClick={() => setAramaMetni('')} />}
-            </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 'black', fontSize: '0.95rem' }}>{plak.ad}</div>
+                <div style={{ fontSize: '0.8rem', color: '#666', fontWeight: 'bold' }}>{plak.sanatci}</div>
+              </div>
+              <div style={{ fontWeight: 'black', fontSize: '0.95rem', color: '#ff9e00', textShadow: '1px 1px 0px #1a1a1a' }}>
+                {plak.fiyat} TL
+              </div>
+            </Link>
+          );
+        })
+      ) : (
+        <div style={{ padding: '15px', textAlign: 'center', fontWeight: 'bold', color: '#888' }}>
+          Aradığınız plak bulunamadı 😔
+        </div>
+      )}
+    </div>
+  )}
 
             <div style={{ flex: 1, minWidth: '150px', display: 'flex', alignItems: 'center', border: '3px solid #1a1a1a', backgroundColor: 'white', padding: '0 10px', boxShadow: '4px 4px 0px #1a1a1a' }}>
               <ArrowUpDown size={18} color="#1a1a1a" />
@@ -433,41 +550,42 @@ const AppContent = ({
               ref={sliderRef}
               style={{ display: 'flex', gap: '20px', overflowX: 'auto', scrollBehavior: 'smooth', paddingBottom: '10px', scrollbarWidth: 'none' }}
             >
-              {filtrelenmisPlaklar.map(plak => {
-                const pId = plak._id || plak.id;
-                const isFav = favorites.some(f => (f._id || f.id) === pId);
+              {/* filtrelenmisPlaklar yerine direkt ham 'plaklar' dizisini ters çevirip ilk 8'ini alıyoruz */}
+{(plaklar || []).slice().reverse().slice(0, 6).map(plak => {
+  const pId = plak._id || plak.id;
+  const isFav = favorites.some(f => (f._id || f.id) === pId);
 
-                return (
-                  <div key={`slide-${pId}`} style={{ minWidth: '220px', maxWidth: '220px', backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '12px', boxShadow: '4px 4px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                    <button 
-                      onClick={() => toggleFavorite(plak)}
-                      style={{ position: 'absolute', top: '18px', right: '18px', background: 'white', border: '2px solid #1a1a1a', borderRadius: '50%', padding: '5px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                    >
-                      <Heart size={16} fill={isFav ? "#ff4d4d" : "none"} color={isFav ? "#ff4d4d" : "#1a1a1a"} />
-                    </button>
+  return (
+    <div key={`slide-${pId}`} style={{ minWidth: '240px', maxWidth: '240px', backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '12px', boxShadow: '4px 4px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+      <button 
+        onClick={() => toggleFavorite(plak)}
+        style={{ position: 'absolute', top: '18px', right: '18px', background: 'white', border: '2px solid #1a1a1a', borderRadius: '50%', padding: '5px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Heart size={16} fill={isFav ? "#ff4d4d" : "none"} color={isFav ? "#ff4d4d" : "#1a1a1a"} />
+      </button>
 
-                    <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
-                      <div style={{ position: 'relative', width: '100%', height: '220px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
-                        <img 
-                          src={plak.resim || plak.image || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'} 
-                          alt={plak.ad} 
-                          onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'; }}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                        />
-                      </div>
-                      <h4 style={{ margin: '0 0 3px 0', fontSize: '1.1rem', textTransform: 'uppercase', lineHeight: '1.2' }}>{plak.ad}</h4>
-                      <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.85rem' }}>{plak.sanatci}</p>
-                    </Link>
+      <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
+        <div style={{ position: 'relative', width: '100%', height: '240px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
+          <img 
+            src={plak.resim || plak.image || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'} 
+            alt={plak.ad} 
+            onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'; }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          />
+        </div>
+        <h4 style={{ margin: '0 0 3px 0', fontSize: '1.1rem', textTransform: 'uppercase', lineHeight: '1.2' }}>{plak.ad}</h4>
+        <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.85rem' }}>{plak.sanatci}</p>
+      </Link>
 
-                    <div style={{ marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
-                      <button onClick={() => sepeteEkle(plak)} style={{ backgroundColor: '#ba82b5', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem' }}>
-                        EKLE +
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+      <div style={{ marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
+        <button onClick={() => sepeteEkle(plak)} style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem' }}>
+          EKLE +
+        </button>
+      </div>
+    </div>
+  );
+})}
                   </div>
                   </div>
 
