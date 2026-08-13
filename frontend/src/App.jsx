@@ -528,7 +528,7 @@ const AppContent = ({
          
                 
           {/* 🔥 YENİ GELEN PLAKLAR SLIDER */}
-          <div style={{ backgroundColor: '#e0a6bf', border: '4px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a', width: '100%', boxSizing: 'border-box' }}>
+          <div className="brutal-card" style={{ backgroundColor: '#e0a6bf', border: '4px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a', width: '100%', boxSizing: 'border-box' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '1.5rem', textTransform: 'uppercase' }}> YENİ GELEN PLAKLAR</h3>
@@ -566,7 +566,9 @@ const AppContent = ({
       </button>
 
       <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
-        <div style={{ position: 'relative', width: '100%', height: '240px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
+        <div
+          className="brutal-img-container"
+          style={{ position: 'relative', width: '100%', height: '240px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
           <img 
             src={plak.resim || plak.image || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'} 
             alt={plak.ad} 
@@ -580,7 +582,9 @@ const AppContent = ({
 
       <div style={{ marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
-        <button onClick={() => sepeteEkle(plak)} style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem' }}>
+        <button onClick={() => sepeteEkle(plak)}
+          className="brutal-btn"
+          style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem' }}>
           EKLE +
         </button>
       </div>
@@ -597,7 +601,7 @@ const AppContent = ({
               const isFav = favorites.some(f => (f._id || f.id) === pId);
 
               return (
-                <div key={pId} style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '15px', boxShadow: '6px 6px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                <div key={pId}  className="brutal-card" style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '15px', boxShadow: '6px 6px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
                   <button 
                     onClick={() => toggleFavorite(plak)}
                     style={{ position: 'absolute', top: '10px', right: '10px', background: 'white', border: '2px solid #1a1a1a', borderRadius: '50%', padding: '6px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -607,7 +611,9 @@ const AppContent = ({
 
                   <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
                     {/* BÜYÜTÜLMÜŞ GÖRSEL ALANI (280px) */}
-                    <div style={{ position: 'relative', width: '100%', height: '280px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
+                    <div
+                      className="brutal-img-container"
+                      style={{ position: 'relative', width: '100%', height: '280px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
                       <img 
                         src={plak.resim || plak.image || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'} 
                         alt={plak.ad} 
@@ -621,7 +627,9 @@ const AppContent = ({
 
                   <div style={{ marginTop: 'auto', paddingTop: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontWeight: 'black', fontSize: '1.2rem' }}>{plak.fiyat} TL</span>
-                    <button onClick={() => sepeteEkle(plak)} style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px 12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
+                    <button onClick={() => sepeteEkle(plak)}
+                      className="brutal-btn"
+                      style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px 12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
                       EKLE +
                     </button>
                   </div>

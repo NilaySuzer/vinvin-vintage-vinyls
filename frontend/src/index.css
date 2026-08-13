@@ -4,3 +4,43 @@ body {
   font-family: "Courier New", Courier, monospace;
   color: #1a1a1a;
 }
+/* ⚡ PLAK KARTLARI HOVER EFEKTİ */
+.brutal-card {
+  transition:
+    transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    box-shadow 0.2s ease !important;
+}
+
+.brutal-card:hover {
+  transform: translateY(-8px) scale(1.02) !important;
+  box-shadow: 10px 10px 0px #1a1a1a !important;
+}
+
+/* 💿 RESMİN ÜZERİNE GELİNCE DÖNEN PLAK EFEKTİ */
+.brutal-img-container {
+  overflow: hidden;
+  position: relative;
+}
+
+.brutal-img-container img {
+  transition: transform 0.3s ease !important;
+}
+
+.brutal-card:hover .brutal-img-container img {
+  transform: scale(1.08) rotate(-2deg) !important;
+}
+
+/* 🔘 BUTONLAR İÇİN BASS HİSSİYATI (CLICK & HOVER) */
+.brutal-btn {
+  transition: all 0.15s ease !important;
+}
+
+.brutal-btn:hover {
+  transform: translate(-3px, -3px) !important;
+  box-shadow: 5px 5px 0px #1a1a1a !important;
+}
+
+.brutal-btn:active {
+  transform: translate(0px, 0px) !important;
+  box-shadow: 1px 1px 0px #1a1a1a !important;
+}
