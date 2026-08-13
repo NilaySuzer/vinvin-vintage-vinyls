@@ -137,7 +137,12 @@ const handleAddProduct = async (e) => {
               return (
                 <div key={pId} style={{ border: '2px solid #1a1a1a', padding: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'white' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <Disc size={35} />
+                    <img 
+  src={p.resim || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=100'} 
+  alt={p.ad} 
+  onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=100'; }}
+  style={{ width: '45px', height: '45px', objectFit: 'cover', border: '2px solid #1a1a1a', borderRadius: '4px' }} 
+/>
                     <div>
                       <div style={{ fontWeight: 'black' }}>{p.ad}</div>
                       <div style={{ fontSize: '0.85rem', color: '#666' }}>{p.sanatci} - <span style={{ color: '#1a1a1a', fontWeight: 'bold' }}>{p.fiyat} TL</span> ({p.kategori})</div>

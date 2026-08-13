@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useParams, useNavigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
-import { Search, X, Disc, Star, ShoppingCart, ShoppingBag, Heart, CheckCircle, ShieldCheck, Truck, CreditCard, User, LogOut, Filter, ArrowUpDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, X, Disc, Star, ShoppingCart, ShoppingBag, Heart, CheckCircle, ShieldCheck, Truck, CreditCard, User, LogOut, Filter, ArrowUpDown } from 'lucide-react';
 import API from './services/api';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
@@ -259,6 +259,29 @@ const AppContent = ({
   const guvenliToplam = Number(toplamTutar) || 0;
   const guvenliIndirim = Number(indirimTutari) || 0;
   const guvenliOdenecek = Number(odenecekTutar) || guvenliToplam;
+  /* --- SLIDER VE OTOMATİK KAYMA MANTIĞI --- */
+ const sliderRef = useRef(null); // 👈 React.useRef yerine useRef
+
+  const slideLeft = () => {
+    if (sliderRef.current) sliderRef.current.scrollBy({ left: -320, behavior: 'smooth' });
+  };
+
+  const slideRight = () => {
+    if (sliderRef.current) sliderRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+  };
+
+  useEffect(() => { // 👈 React.useEffect yerine useEffect
+    const interval = setInterval(() => {
+      if (sliderRef.current) {
+        if (sliderRef.current.scrollLeft + sliderRef.current.clientWidth >= sliderRef.current.scrollWidth - 10) {
+          sliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          sliderRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+        }
+      }
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
@@ -319,97 +342,182 @@ const AppContent = ({
         </div>
       </nav>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
-        {/* SIDEBAR */}
-        {!location.pathname.startsWith('/product') && !["/login", "/register", "/checkout", "/campaigns", "/about", "/favorites"].includes(location.pathname) && (
-          <div style={{ flexBasis: '250px' }}>
-            <Sidebar 
-              onSelectCategory={(cat) => { setActiveCategory(cat); setIsSidebarOpen(false); }} 
-              activeCategory={activeCategory} 
-            />
+        <div style={{ 
+  display: 'flex', 
+  gap: '20px', 
+  alignItems: 'flex-start', 
+  width: '100%', 
+  boxSizing: 'border-box' 
+}}>
+  
+
+  {/* 📍 2. SAĞ İÇERİK ALANI (Banner + Slider + Arama + Grid) */}
+  <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '25px' }}>
+    <Routes>
+      <Route path="/" element={
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+          
+          {/* ⚡ YAZ SONU İNDİRİMİ BANNERI */}
+          <div 
+            onClick={() => setSelectedKampanya(kampanyalar[currentSlide])} 
+            style={{ 
+              backgroundColor: kampanyalar[currentSlide].renk, 
+              padding: '25px', 
+              border: '4px solid #1a1a1a', 
+              boxShadow: '6px 6px 0px #1a1a1a', 
+              cursor: 'pointer', 
+              textAlign: 'center',
+              width: '100%',
+              boxSizing: 'border-box'
+            }}
+          >
+            <div style={{ fontWeight: 'black', fontSize: '1.8rem', letterSpacing: '-0.5px', marginBottom: '8px' }}>
+              ⚡ {kampanyalar[currentSlide].baslik} ⚡
+            </div>
+            <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#1a1a1a' }}>
+              {kampanyalar[currentSlide].detay} - Detaylar ve Fırsatlar İçin Tıkla!
+            </div>
           </div>
-        )}
+{/* 🔍 3. ARAMA VE SIRALAMA BAR */}
+          <div style={{ display: 'flex', gap: '15px', marginBottom: '25px', flexWrap: 'wrap' }}>
+            <div style={{ flex: 2, minWidth: '200px', display: 'flex', alignItems: 'center', border: '3px solid #1a1a1a', backgroundColor: 'white', padding: '0 10px', boxShadow: '4px 4px 0px #1a1a1a' }}>
+              <Search size={20} color="#1a1a1a" />
+              <input 
+                type="text" 
+                placeholder="Plak veya sanatçı ara..." 
+                value={aramaMetni} 
+                onChange={(e) => setAramaMetni(e.target.value)}
+                style={{ width: '100%', border: 'none', padding: '10px', outline: 'none', fontWeight: 'bold' }}
+              />
+              {aramaMetni && <X size={18} style={{ cursor: 'pointer' }} onClick={() => setAramaMetni('')} />}
+            </div>
 
-        <div style={{ flex: '1 1 300px', minWidth: '300px' }}>
-          <Routes>
-            <Route path="/" element={
+            <div style={{ flex: 1, minWidth: '150px', display: 'flex', alignItems: 'center', border: '3px solid #1a1a1a', backgroundColor: 'white', padding: '0 10px', boxShadow: '4px 4px 0px #1a1a1a' }}>
+              <ArrowUpDown size={18} color="#1a1a1a" />
+              <select 
+                value={sirallama} 
+                onChange={(e) => setSirallama(e.target.value)}
+                style={{ width: '100%', border: 'none', padding: '10px', outline: 'none', fontWeight: 'bold', backgroundColor: 'transparent', cursor: 'pointer' }}
+              >
+                <option value="varsayilan">Sıralama: Önerilen</option>
+                <option value="fiyat-artan">Fiyat: Düşükten Yükseğe</option>
+                <option value="fiyat-azalan">Fiyat: Yüksekten Düşüğe</option>
+                <option value="a-z">İsim: A - Z</option>
+              </select>
+            </div>
+          </div>
+
+         
+                
+          {/* 🔥 YENİ GELEN PLAKLAR SLIDER */}
+          <div style={{ backgroundColor: '#e0a6bf', border: '4px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a', width: '100%', boxSizing: 'border-box' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
               <div>
-                {/* BANNER */}
-                <div onClick={() => setSelectedKampanya(kampanyalar[currentSlide])} style={{ backgroundColor: kampanyalar[currentSlide].renk, padding: '15px', border: '4px solid #1a1a1a', boxShadow: '8px 8px 0px #1a1a1a', marginBottom: '25px', cursor: 'pointer', textAlign: 'center' }}>
-                  <div style={{ fontWeight: 'black', fontSize: '1.2rem' }}>⚡ {kampanyalar[currentSlide].baslik} ⚡</div>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>{kampanyalar[currentSlide].detay} - Detaylar için tıkla!</div>
-                </div>
-
-                {/* ARAMA BAR */}
-                <div style={{ display: 'flex', gap: '15px', marginBottom: '25px', flexWrap: 'wrap' }}>
-                  <div style={{ flex: 2, minWidth: '200px', display: 'flex', alignItems: 'center', border: '3px solid #1a1a1a', backgroundColor: 'white', padding: '0 10px', boxShadow: '4px 4px 0px #1a1a1a' }}>
-                    <Search size={20} color="#1a1a1a" />
-                    <input 
-                      type="text" 
-                      placeholder="Plak veya sanatçı ara..." 
-                      value={aramaMetni} 
-                      onChange={(e) => setAramaMetni(e.target.value)}
-                      style={{ width: '100%', border: 'none', padding: '10px', outline: 'none', fontWeight: 'bold' }}
-                    />
-                    {aramaMetni && <X size={18} style={{ cursor: 'pointer' }} onClick={() => setAramaMetni('')} />}
-                  </div>
-
-                  <div style={{ flex: 1, minWidth: '150px', display: 'flex', alignItems: 'center', border: '3px solid #1a1a1a', backgroundColor: 'white', padding: '0 10px', boxShadow: '4px 4px 0px #1a1a1a' }}>
-                    <ArrowUpDown size={18} color="#1a1a1a" />
-                    <select 
-                      value={sirallama} 
-                      onChange={(e) => setSirallama(e.target.value)}
-                      style={{ width: '100%', border: 'none', padding: '10px', outline: 'none', fontWeight: 'bold', backgroundColor: 'transparent', cursor: 'pointer' }}
-                    >
-                      <option value="varsayilan">Sıralama: Önerilen</option>
-                      <option value="fiyat-artan">Fiyat: Düşükten Yükseğe</option>
-                      <option value="fiyat-azalan">Fiyat: Yüksekten Düşüğe</option>
-                      <option value="a-z">İsim: A - Z</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* PLAK LİSTESİ */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '25px' }}>
-                  {filtrelenmisPlaklar.map(plak => {
-                    const pId = plak._id || plak.id;
-                    const isFav = favorites.some(f => (f._id || f.id) === pId);
-
-                    return (
-                      <div key={pId} style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '15px', boxShadow: '6px 6px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                        <button 
-                          onClick={() => toggleFavorite(plak)}
-                          style={{ position: 'absolute', top: '10px', right: '10px', background: 'white', border: '2px solid #1a1a1a', borderRadius: '50%', padding: '6px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                        >
-                          <Heart size={18} fill={isFav ? "#ff4d4d" : "none"} color={isFav ? "#ff4d4d" : "#1a1a1a"} />
-                        </button>
-
-                        <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
-                          <div style={{ width: '100%', aspectRatio: '1/1', backgroundColor: '#eee', marginBottom: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', border: '2px solid #1a1a1a' }}>
-                            <Disc size={70} color="#1a1a1a" strokeWidth={2.5} />
-                          </div>
-                          <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem' }}>{plak.ad}</h3>
-                          <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.9rem' }}>{plak.sanatci}</p>
-                        </Link>
-
-                        <div style={{ marginTop: 'auto', paddingTop: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 'black', fontSize: '1.2rem' }}>{plak.fiyat} TL</span>
-                          <button onClick={() => sepeteEkle(plak)} style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px 12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
-                            EKLE +
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                <h3 style={{ margin: 0, fontSize: '1.5rem', textTransform: 'uppercase' }}> YENİ GELEN PLAKLAR</h3>
+                <p style={{ margin: '2px 0 0 0', fontWeight: 'bold', color: '#666', fontSize: '0.85rem' }}>Koleksiyona taze eklenenler</p>
               </div>
-            } />
+
+              {/* YÖN OKLARI */}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button onClick={slideLeft} style={{ border: '3px solid #1a1a1a', backgroundColor: 'white', padding: '6px 10px', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
+                  <ChevronLeft size={20} color="#1a1a1a" />
+                </button>
+                <button onClick={slideRight} style={{ border: '2px solid #1a1a1a', backgroundColor: '#ff9e00', padding: '6px 10px', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
+                  <ChevronRight size={20} color="#1a1a1a" />
+                </button>
+              </div>
+            </div>
+
+            {/* SLIDER İÇERİĞİ */}
+            <div 
+              ref={sliderRef}
+              style={{ display: 'flex', gap: '20px', overflowX: 'auto', scrollBehavior: 'smooth', paddingBottom: '10px', scrollbarWidth: 'none' }}
+            >
+              {filtrelenmisPlaklar.map(plak => {
+                const pId = plak._id || plak.id;
+                const isFav = favorites.some(f => (f._id || f.id) === pId);
+
+                return (
+                  <div key={`slide-${pId}`} style={{ minWidth: '220px', maxWidth: '220px', backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '12px', boxShadow: '4px 4px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                    <button 
+                      onClick={() => toggleFavorite(plak)}
+                      style={{ position: 'absolute', top: '18px', right: '18px', background: 'white', border: '2px solid #1a1a1a', borderRadius: '50%', padding: '5px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >
+                      <Heart size={16} fill={isFav ? "#ff4d4d" : "none"} color={isFav ? "#ff4d4d" : "#1a1a1a"} />
+                    </button>
+
+                    <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
+                      <div style={{ position: 'relative', width: '100%', height: '220px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
+                        <img 
+                          src={plak.resim || plak.image || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'} 
+                          alt={plak.ad} 
+                          onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'; }}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        />
+                      </div>
+                      <h4 style={{ margin: '0 0 3px 0', fontSize: '1.1rem', textTransform: 'uppercase', lineHeight: '1.2' }}>{plak.ad}</h4>
+                      <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.85rem' }}>{plak.sanatci}</p>
+                    </Link>
+
+                    <div style={{ marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
+                      <button onClick={() => sepeteEkle(plak)} style={{ backgroundColor: '#ba82b5', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem' }}>
+                        EKLE +
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+                  </div>
+                  </div>
+
+           {/* 🖼️ 4. TÜM PLAKLAR LİSTESİ (Kart Yükseklikleri 220px'den 280px'e Çıkarıldı) */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '25px' }}>
+            {filtrelenmisPlaklar.map(plak => {
+              const pId = plak._id || plak.id;
+              const isFav = favorites.some(f => (f._id || f.id) === pId);
+
+              return (
+                <div key={pId} style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '15px', boxShadow: '6px 6px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                  <button 
+                    onClick={() => toggleFavorite(plak)}
+                    style={{ position: 'absolute', top: '10px', right: '10px', background: 'white', border: '2px solid #1a1a1a', borderRadius: '50%', padding: '6px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Heart size={18} fill={isFav ? "#ff4d4d" : "none"} color={isFav ? "#ff4d4d" : "#1a1a1a"} />
+                  </button>
+
+                  <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
+                    {/* BÜYÜTÜLMÜŞ GÖRSEL ALANI (280px) */}
+                    <div style={{ position: 'relative', width: '100%', height: '280px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
+                      <img 
+                        src={plak.resim || plak.image || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'} 
+                        alt={plak.ad} 
+                        onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'; }}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      />
+                    </div>
+                    <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem', textTransform: 'uppercase' }}>{plak.ad}</h3>
+                    <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.9rem' }}>{plak.sanatci}</p>
+                  </Link>
+
+                  <div style={{ marginTop: 'auto', paddingTop: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontWeight: 'black', fontSize: '1.2rem' }}>{plak.fiyat} TL</span>
+                    <button onClick={() => sepeteEkle(plak)} style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px 12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
+                      EKLE +
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+                </div>
+        </div>
+      } />
 
             <Route path="/product/:id" element={<ProductDetail plaklar={plaklar} sepeteEkle={sepeteEkle} isLoggedIn={isLoggedIn} favorites={favorites} toggleFavorite={toggleFavorite} />} />
 
             <Route path="/profile" element={<ProfilePage handleLogout={handleLogout} />} />
             <Route path="/profile" element={<ProfilePage handleLogout={handleLogout} />} />
-<Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin" element={<AdminPage />} />
             
             {/* FAVORİLER */}
             <Route path="/favorites" element={
