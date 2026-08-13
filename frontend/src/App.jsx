@@ -279,7 +279,7 @@ const AppContent = ({
           sliderRef.current.scrollBy({ left: 320, behavior: 'smooth' });
         }
       }
-    }, 4000);
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -429,27 +429,63 @@ const AppContent = ({
       <Route path="/" element={
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
           
-          {/* ⚡ YAZ SONU İNDİRİMİ BANNERI */}
-          <div 
-            onClick={() => setSelectedKampanya(kampanyalar[currentSlide])} 
-            style={{ 
-              backgroundColor: kampanyalar[currentSlide].renk, 
-              padding: '25px', 
-              border: '4px solid #1a1a1a', 
-              boxShadow: '6px 6px 0px #1a1a1a', 
-              cursor: 'pointer', 
-              textAlign: 'center',
-              width: '100%',
-              boxSizing: 'border-box'
-            }}
-          >
-            <div style={{ fontWeight: 'black', fontSize: '1.8rem', letterSpacing: '-0.5px', marginBottom: '8px' }}>
-              ⚡ {kampanyalar[currentSlide].baslik} ⚡
-            </div>
-            <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#1a1a1a' }}>
-              {kampanyalar[currentSlide].detay} - Detaylar ve Fırsatlar İçin Tıkla!
-            </div>
-          </div>
+         {/* ⚡ DİNAMİK VE TIKLANABİLİR REKLAM / KAMPANYA BANNERI */}
+<div 
+  onClick={() => {
+    console.log("Seçilen Kampanya:", kampanyalar[currentSlide]);
+    setSelectedKampanya(kampanyalar[currentSlide]);
+  }}
+  className="brutal-btn"
+  style={{ 
+    backgroundColor: kampanyalar[currentSlide]?.renk || '#ff9e00', 
+    color: '#1a1a1a', 
+    border: '4px solid #1a1a1a', 
+    padding: '25px', 
+    boxShadow: '8px 8px 0px #1a1a1a', 
+    marginBottom: '30px', 
+    cursor: 'pointer', 
+    textAlign: 'center',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justify: 'center',
+    transition: 'all 0.2s ease'
+  }}
+>
+  <span style={{ 
+    backgroundColor: '#1a1a1a', 
+    color: 'white', 
+    padding: '4px 12px', 
+    fontWeight: 'black', 
+    fontSize: '0.8rem', 
+    marginBottom: '10px', 
+    border: '2px solid #1a1a1a',
+    letterSpacing: '1px'
+  }}>
+    HAFTANIN FIRSATI ⚡ (Tıkla & İncele)
+  </span>
+
+  <h2 style={{ 
+    fontSize: '2rem', 
+    margin: '0 0 8px 0', 
+    textTransform: 'uppercase', 
+    letterSpacing: '-1px',
+    fontWeight: 'black'
+  }}>
+    {kampanyalar[currentSlide]?.baslik}
+  </h2>
+
+  <p style={{ 
+    margin: 0, 
+    fontSize: '1rem', 
+    fontWeight: 'bold', 
+    maxWidth: '700px'
+  }}>
+    {kampanyalar[currentSlide]?.detay} — Kampanya detayları ve indirim kuponu için tıkla! 💿
+  </p>
+</div>
+                
+
 {/* 🔍 3. ARAMA VE SIRALAMA BAR */}
           {/* ARAMA BAR (CANLI SONUÇ DROPDOWN'LI) */}
 <div style={{ flex: 2, minWidth: '220px', position: 'relative' }}>
@@ -903,6 +939,92 @@ const AppContent = ({
           <span>{bildirim}</span>
         </div>
       )}
+      
+{/* 🎁 KAMPANYA DETAY MODAL (YÖNLENDİRME BUTONLU) */}
+{selectedKampanya && (
+  <div style={{
+    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.75)', zIndex: 1000,
+    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
+  }}>
+    <div style={{
+      backgroundColor: selectedKampanya.renk || '#ff9e00',
+      border: '4px solid #1a1a1a',
+      boxShadow: '12px 12px 0px #1a1a1a',
+      padding: '30px',
+      maxWidth: '480px',
+      width: '100%',
+      position: 'relative'
+    }}>
+      {/* SAĞ ÜST KAPAT X BUTONU */}
+      <button 
+        onClick={() => setSelectedKampanya(null)}
+        style={{
+          position: 'absolute', top: '15px', right: '15px',
+          backgroundColor: '#1a1a1a', color: 'white', border: '2px solid white',
+          fontWeight: 'black', padding: '5px 10px', cursor: 'pointer'
+        }}
+      >
+        ✕
+      </button>
+
+      <span style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '4px 10px', fontWeight: 'black', fontSize: '0.8rem', border: '1px solid white' }}>
+        KAMPANYA DETAYI ⚡
+      </span>
+
+      <h2 style={{ fontSize: '2rem', margin: '15px 0 10px 0', textTransform: 'uppercase', lineHeight: '1.1' }}>
+        {selectedKampanya.baslik}
+      </h2>
+
+      <p style={{ fontWeight: 'bold', fontSize: '1.05rem', marginBottom: '20px', color: '#1a1a1a' }}>
+        {selectedKampanya.detay}
+      </p>
+
+      {/* İNDİRİM KODU ALANI */}
+      {selectedKampanya.kod && (
+        <div style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '12px', textAlign: 'center', boxShadow: '4px 4px 0px #1a1a1a', marginBottom: '20px' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 'bold', display: 'block', color: '#666' }}>İNDİRİM KODUNUZ:</span>
+          <span style={{ fontSize: '1.4rem', fontWeight: 'black', letterSpacing: '2px', color: '#1a1a1a' }}>{selectedKampanya.kod}</span>
+        </div>
+      )}
+
+      {/* 🚀 AKILLI YÖNLEDİRME BUTONLARI */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {selectedKampanya.kategori && (
+          <button 
+            onClick={() => {
+              setActiveCategory(selectedKampanya.kategori); // Kategori filtresini aktifleştirir
+              setSelectedKampanya(null); // Modalı kapatır
+            }}
+            className="brutal-btn"
+            style={{
+              width: '100%', backgroundColor: '#1a1a1a', color: 'white',
+              border: '3px solid #1a1a1a', padding: '14px', fontWeight: 'black',
+              cursor: 'pointer', fontSize: '1rem', textTransform: 'uppercase',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+            }}
+          >
+            <span> {selectedKampanya.kategori.toUpperCase()} PLAKLARINI İNCELE</span>
+            <span>→</span>
+          </button>
+        )}
+
+        <button 
+          onClick={() => setSelectedKampanya(null)}
+          style={{
+            width: '100%', backgroundColor: 'transparent', color: '#1a1a1a',
+            border: '2px solid #1a1a1a', padding: '8px', fontWeight: 'bold',
+            cursor: 'pointer', fontSize: '0.85rem'
+          }}
+        >
+          Kapat
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
@@ -969,9 +1091,43 @@ function App() {
   };
 
   const kampanyalar = [
-    { id: 1, baslik: "Yaz Sonu İndirimi", detay: "Tüm Rock plaklarında %20 indirim!", renk: "#ff9e00", tarih: "15 Mart" },
-    { id: 2, baslik: "Ücretsiz Kargo", detay: "500 TL ve üzeri kargo bedava!", renk: "#e2f0cb", tarih: "20 Mart" }
-  ];
+  {
+    id: 1,
+    baslik: "YAZ SONU İNDİRİMİ ⚡",
+    detay: "Tüm Rock plaklarında %20 indirim fırsatını kaçırma!",
+    renk: "#ff9e00",
+    kod: "ROCK20",
+    kategori: "Rock" // 👈 Tıklayınca Rock kategorisine filtreler
+  },
+  {
+    id: 2,
+    baslik: "JAZZ GECELERİ 🎷",
+    detay: "Seçili Jazz albümlerinde net %15 indirim!",
+    renk: "#e2f0cb",
+    kod: "JAZZ15",
+    kategori: "Jazz" // 👈 Tıklayınca Jazz kategorisine filtreler
+  },
+  {
+    id: 3,
+    baslik: "NOSTALJİ POP RÜZGARI 📀",
+    detay: "Pop klasiklerinde 3 al 2 öde kampanyası başladı.",
+    renk: "#c7f9cc",
+    kod: "POP3AL2",
+    kategori: "Pop" // 👈 Tıklayınca Pop kategorisine filtreler
+  }
+];
+
+  /* BANNER SLIDE DÖNGÜSÜ (4 saniyede bir kampanya değişir) */
+useEffect(() => {
+  if (!kampanyalar || kampanyalar.length === 0) return;
+
+  const timer = setInterval(() => {
+    // Slaytı bir sonraki kampanyaya kaydırır
+    setCurrentSlide((prev) => (prev + 1) % kampanyalar.length);
+  }, 3000);
+
+  return () => clearInterval(timer);
+}, [kampanyalar]);
 
   const sepeteEkle = (plak) => {
     const plakId = plak._id || plak.id;
