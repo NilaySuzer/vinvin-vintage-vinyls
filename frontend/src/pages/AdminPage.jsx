@@ -7,6 +7,47 @@ const AdminPage = () => {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  // AdminPage.jsx içine eklenecek Kampanya Yönetim Bölümü:
+const [kampanyalar, setKampanyalar] = useState([]);
+  const [yeniKampanya, setYeniKampanya] = useState({ baslik: '', detay: '', renk: '#ff9e00', kod: '', kategori: 'Tümü' });
+  const [showCampaignForm, setShowCampaignForm] = useState(false);
+
+// Kampanyaları Çek
+const fetchAdminKampanyalar = async () => {
+  try {
+    const { data } = await API.get('/campaigns/admin');
+    setKampanyalar(data);
+  } catch (err) {
+    console.error("Kampanya yükleme hatası", err);
+  }
+};
+
+useEffect(() => {
+  fetchAdminKampanyalar();
+}, []);
+
+// Yeni Kampanya Ekle
+const handleAddCampaign = async (e) => {
+  e.preventDefault();
+  try {
+    await API.post('/campaigns', yeniKampanya);
+    alert("Kampanya ve Kupon Başarıyla Oluşturuldu! ⚡");
+    setYeniKampanya({ baslik: '', detay: '', renk: '#ff9e00', kod: '', kategori: 'Tümü' });
+    fetchAdminKampanyalar();
+  } catch (err) {
+    alert("Kampanya eklenirken hata oluştu.");
+  }
+};
+
+// Durum Değiştir (Aktif / Geçersiz Yap)
+const handleToggleActive = async (id) => {
+  try {
+    await API.patch(`/campaigns/${id}/toggle`);
+    fetchAdminKampanyalar();
+  } catch (err) {
+    alert("Durum değiştirilemedi.");
+  }
+};
 
   // YENİ ÜRÜN FORM STATE
   const [yeniPlak, setYeniPlak] = useState({
@@ -97,6 +138,16 @@ const handleAddProduct = async (e) => {
         <button onClick={() => setActiveTab('products')} style={{ flex: 1, padding: '15px', border: '3px solid #1a1a1a', backgroundColor: activeTab === 'products' ? '#ff9e00' : 'white', fontWeight: 'black', cursor: 'pointer', boxShadow: activeTab === 'products' ? '5px 5px 0px #1a1a1a' : 'none' }}>
           💿 PLAK KATALOĞU ({products.length})
         </button>
+        {/* ⚡ YENİ EKLENEN KAMPANYA SEKMESİ BUTONU */}
+  <button 
+    onClick={() => setActiveTab('campaigns')} 
+    style={{ 
+      backgroundColor: activeTab === 'campaigns' ? '#ff9e00' : 'white', 
+      border: '3px solid #1a1a1a', padding: '10px 20px', fontWeight: 'black', cursor: 'pointer' , boxShadow: activeTab === 'campaigns' ? '5px 5px 0px #1a1a1a' : 'none'
+    }}
+  >
+    ⚡ KAMPANYALAR & KUPONLAR
+  </button>
         <button onClick={() => setActiveTab('orders')} style={{ flex: 1, padding: '15px', border: '3px solid #1a1a1a', backgroundColor: activeTab === 'orders' ? '#ff9e00' : 'white', fontWeight: 'black', cursor: 'pointer', boxShadow: activeTab === 'orders' ? '5px 5px 0px #1a1a1a' : 'none' }}>
           📦 MÜŞTERİ SİPARİŞLERİ ({orders.length})
         </button>
@@ -159,6 +210,7 @@ const handleAddProduct = async (e) => {
         </div>
       )}
 
+      
       {/* SECİM 2: TÜM MÜŞTERİ SİPARİŞLERİ */}
       {activeTab === 'orders' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -196,6 +248,115 @@ const handleAddProduct = async (e) => {
         </div>
       )}
 
+      {activeTab === 'campaigns' && (
+  <div>
+    {/* ÜST BAŞLIK VE YENİ KAMPANYA EKLE BUTONU */}
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <h2 style={{ margin: 0, textTransform: 'uppercase' }}>⚡ KAMPANYA VE KUPON YÖNETİMİ</h2>
+      
+      <button 
+        onClick={() => setShowCampaignForm(!showCampaignForm)}
+        className="brutal-btn"
+        style={{ 
+          backgroundColor: showCampaignForm ? '#ff4d4d' : '#ff9e00', 
+          color: showCampaignForm ? 'white' : '#1a1a1a',
+          border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'black', cursor: 'pointer' 
+        }}
+      >
+        {showCampaignForm ? '✕ FORMU KAPAT' : '+ YENİ KAMPANYA / KUPON EKLE'}
+      </button>
+    </div>
+
+    {/* AÇILIR / KAPANIR YENİ KAMPANYA FORMU */}
+    {showCampaignForm && (
+      <form 
+        onSubmit={handleAddCampaign} 
+        style={{ 
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+          gap: '15px', backgroundColor: '#fff', padding: '25px', 
+          border: '4px solid #1a1a1a', boxShadow: '8px 8px 0px #1a1a1a', marginBottom: '30px' 
+        }}
+      >
+        <div>
+          <label style={{ fontWeight: 'black', fontSize: '0.8rem', display: 'block', marginBottom: '4px' }}>KAMPANYA BAŞLIĞI</label>
+          <input required placeholder="Örn: YAZ SONU İNDİRİMİ" value={yeniKampanya.baslik} onChange={e => setYeniKampanya({ ...yeniKampanya, baslik: e.target.value })} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} />
+        </div>
+
+        <div>
+          <label style={{ fontWeight: 'black', fontSize: '0.8rem', display: 'block', marginBottom: '4px' }}>KUPON KODU</label>
+          <input required placeholder="Örn: ROCK20" value={yeniKampanya.kod} onChange={e => setYeniKampanya({ ...yeniKampanya, kod: e.target.value })} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} />
+        </div>
+
+        <div>
+          <label style={{ fontWeight: 'black', fontSize: '0.8rem', display: 'block', marginBottom: '4px' }}>İNDİRİMLİ KATEGORİ</label>
+          <select value={yeniKampanya.kategori} onChange={e => setYeniKampanya({ ...yeniKampanya, kategori: e.target.value })} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', backgroundColor: 'white', boxSizing: 'border-box' }}>
+            <option value="Tümü">Tüm Plaklar</option>
+            <option value="Rock">Rock</option>
+            <option value="Jazz">Jazz</option>
+            <option value="Pop">Pop</option>
+            <option value="Klasik">Klasik</option>
+          </select>
+        </div>
+
+        <div style={{ gridColumn: '1 / -1' }}>
+          <label style={{ fontWeight: 'black', fontSize: '0.8rem', display: 'block', marginBottom: '4px' }}>DETAY AÇIKLAMASI</label>
+          <input required placeholder="Örn: Tüm Rock plaklarında geçerli %20 indirim fırsatı!" value={yeniKampanya.detay} onChange={e => setYeniKampanya({ ...yeniKampanya, detay: e.target.value })} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} />
+        </div>
+
+        <button type="submit" className="brutal-btn" style={{ gridColumn: '1 / -1', backgroundColor: '#4caf50', color: 'white', border: '3px solid #1a1a1a', padding: '12px', fontWeight: 'black', cursor: 'pointer', fontSize: '1rem' }}>
+          KAMPANYAYI YAYINLA 🚀
+        </button>
+      </form>
+    )}
+
+    {/* KAMPANYALAR LİSTESİ */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+      {kampanyalar.length === 0 ? (
+        <div style={{ padding: '20px', backgroundColor: 'white', border: '3px solid #1a1a1a', fontWeight: 'bold', textAlign: 'center' }}>
+          Henüz eklenmiş bir kampanya bulunmuyor.
+        </div>
+      ) : (
+        kampanyalar.map(k => (
+          <div 
+            key={k._id} 
+            style={{ 
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
+              backgroundColor: k.isAktif ? 'white' : '#f0f0f0', border: '3px solid #1a1a1a', 
+              padding: '15px 20px', boxShadow: '6px 6px 0px #1a1a1a', opacity: k.isAktif ? 1 : 0.65 
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
+                <span style={{ fontWeight: 'black', fontSize: '1.2rem' }}>{k.baslik}</span>
+                <span style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '2px 8px', fontSize: '0.8rem', fontWeight: 'black', border: '1px solid #1a1a1a' }}>
+                  KOD: {k.kod}
+                </span>
+                <span style={{ backgroundColor: '#ff9e00', padding: '2px 8px', fontSize: '0.75rem', fontWeight: 'black', border: '1px solid #1a1a1a' }}>
+                  {k.kategori}
+                </span>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: '#444', fontWeight: 'bold' }}>{k.detay}</p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <button 
+                onClick={() => handleToggleActive(k._id)} 
+                className="brutal-btn"
+                style={{ 
+                  backgroundColor: k.isAktif ? '#4caf50' : '#ff9800', 
+                  color: 'white', border: '2px solid #1a1a1a', 
+                  padding: '8px 14px', fontWeight: 'black', cursor: 'pointer' 
+                }}
+              >
+                {k.isAktif ? 'AKTİF (GEÇERLİ)' : 'PASİF (GEÇERSİZ)'}
+              </button>
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  </div>
+)}
     </div>
   );
 };

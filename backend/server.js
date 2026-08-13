@@ -8,6 +8,7 @@ import productRoutes from './routes/productRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import campaignRoutes from './routes/campaignRoutes.js';
 
 dotenv.config();
 connectDB();
@@ -24,6 +25,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/campaigns', campaignRoutes);
 
 app.get('/', (req, res) => {
   res.send('VINtage VINyls API Çalışıyor... 💿');
