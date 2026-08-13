@@ -284,7 +284,7 @@ const AppContent = ({
   }, []);
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+    <div style={{ width: '90%', margin: '0 auto', padding: '20px' }}>
       {/* NAVBAR */}
       <nav style={{ 
         display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
@@ -337,7 +337,7 @@ const AppContent = ({
       </>
     )}
 {/* 📂 KATEGORİLER DROPDOWN (YENİLENMİŞ RETRO BRUTALIST TASARIM) */}
-<div style={{ position: 'relative', display: 'inline-block' }}>
+<div style={{ position: 'relative', display: 'inline-block', }}>
   <button 
     onClick={() => setIsNavOpen(!isNavOpen)} 
     style={{ 
@@ -345,7 +345,7 @@ const AppContent = ({
       color: '#1a1a1a', 
       border: '3px solid #1a1a1a', 
       padding: '6px 14px', 
-      fontWeight: 'black', 
+      fontWeight: 'bold', 
       cursor: 'pointer', 
       fontSize: '0.9rem', 
       display: 'flex', 
@@ -353,7 +353,8 @@ const AppContent = ({
       gap: '8px',
       boxShadow: '3px 3px 0px #1a1a1a',
       transition: 'all 0.1s ease',
-      textTransform: 'uppercase'
+      textTransform: 'uppercase',
+      fontFamily: 'inherit'
     }}
   >
     <span>Kategoriler</span>
@@ -393,7 +394,7 @@ const AppContent = ({
             padding: '10px 12px', 
             border: activeCategory === cat ? '2px solid #1a1a1a' : '2px solid transparent', 
             backgroundColor: activeCategory === cat ? '#ff9e00' : 'transparent',
-            fontWeight: 'black', 
+            fontWeight: 'bold', 
             cursor: 'pointer', 
             fontSize: '0.85rem',
             textTransform: 'uppercase',
@@ -785,7 +786,7 @@ const AppContent = ({
 
             {/* LOGIN ROUTE */}
             <Route path="/login" element={
-              <div style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '40px', boxShadow: '12px 12px 0px #ff9e00', maxWidth: '400px', margin: '40px auto' }}>
+              <div style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '40px', boxShadow: '12px 12px 0px #ff9e00', width: '60%', margin: '40px auto' }}>
                 <h2 style={{ textTransform: 'uppercase', marginBottom: '30px', borderBottom: '4px solid #1a1a1a', paddingBottom: '10px' }}>Giriş Yap</h2>
                 <form onSubmit={async (e) => {
                   e.preventDefault();
@@ -834,7 +835,7 @@ const AppContent = ({
 
             {/* REGISTER ROUTE */}
             <Route path="/register" element={
-              <div style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '40px', boxShadow: '12px 12px 0px #ff9e00', maxWidth: '400px', margin: '40px auto' }}>
+              <div style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '40px', boxShadow: '12px 12px 0px #ff9e00', width: '60%', margin: '40px auto' }}>
                 <h2 style={{ textTransform: 'uppercase', marginBottom: '30px', borderBottom: '4px solid #1a1a1a', paddingBottom: '10px' }}>Kayıt Ol</h2>
                 <form onSubmit={async (e) => {
                   e.preventDefault();
