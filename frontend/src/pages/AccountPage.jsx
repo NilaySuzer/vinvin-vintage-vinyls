@@ -1,0 +1,219 @@
+import React, { useState, useEffect } from 'react';
+import { User, MapPin, Package, Trash2, Plus } from 'lucide-react';
+import API from '../services/api';
+
+const AccountPage = ({ user, setUser }) => {
+  const [activeTab, setActiveTab] = useState('profile');
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [password, setPassword] = useState('');
+  
+  const [adresler, setAdresler] = useState([]);
+  const [yeniAdres, setYeniAdres] = useState({ baslik: '', sehir: '', ilce: '', acikAdres: '' });
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [orders, setOrders] = useState([]);
+
+  // Kullanıcı profilini ve kayıtlı adreslerini çek
+  const fetchProfile = async () => {
+    try {
+      const { data } = await API.get('/users/profile');
+      if (data) {
+        setAdresler(data.adresler || []);
+        setName(data.name || '');
+        setEmail(data.email || '');
+      }
+    } catch (err) {
+      console.error("Profil yüklenemedi", err);
+    }
+  };
+
+  // Kullanıcının siparişlerini çek
+  const fetchOrders = async () => {
+    try {
+      const { data } = await API.get('/orders/myorders');
+      setOrders(data || []);
+    } catch (err) {
+      console.error("Siparişler yüklenemedi", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+    fetchOrders();
+  }, []);
+
+  // Profil & Şifre Güncelleme
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = { name, email };
+      if (password.trim() !== '') payload.password = password;
+      const { data } = await API.put('/users/profile', payload);
+      if (setUser) setUser(data);
+      localStorage.setItem('user', JSON.stringify({ ...user, name: data.name, email: data.email }));
+      alert('Bilgileriniz başarıyla güncellendi! ⚡');
+      setPassword('');
+    } catch (err) {
+      alert('Güncelleme sırasında hata oluştu.');
+    }
+  };
+
+  // Yeni Adres Ekleme
+  const handleAddAddress = async (e) => {
+    e.preventDefault();
+    try {
+      const { data } = await API.post('/users/address', yeniAdres);
+      setAdresler(data);
+      setYeniAdres({ baslik: '', sehir: '', ilce: '', acikAdres: '' });
+      setShowAddressModal(false);
+      alert('Yeni adres başarıyla eklendi! 📍');
+    } catch (err) {
+      alert('Adres eklenemedi.');
+    }
+  };
+
+  // Adres Silme
+  const handleDeleteAddress = async (addressId) => {
+    if (!window.confirm('Bu adresi silmek istediğinize emin misiniz?')) return;
+    try {
+      const { data } = await API.delete(`/users/address/${addressId}`);
+      setAdresler(data);
+    } catch (err) {
+      alert('Adres silinemedi.');
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: '1000px', margin: '30px auto', padding: '0 20px', width: '100%', boxSizing: 'border-box' }}>
+      
+      {/* BAŞLIK */}
+      <div style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '25px', border: '4px solid #1a1a1a', boxShadow: '8px 8px 0px #ff9e00', marginBottom: '25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+        <h1 style={{ margin: 0, fontSize: '1.8rem', textTransform: 'uppercase' }}>👤 HESAP YÖNETİMİ</h1>
+        <span style={{ backgroundColor: '#ff9e00', color: '#1a1a1a', padding: '6px 12px', fontWeight: 'black', fontSize: '0.85rem' }}>{email || user?.email}</span>
+      </div>
+
+      {/* SEKME BUTONLARI */}
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '25px', flexWrap: 'wrap' }}>
+        <button onClick={() => setActiveTab('profile')} className="brutal-btn" style={{ backgroundColor: activeTab === 'profile' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'black', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
+          <User size={18} /> ÜYELİK BİLGİLERİ & ŞİFRE
+        </button>
+        <button onClick={() => setActiveTab('addresses')} className="brutal-btn" style={{ backgroundColor: activeTab === 'addresses' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'black', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
+          <MapPin size={18} /> ADRESLERİM ({adresler.length})
+        </button>
+        <button onClick={() => setActiveTab('orders')} className="brutal-btn" style={{ backgroundColor: activeTab === 'orders' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'black', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
+          <Package size={18} /> SİPARİŞLERİM ({orders.length})
+        </button>
+      </div>
+
+      {/* 1. ÜYELİK VE ŞİFRE BİLGİLERİ */}
+      {activeTab === 'profile' && (
+        <form onSubmit={handleUpdateProfile} style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '30px', boxShadow: '8px 8px 0px #1a1a1a', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <div>
+            <label style={{ fontWeight: 'black', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>AD SOYAD</label>
+            <input required value={name} onChange={e => setName(e.target.value)} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} />
+          </div>
+          <div>
+            <label style={{ fontWeight: 'black', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>E-POSTA ADRESİ</label>
+            <input required type="email" value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} />
+          </div>
+          <div>
+            <label style={{ fontWeight: 'black', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>YENİ ŞİFRE (Değiştirmek istemiyorsanız boş bırakın)</label>
+            <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} />
+          </div>
+          <button type="submit" className="brutal-btn" style={{ backgroundColor: '#ff9e00', border: '3px solid #1a1a1a', padding: '12px', fontWeight: 'black', cursor: 'pointer', marginTop: '10px', fontSize: '1rem', fontFamily: 'inherit' }}>
+            BİLGİLERİ GÜNCELLE 💾
+          </button>
+        </form>
+      )}
+
+      {/* 2. ADRESLERİM SEKMESİ */}
+      {activeTab === 'addresses' && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+            <h3 style={{ margin: 0, textTransform: 'uppercase' }}>KAYITLI TESLİMAT ADRESLERİ</h3>
+            <button onClick={() => setShowAddressModal(true)} className="brutal-btn" style={{ backgroundColor: '#4caf50', color: 'white', border: '2px solid #1a1a1a', padding: '8px 14px', fontWeight: 'black', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'inherit' }}>
+              <Plus size={16} /> YENİ ADRES EKLE
+            </button>
+          </div>
+
+          {adresler.length === 0 ? (
+            <div style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '30px', textAlign: 'center', fontWeight: 'bold' }}>
+              Henüz kayıtlı bir adresiniz bulunmuyor.
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+              {adresler.map(adr => (
+                <div key={adr._id} style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a', position: 'relative' }}>
+                  <button onClick={() => handleDeleteAddress(adr._id)} style={{ position: 'absolute', top: '15px', right: '15px', backgroundColor: '#ff4d4d', color: 'white', border: '2px solid #1a1a1a', padding: '4px', cursor: 'pointer' }}>
+                    <Trash2 size={16} />
+                  </button>
+                  <span style={{ backgroundColor: '#ff9e00', padding: '2px 8px', fontWeight: 'black', fontSize: '0.8rem', border: '1px solid #1a1a1a' }}>{adr.baslik}</span>
+                  <h4 style={{ margin: '10px 0 5px 0' }}>{adr.ilce} / {adr.sehir}</h4>
+                  <p style={{ margin: 0, fontSize: '0.9rem', color: '#555', fontWeight: 'bold' }}>{adr.acikAdres}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ADRES EKLEME MODALI */}
+          {showAddressModal && (
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+              <form onSubmit={handleAddAddress} style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '30px', maxWidth: '450px', width: '100%', boxShadow: '10px 10px 0px #1a1a1a', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <h3 style={{ margin: '0 0 10px 0', textTransform: 'uppercase' }}>📍 YENİ ADRES EKLE</h3>
+                <input required placeholder="Adres Başlığı (Örn: Ev, Ofis)" value={yeniAdres.baslik} onChange={e => setYeniAdres({ ...yeniAdres, baslik: e.target.value })} style={{ padding: '8px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} />
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <input required placeholder="Şehir" value={yeniAdres.sehir} onChange={e => setYeniAdres({ ...yeniAdres, sehir: e.target.value })} style={{ flex: 1, padding: '8px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} />
+                  <input required placeholder="İlçe" value={yeniAdres.ilce} onChange={e => setYeniAdres({ ...yeniAdres, ilce: e.target.value })} style={{ flex: 1, padding: '8px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} />
+                </div>
+                <textarea required placeholder="Açık Adres (Cadde, Sokak, No, Daire)" value={yeniAdres.acikAdres} onChange={e => setYeniAdres({ ...yeniAdres, acikAdres: e.target.value })} style={{ padding: '8px', border: '2px solid #1a1a1a', fontWeight: 'bold', minHeight: '70px' }} />
+                <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                  <button type="submit" className="brutal-btn" style={{ flex: 1, backgroundColor: '#4caf50', color: 'white', border: '2px solid #1a1a1a', padding: '10px', fontWeight: 'black', cursor: 'pointer', fontFamily: 'inherit' }}>KAYDET</button>
+                  <button type="button" onClick={() => setShowAddressModal(false)} style={{ flex: 1, backgroundColor: '#eee', border: '2px solid #1a1a1a', padding: '10px', fontWeight: 'black', cursor: 'pointer', fontFamily: 'inherit' }}>İPTAL</button>
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 3. SİPARİŞLERİM SEKMESİ */}
+      {activeTab === 'orders' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          {orders.length === 0 ? (
+            <div style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '30px', textAlign: 'center', fontWeight: 'bold' }}>
+              Henüz verilmiş bir siparişiniz bulunmuyor.
+            </div>
+          ) : (
+            orders.map(ord => (
+              <div key={ord._id} style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #eee', paddingBottom: '10px', marginBottom: '10px' }}>
+                  <div>
+                    <span style={{ fontWeight: 'black' }}>Sipariş Kodu: #{ord._id.slice(-6).toUpperCase()}</span>
+                    <span style={{ display: 'block', fontSize: '0.8rem', color: '#666' }}>{new Date(ord.createdAt).toLocaleDateString('tr-TR')}</span>
+                  </div>
+                  <span style={{ backgroundColor: '#2196f3', color: 'white', padding: '4px 10px', fontWeight: 'black', fontSize: '0.8rem', border: '1px solid #1a1a1a' }}>
+                    {ord.isDelivered ? 'TESLİM EDİLDİ' : 'HAZIRLANIYOR'}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {ord.orderItems?.map((item, idx) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', fontWeight: 'bold' }}>
+                      <span>{item.ad} x {item.adet}</span>
+                      <span>{(item.fiyat * item.adet).toFixed(2)} TL</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ borderTop: '2px dashed #1a1a1a', marginTop: '10px', paddingTop: '8px', textAlign: 'right', fontWeight: 'black', fontSize: '1.1rem' }}>
+                  Toplam: {ord.totalPrice} TL
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+    </div>
+  );
+};
+
+export default AccountPage;

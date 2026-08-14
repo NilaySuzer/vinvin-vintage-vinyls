@@ -51,4 +51,21 @@ router.delete('/:id', protect, admin, async (req, res) => {
   }
 });
 
+// Admin Hızlı Stok Güncelleme
+router.patch('/:id/stock', protect, admin, async (req, res) => {
+  try {
+    const { stok } = req.body;
+    const product = await Product.findById(req.params.id);
+    if (product) {
+      product.stok = Number(stok);
+      const updatedProduct = await product.save();
+      res.json(updatedProduct);
+    } else {
+      res.status(404).json({ message: 'Ürün bulunamadı' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: 'Stok güncellenemedi' });
+  }
+});
+
 export default router;

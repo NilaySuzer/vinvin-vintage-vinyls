@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useParams, useNavigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, useParams, useNavigate, Navigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import { ChevronLeft, ChevronRight, Search, X, Disc, Star, ShoppingCart, ShoppingBag, Heart, CheckCircle, ShieldCheck, Truck, CreditCard, User, LogOut, Filter, ArrowUpDown } from 'lucide-react';
 import API from './services/api';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
 import CampaignsPage from './pages/CampaignsPage.jsx';
+import AccountPage from './pages/AccountPage.jsx';
 
 // --- ÜRÜN DETAY SAYFASI ---
 const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavorite }) => {
@@ -260,6 +261,7 @@ const AppContent = ({
   const guvenliToplam = Number(toplamTutar) || 0;
   const guvenliIndirim = Number(indirimTutari) || 0;
   const guvenliOdenecek = Number(odenecekTutar) || guvenliToplam;
+  
   /* --- SLIDER VE OTOMATİK KAYMA MANTIĞI --- */
  const sliderRef = useRef(null); // 👈 React.useRef yerine useRef
 
@@ -283,6 +285,13 @@ const AppContent = ({
     }, 3000);
     return () => clearInterval(interval);
   }, []);
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (e) {
+      return null;
+    }});
 
   return (
     <div style={{ width: '90%', margin: '0 auto', padding: '20px' }}>
@@ -305,7 +314,7 @@ const AppContent = ({
  
           {isLoggedIn ? (
       <>
-        <Link to="/profile" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', backgroundColor: 'white', border: '2px solid #1a1a1a', padding: '5px 10px', boxShadow: '2px 2px 0px #1a1a1a' }}>
+        <Link to="/account" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', backgroundColor: 'white', border: '2px solid #1a1a1a', padding: '5px 10px', boxShadow: '2px 2px 0px #1a1a1a' }}>
           👤 HESABIM
         </Link>
         
@@ -666,10 +675,16 @@ const AppContent = ({
       } />
 
             <Route path="/product/:id" element={<ProductDetail plaklar={plaklar} sepeteEkle={sepeteEkle} isLoggedIn={isLoggedIn} favorites={favorites} toggleFavorite={toggleFavorite} />} />
-
-            <Route path="/profile" element={<ProfilePage handleLogout={handleLogout} />} />
-            <Route path="/profile" element={<ProfilePage handleLogout={handleLogout} />} />
             <Route path="/admin" element={<AdminPage />} />
+ <Route 
+  path="/account" 
+  element={<AccountPage user={user} setUser={setUser} />} 
+/>
+            <Route 
+  path="/profile" 
+  element={<Navigate to="/account" replace />} 
+/>
+
             <Route 
   path="/campaigns" 
   element={
