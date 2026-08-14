@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Search, X, Disc, Star, ShoppingCart, Shoppin
 import API from './services/api';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
+import CampaignsPage from './pages/CampaignsPage.jsx';
 
 // --- ÜRÜN DETAY SAYFASI ---
 const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavorite }) => {
@@ -430,60 +431,48 @@ const AppContent = ({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
           
          {/* ⚡ DİNAMİK VE TIKLANABİLİR REKLAM / KAMPANYA BANNERI */}
-<div 
-  onClick={() => {
-    console.log("Seçilen Kampanya:", kampanyalar[currentSlide]);
-    setSelectedKampanya(kampanyalar[currentSlide]);
-  }}
-  className="brutal-btn"
-  style={{ 
-    backgroundColor: kampanyalar[currentSlide]?.renk || '#ff9e00', 
-    color: '#1a1a1a', 
-    border: '4px solid #1a1a1a', 
-    padding: '25px', 
-    boxShadow: '8px 8px 0px #1a1a1a', 
-    marginBottom: '30px', 
-    cursor: 'pointer', 
-    textAlign: 'center',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justify: 'center',
-    transition: 'all 0.2s ease'
-  }}
->
-  <span style={{ 
-    backgroundColor: '#1a1a1a', 
-    color: 'white', 
-    padding: '4px 12px', 
-    fontWeight: 'black', 
-    fontSize: '0.8rem', 
-    marginBottom: '10px', 
-    border: '2px solid #1a1a1a',
-    letterSpacing: '1px'
-  }}>
-    HAFTANIN FIRSATI ⚡ (Tıkla & İncele)
-  </span>
+                {(() => {
+                  const renkPaleti = ['#c7f9cc', '#ffd166', '#a0c4ff', '#ffadad', '#bdb2ff'];
 
-  <h2 style={{ 
-    fontSize: '2rem', 
-    margin: '0 0 8px 0', 
-    textTransform: 'uppercase', 
-    letterSpacing: '-1px',
-    fontWeight: 'black'
-  }}>
-    {kampanyalar[currentSlide]?.baslik}
-  </h2>
+        const aktifKampanyalar = (kampanyalar || [])
+          .filter(k => k.isAktif !== false)
+          .slice()
+          .reverse();
 
-  <p style={{ 
-    margin: 0, 
-    fontSize: '1rem', 
-    fontWeight: 'bold', 
-    maxWidth: '700px'
-  }}>
-    {kampanyalar[currentSlide]?.detay} — Kampanya detayları ve indirim kuponu için tıkla! 💿
-  </p>
-</div>
+        if (aktifKampanyalar.length === 0) return null;
+
+        const mevcutIndex = currentSlide % aktifKampanyalar.length;
+        const mevcutSlayt = aktifKampanyalar[currentSlide % aktifKampanyalar.length];
+
+                  const bannerRengi = renkPaleti[mevcutIndex % renkPaleti.length];
+        return (
+          <div 
+            onClick={() => setSelectedKampanya(mevcutSlayt)} 
+            className="brutal-btn"
+            style={{ 
+              backgroundColor: bannerRengi, 
+              color: '#1a1a1a', 
+              border: '4px solid #1a1a1a', 
+              padding: '25px', 
+              boxShadow: '8px 8px 0px #1a1a1a', 
+              marginBottom: '30px', 
+              cursor: 'pointer', 
+              textAlign: 'center',
+              transition: 'background-color 0.5s ease, transform 0.1s ease'
+            }}
+          >
+            <span style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '4px 12px', fontWeight: 'black', fontSize: '0.8rem', border: '1px solid white' }}>
+              HAFTANIN FIRSATI ⚡ (Tıkla & İncele)
+            </span>
+            <h2 style={{ fontSize: '2rem', margin: '10px 0 5px 0', textTransform: 'uppercase', fontWeight: 'black' }}>
+              {mevcutSlayt?.baslik}
+            </h2>
+            <p style={{ margin: 0, fontWeight: 'bold', fontSize: '1rem' }}>
+              {mevcutSlayt?.detay} — Kampanya detayları ve indirim kodu için tıkla! 💿
+            </p>
+          </div>
+        );
+      })()}
                 
 
 {/* 🔍 3. ARAMA VE SIRALAMA BAR */}
@@ -681,6 +670,15 @@ const AppContent = ({
             <Route path="/profile" element={<ProfilePage handleLogout={handleLogout} />} />
             <Route path="/profile" element={<ProfilePage handleLogout={handleLogout} />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route 
+  path="/campaigns" 
+  element={
+    <CampaignsPage 
+      kampanyalar={kampanyalar} 
+      setSelectedKampanya={setSelectedKampanya} 
+    />
+  } 
+/>
             
             {/* FAVORİLER */}
             <Route path="/favorites" element={
@@ -1045,6 +1043,7 @@ function App() {
   const [sirallama, setSirallama] = useState('varsayilan');
   const [favorites, setFavorites] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('token'));
+  const [kampanyalar, setKampanyalar] = useState([]); // 👈 Sabit dizi silindi, boş başlatıldı
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -1090,33 +1089,6 @@ function App() {
     }
   };
 
-  const kampanyalar = [
-  {
-    id: 1,
-    baslik: "YAZ SONU İNDİRİMİ ⚡",
-    detay: "Tüm Rock plaklarında %20 indirim fırsatını kaçırma!",
-    renk: "#ff9e00",
-    kod: "ROCK20",
-    kategori: "Rock" // 👈 Tıklayınca Rock kategorisine filtreler
-  },
-  {
-    id: 2,
-    baslik: "JAZZ GECELERİ 🎷",
-    detay: "Seçili Jazz albümlerinde net %15 indirim!",
-    renk: "#e2f0cb",
-    kod: "JAZZ15",
-    kategori: "Jazz" // 👈 Tıklayınca Jazz kategorisine filtreler
-  },
-  {
-    id: 3,
-    baslik: "NOSTALJİ POP RÜZGARI 📀",
-    detay: "Pop klasiklerinde 3 al 2 öde kampanyası başladı.",
-    renk: "#c7f9cc",
-    kod: "POP3AL2",
-    kategori: "Pop" // 👈 Tıklayınca Pop kategorisine filtreler
-  }
-];
-
   /* BANNER SLIDE DÖNGÜSÜ (4 saniyede bir kampanya değişir) */
 useEffect(() => {
   if (!kampanyalar || kampanyalar.length === 0) return;
@@ -1128,6 +1100,22 @@ useEffect(() => {
 
   return () => clearInterval(timer);
 }, [kampanyalar]);
+  
+  // Kampanyaları Backend'den Çekme Fonksiyonu
+const fetchKampanyalar = async () => {
+  try {
+    const { data } = await API.get('/campaigns'); // backend/routes/campaignRoutes.js'e istek atar
+    setKampanyalar(data);
+  } catch (error) {
+    console.error("Kampanyalar yüklenemedi:", error);
+  }
+};
+
+// Sayfa ilk açıldığında çalıştır
+useEffect(() => {
+  fetchKampanyalar();
+}, []);
+  
 
   const sepeteEkle = (plak) => {
     const plakId = plak._id || plak.id;

@@ -122,6 +122,21 @@ const handleAddProduct = async (e) => {
     }
   };
 
+  // Kampanyaları Backend'den Çekme Fonksiyonu
+const fetchKampanyalar = async () => {
+  try {
+    const { data } = await API.get('/campaigns'); // backend/routes/campaignRoutes.js'e istek atar
+    setKampanyalar(data);
+  } catch (error) {
+    console.error("Kampanyalar yüklenemedi:", error);
+  }
+};
+
+// Sayfa ilk açıldığında çalıştır
+useEffect(() => {
+  fetchKampanyalar();
+}, []);
+
   return (
     <div style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '30px', boxShadow: '12px 12px 0px #1a1a1a' }}>
       
