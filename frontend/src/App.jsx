@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useParams, useNavigate, Navigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
-import { ChevronLeft, ChevronRight, Search, X, Disc, Star, ShoppingCart, ShoppingBag, Heart, CheckCircle, ShieldCheck, Truck, CreditCard, User, LogOut, Filter, ArrowUpDown } from 'lucide-react';
+import { Bell, ChevronLeft, ChevronRight, Search, X, Disc, Star, ShoppingCart, ShoppingBag, Heart, CheckCircle, ShieldCheck, Truck, CreditCard, User, LogOut, Filter, ArrowUpDown } from 'lucide-react';
 import API from './services/api';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
@@ -35,11 +35,13 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavor
 
   const plakId = plak._id || plak.id;
   const isFav = favorites.some(fav => (fav._id || fav.id) === plakId);
+  const stokVarMi = (plak.stok ?? 10) > 0;
 
   return (
     <div style={{ padding: '20px' }}>
       <div style={{ display: 'flex', gap: '50px', flexWrap: 'wrap' }}>
         <div style={{ flex: '1', minWidth: '300px', border: '5px solid #1a1a1a', boxShadow: '15px 15px 0px #ff9e00', backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '5rem', aspectRatio: '1/1', position: 'relative' }}>
+    
             <Disc size={120} color="#1a1a1a" strokeWidth={2.5} />
             <button 
               onClick={() => toggleFavorite(plak)}
@@ -77,9 +79,26 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavor
             </ul>
           </div>
 
-          <button onClick={() => sepeteEkle(plak)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%', padding: '20px', backgroundColor: '#1a1a1a', color: 'white', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '1.2rem', boxShadow: '5px 5px 0px #ff9e00' }}>
+          {/* 2. Buton Değişimi */}
+      {stokVarMi ? (
+        <button 
+          onClick={() => sepeteEkle(plak)} 
+          className="brutal-btn" 
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%', padding: '20px', backgroundColor: '#1a1a1a', color: 'white', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '1.2rem', boxShadow: '5px 5px 0px #ff9e00' }}>
             <ShoppingCart size={22} color="white" /> SEPETE EKLE +
-          </button>
+        </button>
+      ) : (
+        <button 
+          onClick={() => alert(`"${plak.ad}" yeniden stoklara girdiğinde e-posta bildirimi alacaksınız! 🔔`)} 
+          className="brutal-btn" 
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%', padding: '20px', backgroundColor: 'rgb(51, 135, 51)', color: 'white', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '1.2rem', boxShadow: '5px 5px 0px #000000' }}>
+        
+          GELİNCE HABER VER <Bell size={22} color="yellow" /> 
+
+
+        </button>
+      )}
+
         </div>
       </div>
       
@@ -258,6 +277,13 @@ const AppContent = ({
   aramaMetni, setAramaMetni, sirallama, setSirallama, favorites, toggleFavorite, isLoggedIn, setIsLoggedIn, handleLogout,
 }) => {
   const location = useLocation();
+  const [showNotifications, setShowNotifications] = useState(false);
+const [bildirimler, setBildirimler] = useState([
+  { id: 1, baslik: '🔥 %20 İndirim Başladı!', mesaj: 'Seçili Rock plaklarında indirim fırsatı!', tarih: '1 saat önce' },
+  { id: 2, baslik: '📦 Stok Güncellemesi', mesaj: 'Tükenen plaklar yeniden stoklarda!', tarih: 'Dün' }
+]);
+  // Arama çubuğunda hepsi görünsün ama vitrinde sadece stoğu > 0 olanlar görünsün:
+const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 10) > 0);
   const guvenliToplam = Number(toplamTutar) || 0;
   const guvenliIndirim = Number(indirimTutari) || 0;
   const guvenliOdenecek = Number(odenecekTutar) || guvenliToplam;
@@ -294,7 +320,7 @@ const AppContent = ({
     }});
 
   return (
-    <div style={{ width: '90%', margin: '0 auto', padding: '20px' }}>
+    <div style={{ width: '92%', margin: '0 auto', padding: '20px' }}>
       {/* NAVBAR */}
       <nav style={{ 
         display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
@@ -418,6 +444,42 @@ const AppContent = ({
     </div>
   )}
 </div>
+          {/* NAVBAR İÇİNDE BİLDİRİM ZİLİ */}
+{user && (
+  <div style={{ position: 'relative' }}>
+    <button 
+      onClick={() => setShowNotifications(!showNotifications)}
+      className="brutal-btn"
+      style={{ backgroundColor: showNotifications ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '8px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', position: 'relative' }}
+    >
+      <Bell size={20} color="#1a1a1a" />
+      {bildirimler.length > 0 && (
+        <span style={{ position: 'absolute', top: '-6px', right: '-6px', backgroundColor: '#ff4d4d', color: 'white', borderRadius: '50%', width: '18px', height: '18px', fontSize: '0.7rem', fontWeight: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #1a1a1a' }}>
+          {bildirimler.length}
+        </span>
+      )}
+    </button>
+
+    {/* BİLDİRİMLER AÇILIR KUTUSU */}
+    {showNotifications && (
+      <div style={{ position: 'absolute', top: 'calc(100% + 10px)', right: 0, backgroundColor: 'white', border: '4px solid #1a1a1a', boxShadow: '8px 8px 0px #1a1a1a', width: '280px', zIndex: 1000, padding: '15px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #1a1a1a', paddingBottom: '8px', marginBottom: '10px' }}>
+          <span style={{ fontWeight: 'black', fontSize: '0.9rem' }}>🔔 BİLDİRİMLER</span>
+          <span style={{ fontSize: '0.75rem', color: '#666', fontWeight: 'bold' }}>{bildirimler.length} Yeni</span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '250px', overflowY: 'auto' }}>
+          {bildirimler.map(b => (
+            <div key={b.id} style={{ borderBottom: '1px solid #eee', paddingBottom: '8px' }}>
+              <div style={{ fontWeight: 'black', fontSize: '0.85rem', color: '#ff9e00' }}>{b.baslik}</div>
+              <p style={{ margin: '3px 0', fontSize: '0.8rem', color: '#333', fontWeight: 'bold' }}>{b.mesaj}</p>
+              <span style={{ fontSize: '0.7rem', color: '#888' }}>{b.tarih}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+)}
           <Link to="/cart" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 12px', backgroundColor: 'white', boxShadow: '3px 3px 0px #1a1a1a' }}>
             🛒 SEPET ({(cart || []).reduce((acc, curr) => acc + (curr.adet || 1), 0)})
           </Link>
@@ -630,7 +692,7 @@ const AppContent = ({
 
            {/* 🖼️ 4. TÜM PLAKLAR LİSTESİ (Kart Yükseklikleri 220px'den 280px'e Çıkarıldı) */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '25px' }}>
-            {filtrelenmisPlaklar.map(plak => {
+            {vitrinPlaklari.map(plak => {
               const pId = plak._id || plak.id;
               const isFav = favorites.some(f => (f._id || f.id) === pId);
 
