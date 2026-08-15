@@ -292,7 +292,14 @@ const AppContent = ({
   sepeteEkle, sepetiBosalt, adetGuncelle, urunCikar, toplamTutar, selectedKampanya, plaklar, bildirim, kuponKodu, kuponMesaji, kuponKullan, uygulananIndirim, indirimTutari, odenecekTutar, DEFAULT_KUPONLAR,
   aramaMetni, setAramaMetni, sirallama, setSirallama, favorites, toggleFavorite, isLoggedIn, setIsLoggedIn, handleLogout,
 }) => {
-  const location = useLocation();
+
+  const { pathname } = useLocation(); // 👈 Mevcut sayfa yolunu alır
+
+  // Her sayfa değiştiğinde (URL değiştiğinde) otomatik en üste kaydır:
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  
   const [showNotifications, setShowNotifications] = useState(false);
 const [bildirimler, setBildirimler] = useState([
   { id: 1, baslik: '🔥 %20 İndirim Başladı!', mesaj: 'Seçili Rock plaklarında indirim fırsatı!', tarih: '1 saat önce' },
@@ -434,7 +441,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
       minWidth: '180px',
       padding: '6px'
     }}>
-      {['Tümü', 'Rock', 'Jazz', 'Pop', 'Klasik'].map((cat) => (
+      {['Tümü', 'Rock', 'Jazz', 'Pop', 'Klasik', 'Metal'].map((cat) => (
         <button
           key={cat}
           onClick={() => {
@@ -702,8 +709,8 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
         <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
         <button onClick={() => sepeteEkle(plak)}
           className="brutal-btn"
-          style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem' }}>
-          EKLE +
+          style={{ backgroundColor: '#e0a6bf', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem' }}>
+          <ShoppingCart size={22} color="black" /> +
         </button>
       </div>
     </div>

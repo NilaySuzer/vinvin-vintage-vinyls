@@ -237,7 +237,9 @@ const AdminPage = () => {
               <option value="Rock">Rock</option>
               <option value="Jazz">Jazz</option>
               <option value="Pop">Pop</option>
+              <option value="Metal">Metal</option>
               <option value="Klasik">Klasik</option>
+              
             </select>
 
             <input type="number" placeholder="Stok Adedi" value={yeniPlak.stok} onChange={e => setYeniPlak({ ...yeniPlak, stok: e.target.value })} style={{ padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} />
@@ -392,7 +394,9 @@ const AdminPage = () => {
                   <option value="Rock">Rock</option>
                   <option value="Jazz">Jazz</option>
                   <option value="Pop">Pop</option>
+                  <option value="Klasik">Metal</option>
                   <option value="Klasik">Klasik</option>
+                  
                 </select>
               </div>
 

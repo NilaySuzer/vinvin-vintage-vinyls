@@ -11,7 +11,7 @@ const productSchema = new mongoose.Schema({
   ad: { type: String, required: true },
   sanatci: { type: String, required: true },
   fiyat: { type: Number, required: true },
-  kategori: { type: String, required: true, enum: ['Rock', 'Jazz', 'Pop'] },
+  kategori: { type: String, required: true, enum: ['Rock', 'Jazz', 'Pop', 'Metal', 'Klasik'] },
   stok: { type: Number, required: true, default: 1 },
   kondisyon: { type: String, default: 'Pırıl Pırıl (NM / 9/10)' },
   devir: { type: String, default: '33 RPM (12" LP)' },
