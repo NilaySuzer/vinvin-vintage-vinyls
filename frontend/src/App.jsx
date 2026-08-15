@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useParams, useNavigate, Navigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
-import { Bell, ChevronLeft, ChevronRight, Search, X, Disc, Star, ShoppingCart, ShoppingBag, Heart, CheckCircle, ShieldCheck, Truck, CreditCard, User, LogOut, Filter, ArrowUpDown } from 'lucide-react';
+import { Music2Icon, LucideCreditCard, User2Icon, KeyIcon, Bell, ChevronLeft, ChevronRight, Search, X, Disc, Star, ShoppingCart, ShoppingBag, Heart, CheckCircle, ShieldCheck, Truck, CreditCard, User, LogOut, Filter, ArrowUpDown } from 'lucide-react';
 import API from './services/api';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
@@ -211,7 +211,7 @@ const CheckoutPage = ({ total, sepetiBosalt, cart, indirimTutari, odenecekTutar 
         <p style={{ fontWeight: 'bold', color: '#555' }}>Sipariş numaranız: <strong>#{siparisNo || `VV-${Math.floor(100000 + Math.random() * 900000)}`}</strong></p>
         <p style={{ margin: '20px 0', fontSize: '0.95rem' }}>Plaklarınız özenle paketlenip korunaklı kutusunda en kısa sürede kargoya verilecektir. 📦</p>
         <button onClick={() => navigate('/')} style={{ backgroundColor: '#ff9e00', border: '3px solid #1a1a1a', padding: '15px 30px', fontWeight: 'black', cursor: 'pointer', width: '100%' }}>
-          ALIŞVERİŞE DEVAM ET 💿
+          ALIŞVERİŞE DEVAM ET <ShoppingCart size={22} color="black" /> 
         </button>
       </div>
     );
@@ -261,7 +261,7 @@ const CheckoutPage = ({ total, sepetiBosalt, cart, indirimTutari, odenecekTutar 
         </div>
 
         <button type="submit" style={{ backgroundColor: '#ff9e00', border: '3px solid #1a1a1a', padding: '15px', fontWeight: 'black', cursor: 'pointer', fontSize: '1.1rem', boxShadow: '4px 4px 0px #1a1a1a' }}>
-          ÖDEMEYİ TAMAMLA VE SİPARİŞ VER 💳
+          ÖDEMEYİ TAMAMLA VE SİPARİŞ VER <LucideCreditCard size={22} color="blue" /> 
         </button>
         <Link to="/cart" style={{ marginTop: '5px', textAlign: 'center', color: '#1a1a1a', display: 'block', fontWeight: 'bold' }}>← Sepete Geri Dön</Link>
       </form>
@@ -341,7 +341,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
           {isLoggedIn ? (
       <>
         <Link to="/account" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', backgroundColor: 'white', border: '2px solid #1a1a1a', padding: '5px 10px', boxShadow: '2px 2px 0px #1a1a1a' }}>
-          👤 HESABIM
+        <User2Icon size={22} color="gray" /> HESABIM
         </Link>
         
        {/* Giriş yapılmış ve rolü 'admin' ise göster */}
@@ -354,7 +354,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
   }
 })() && (
   <Link to="/admin" style={{ textDecoration: 'none', color: 'white', backgroundColor: '#1a1a1a', border: '2px solid #1a1a1a', padding: '5px 10px', fontWeight: 'bold' }}>
-    🔑 ADMIN
+  <KeyIcon size={22} color="yellow" />  ADMIN
   </Link>
 )}
 
@@ -627,7 +627,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
           <div className="brutal-card" style={{ backgroundColor: '#e0a6bf', border: '4px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a', width: '100%', boxSizing: 'border-box' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.5rem', textTransform: 'uppercase' }}> YENİ GELEN PLAKLAR</h3>
+                <h3 style={{ margin: 0, fontSize: '1.5rem', textTransform: 'uppercase' }}><Music2Icon size={30} color="white"/> YENİ GELEN PLAKLAR</h3>
                 <p style={{ margin: '2px 0 0 0', fontWeight: 'bold', color: '#666', fontSize: '0.85rem' }}>Koleksiyona taze eklenenler</p>
               </div>
 
@@ -647,7 +647,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
               ref={sliderRef}
               style={{ display: 'flex', gap: '20px', overflowX: 'auto', scrollBehavior: 'smooth', paddingBottom: '10px', scrollbarWidth: 'none' }}
             >
-              {/* filtrelenmisPlaklar yerine direkt ham 'plaklar' dizisini ters çevirip ilk 8'ini alıyoruz */}
+              {/* filtrelenmisPlaklar yerine direkt ham 'plaklar' dizisini ters çevirip ilk 6'ini alıyoruz */}
 {(plaklar || []).slice().reverse().slice(0, 6).map(plak => {
   const pId = plak._id || plak.id;
   const isFav = favorites.some(f => (f._id || f.id) === pId);
