@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useParams, useNavigate, Navigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
-import { Music2Icon, LucideCreditCard, User2Icon, KeyIcon, Bell, ChevronLeft, ChevronRight, Search, X, Disc, Star, ShoppingCart, ShoppingBag, Heart, CheckCircle, ShieldCheck, Truck, CreditCard, User, LogOut, Filter, ArrowUpDown } from 'lucide-react';
+import { LucideHandMetal, Music2Icon, LucideCreditCard, User2Icon, KeyIcon, Bell, ChevronLeft, ChevronRight, Search, X, Disc, Star, ShoppingCart, ShoppingBag, Heart, CheckCircle, ShieldCheck, Truck, CreditCard, User, LogOut, Filter, ArrowUpDown, ChessQueenIcon } from 'lucide-react';
 import API from './services/api';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
@@ -300,6 +300,16 @@ const AppContent = ({
     window.scrollTo(0, 0);
   }, [pathname]);
   
+// Ref ve Kaydırma Fonksiyonları
+const editorSliderRef = useRef(null);
+const firsatSliderRef = useRef(null);
+
+const slideEditorLeft = () => editorSliderRef.current?.scrollBy({ left: -300, behavior: 'smooth' });
+const slideEditorRight = () => editorSliderRef.current?.scrollBy({ left: 300, behavior: 'smooth' });
+
+const slideFirsatLeft = () => firsatSliderRef.current?.scrollBy({ left: -300, behavior: 'smooth' });
+const slideFirsatRight = () => firsatSliderRef.current?.scrollBy({ left: 300, behavior: 'smooth' });
+
   const [showNotifications, setShowNotifications] = useState(false);
 const [bildirimler, setBildirimler] = useState([
   { id: 1, baslik: '🔥 %20 İndirim Başladı!', mesaj: 'Seçili Rock plaklarında indirim fırsatı!', tarih: '1 saat önce' },
@@ -717,7 +727,347 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
   );
 })}
                   </div>
-                  </div>
+                </div>
+                
+{/* SLIDER: EDİTÖRÜN ÖZEL SEÇTİKLERİ */}
+{(() => {
+  // Manuel olarak öne çıkarmak istediğin plakların tam adları:
+  const secilenPlaklar = ['Fearless', '21', 'The Best Of Sade', '1989', 'Can Kırıkları', 'Lover'];
+  const editorListesi = (plaklar || []).filter(p => secilenPlaklar.includes(p.ad));
+
+  return (
+    <div className="brutal-card" style={{ backgroundColor: '#ffd166', border: '4px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a', width: '100%', boxSizing: 'border-box', marginTop: '0px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+        <div>
+          <h3 style={{ margin: 0, fontSize: '1.5rem', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Music2Icon size={30} color="#1a1a1a"/> EDİTÖRÜN SEÇTİKLERİ <Star size={22} color="blue" /> 
+          </h3>
+          <p style={{ margin: '2px 0 0 0', fontWeight: 'bold', color: '#333', fontSize: '0.85rem' }}>Özel olarak seçilmiş plaklar</p>
+        </div>
+
+        {/* YÖN OKLARI */}
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button onClick={slideEditorLeft} style={{ border: '3px solid #1a1a1a', backgroundColor: 'white', padding: '6px 10px', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
+            <ChevronLeft size={20} color="#1a1a1a" />
+          </button>
+          <button onClick={slideEditorRight} style={{ border: '3px solid #1a1a1a', backgroundColor: '#1a1a1a', padding: '6px 10px', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
+            <ChevronRight size={20} color="white" />
+          </button>
+        </div>
+      </div>
+
+      {/* SLIDER İÇERİĞİ */}
+      <div 
+        ref={editorSliderRef}
+        style={{ display: 'flex', gap: '20px', overflowX: 'auto', scrollBehavior: 'smooth', paddingBottom: '10px', scrollbarWidth: 'none' }}
+      >
+        {editorListesi.map(plak => {
+          const pId = plak._id || plak.id;
+          const isFav = favorites.some(f => (f._id || f.id) === pId);
+
+          return (
+            <div key={`editor-${pId}`} style={{ minWidth: '240px', maxWidth: '240px', backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '12px', boxShadow: '4px 4px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+              <button 
+                onClick={() => toggleFavorite(plak)}
+                style={{ position: 'absolute', top: '18px', right: '18px', background: 'white', border: '2px solid #1a1a1a', borderRadius: '50%', padding: '5px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Heart size={16} fill={isFav ? "#ff4d4d" : "none"} color={isFav ? "#ff4d4d" : "#1a1a1a"} />
+              </button>
+
+              <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
+                <div
+                  className="brutal-img-container"
+                  style={{ position: 'relative', width: '100%', height: '240px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
+                  <img 
+                    src={plak.resim} 
+                    alt={plak.ad} 
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      if (!e.target.dataset.fallback) {
+                        e.target.dataset.fallback = "true";
+                        e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=500';
+                      }
+                    }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  />
+                </div>
+                <h4 style={{ margin: '0 0 3px 0', fontSize: '1.1rem', textTransform: 'uppercase', lineHeight: '1.2' }}>{plak.ad}</h4>
+                <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.85rem' }}>{plak.sanatci}</p>
+              </Link>
+
+              <div style={{ marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
+                <button 
+                  onClick={() => sepeteEkle(plak)}
+                  className="brutal-btn"
+                  style={{ backgroundColor: '#ffd166', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem' }}
+                >
+                  <ShoppingCart size={22} color="black" /> +
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+})()}
+
+{/* 4. YÖNTEM SLIDER: FIRSAT & BÜTÇE DOSTU PLAKLAR */}
+{(() => {
+  const firsatPlaklari = (plaklar || [])
+    .filter(p => Number(p.fiyat) <= 1000) // 👈 400 TL ve altındaki ürünleri yakalar
+    .sort((a, b) => Number(a.fiyat) - Number(b.fiyat)); // Ucuzdan pahalıya sıralar
+
+  return (
+    <div className="brutal-card" style={{ backgroundColor: '#06d6a0', border: '4px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a', width: '100%', boxSizing: 'border-box', marginTop: '1px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+        <div>
+          <h3 style={{ margin: 0, fontSize: '1.5rem', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Music2Icon size={30} color="yellow"/> 1000 TL VE ALTI FIRSATLAR 🏷️
+          </h3>
+          <p style={{ margin: '2px 0 0 0', fontWeight: 'bold', color: '#1a1a1a', fontSize: '0.85rem' }}>Öğrenci ve koleksiyoner dostu uygun fiyatlar</p>
+        </div>
+
+        {/* YÖN OKLARI */}
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button onClick={slideFirsatLeft} style={{ border: '3px solid #1a1a1a', backgroundColor: 'white', padding: '6px 10px', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
+            <ChevronLeft size={20} color="#1a1a1a" />
+          </button>
+          <button onClick={slideFirsatRight} style={{ border: '3px solid #1a1a1a', backgroundColor: '#1a1a1a', padding: '6px 10px', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
+            <ChevronRight size={20} color="white" />
+          </button>
+        </div>
+      </div>
+
+      {/* SLIDER İÇERİĞİ */}
+      <div 
+        ref={firsatSliderRef}
+        style={{ display: 'flex', gap: '20px', overflowX: 'auto', scrollBehavior: 'smooth', paddingBottom: '10px', scrollbarWidth: 'none' }}
+      >
+        {firsatPlaklari.map(plak => {
+          const pId = plak._id || plak.id;
+          const isFav = favorites.some(f => (f._id || f.id) === pId);
+
+          return (
+            <div key={`firsat-${pId}`} style={{ minWidth: '240px', maxWidth: '240px', backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '12px', boxShadow: '4px 4px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+              <button 
+                onClick={() => toggleFavorite(plak)}
+                style={{ position: 'absolute', top: '18px', right: '18px', background: 'white', border: '2px solid #1a1a1a', borderRadius: '50%', padding: '5px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Heart size={16} fill={isFav ? "#ff4d4d" : "none"} color={isFav ? "#ff4d4d" : "#1a1a1a"} />
+              </button>
+
+              <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
+                <div
+                  className="brutal-img-container"
+                  style={{ position: 'relative', width: '100%', height: '240px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
+                  <img 
+                    src={plak.resim} 
+                    alt={plak.ad} 
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      if (!e.target.dataset.fallback) {
+                        e.target.dataset.fallback = "true";
+                        e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=500';
+                      }
+                    }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  />
+                </div>
+                <h4 style={{ margin: '0 0 3px 0', fontSize: '1.1rem', textTransform: 'uppercase', lineHeight: '1.2' }}>{plak.ad}</h4>
+                <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.85rem' }}>{plak.sanatci}</p>
+              </Link>
+
+              <div style={{ marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: 'black', fontSize: '1.1rem', color: 'black' }}>{plak.fiyat} TL</span>
+                <button 
+                  onClick={() => sepeteEkle(plak)}
+                  className="brutal-btn"
+                  style={{ backgroundColor: '#06d6a0', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem' }}
+                >
+                  <ShoppingCart size={22} color="black" /> +
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+})()}
+                
+{/* SLIDER: METAL EFSANELERİ */}
+{(() => {
+  // Manuel olarak öne çıkarmak istediğin plakların tam adları:
+  const secilenPlaklar = ['Rust In Peace', 'Master of Puppets', 'Meteora', 'Ride The Lightning', 'Metallica', 'Hybrid Theory'];
+  const editorListesi = (plaklar || []).filter(p => secilenPlaklar.includes(p.ad));
+
+  return (
+    <div className="brutal-card" style={{ backgroundColor: 'black', border: '4px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a', width: '100%', boxSizing: 'border-box', marginTop: '0px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+        <div>
+          <h3 style={{ color: 'white', margin: 0, fontSize: '1.5rem', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Music2Icon size={30} color="white"/> METAL EFSANELERİ <LucideHandMetal size={22} color="white" /> 
+          </h3>
+          <p style={{ margin: '2px 0 0 0', fontWeight: 'bold', color: 'white', fontSize: '0.85rem' }}>Özel olarak seçilmiş plaklar</p>
+        </div>
+
+        {/* YÖN OKLARI */}
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button onClick={slideEditorLeft} style={{ border: '3px solid #1a1a1a', backgroundColor: 'white', padding: '6px 10px', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
+            <ChevronLeft size={20} color="#1a1a1a" />
+          </button>
+          <button onClick={slideEditorRight} style={{ border: '3px solid #1a1a1a', backgroundColor: '#1a1a1a', padding: '6px 10px', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
+            <ChevronRight size={20} color="white" />
+          </button>
+        </div>
+      </div>
+
+      {/* SLIDER İÇERİĞİ */}
+      <div 
+        ref={editorSliderRef}
+        style={{ display: 'flex', gap: '20px', overflowX: 'auto', scrollBehavior: 'smooth', paddingBottom: '10px', scrollbarWidth: 'none' }}
+      >
+        {editorListesi.map(plak => {
+          const pId = plak._id || plak.id;
+          const isFav = favorites.some(f => (f._id || f.id) === pId);
+
+          return (
+            <div key={`editor-${pId}`} style={{ minWidth: '240px', maxWidth: '240px', backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '12px', boxShadow: '4px 4px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+              <button 
+                onClick={() => toggleFavorite(plak)}
+                style={{ position: 'absolute', top: '18px', right: '18px', background: 'white', border: '2px solid #1a1a1a', borderRadius: '50%', padding: '5px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Heart size={16} fill={isFav ? "#ff4d4d" : "none"} color={isFav ? "#ff4d4d" : "#1a1a1a"} />
+              </button>
+
+              <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
+                <div
+                  className="brutal-img-container"
+                  style={{ position: 'relative', width: '100%', height: '240px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
+                  <img 
+                    src={plak.resim} 
+                    alt={plak.ad} 
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      if (!e.target.dataset.fallback) {
+                        e.target.dataset.fallback = "true";
+                        e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=500';
+                      }
+                    }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  />
+                </div>
+                <h4 style={{ margin: '0 0 3px 0', fontSize: '1.1rem', textTransform: 'uppercase', lineHeight: '1.2' }}>{plak.ad}</h4>
+                <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.85rem' }}>{plak.sanatci}</p>
+              </Link>
+
+              <div style={{ marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
+                <button 
+                  onClick={() => sepeteEkle(plak)}
+                  className="brutal-btn"
+                  style={{ backgroundColor: 'black', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem', color: 'white'}}
+                >
+                  <ShoppingCart size={22} color="white" /> +
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+})()}
+
+
+{/* SLIDER: TÜRKÇE POP KRALİÇELERİ */}
+{(() => {
+  // Manuel olarak öne çıkarmak istediğin plakların tam adları:
+  const secilenPlaklar = [ 'Gülümse','Beni Durdursan Mı?','Selam Söyle', 'Handeye Neler Oluyor?', 'Of Of', 'Öptüm', ' Nilüfer LP'];
+  const editorListesi = (plaklar || []).filter(p => secilenPlaklar.includes(p.ad));
+
+  return (
+    <div className="brutal-card" style={{ backgroundColor: '#7e1818', border: '4px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a', width: '100%', boxSizing: 'border-box', marginTop: '0px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+        <div>
+          <h3 style={{ margin: 0, fontSize: '1.5rem', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Music2Icon size={30} color="#1a1a1a"/> TÜRKÇE POP KRALİÇELERİ <ChessQueenIcon size={22} color="yellow" /> 
+          </h3>
+          <p style={{ margin: '2px 0 0 0', fontWeight: 'bold', color: '#333', fontSize: '0.85rem' }}>Özel olarak seçilmiş plaklar</p>
+        </div>
+
+        {/* YÖN OKLARI */}
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button onClick={slideEditorLeft} style={{ border: '3px solid #1a1a1a', backgroundColor: 'white', padding: '6px 10px', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
+            <ChevronLeft size={20} color="#1a1a1a" />
+          </button>
+          <button onClick={slideEditorRight} style={{ border: '3px solid #1a1a1a', backgroundColor: '#1a1a1a', padding: '6px 10px', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
+            <ChevronRight size={20} color="white" />
+          </button>
+        </div>
+      </div>
+
+      {/* SLIDER İÇERİĞİ */}
+      <div 
+        ref={editorSliderRef}
+        style={{ display: 'flex', gap: '20px', overflowX: 'auto', scrollBehavior: 'smooth', paddingBottom: '10px', scrollbarWidth: 'none' }}
+      >
+        {editorListesi.map(plak => {
+          const pId = plak._id || plak.id;
+          const isFav = favorites.some(f => (f._id || f.id) === pId);
+
+          return (
+            <div key={`editor-${pId}`} style={{ minWidth: '240px', maxWidth: '240px', backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '12px', boxShadow: '4px 4px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+              <button 
+                onClick={() => toggleFavorite(plak)}
+                style={{ position: 'absolute', top: '18px', right: '18px', background: 'white', border: '2px solid #1a1a1a', borderRadius: '50%', padding: '5px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Heart size={16} fill={isFav ? "#ff4d4d" : "none"} color={isFav ? "#ff4d4d" : "#1a1a1a"} />
+              </button>
+
+              <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
+                <div
+                  className="brutal-img-container"
+                  style={{ position: 'relative', width: '100%', height: '240px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
+                  <img 
+                    src={plak.resim} 
+                    alt={plak.ad} 
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      if (!e.target.dataset.fallback) {
+                        e.target.dataset.fallback = "true";
+                        e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=500';
+                      }
+                    }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  />
+                </div>
+                <h4 style={{ margin: '0 0 3px 0', fontSize: '1.1rem', textTransform: 'uppercase', lineHeight: '1.2' }}>{plak.ad}</h4>
+                <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.85rem' }}>{plak.sanatci}</p>
+              </Link>
+
+              <div style={{ marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
+                <button 
+                  onClick={() => sepeteEkle(plak)}
+                  className="brutal-btn"
+                  style={{ backgroundColor: '#ffd166', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem' }}
+                >
+                  <ShoppingCart size={22} color="black" /> +
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+})()}
+
+
+
 
            {/* 🖼️ 4. TÜM PLAKLAR LİSTESİ (Kart Yükseklikleri 220px'den 280px'e Çıkarıldı) */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '25px' }}>
