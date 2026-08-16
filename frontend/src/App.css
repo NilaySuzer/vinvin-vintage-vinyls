@@ -233,4 +233,24 @@
   .spinning-record {
     animation: spinVinyl 3.5s linear infinite;
   }
+
+  @keyframes marqueeScroll {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .brutal-marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marqueeScroll 18s linear infinite;
+  }
+
+  /* Kullanıcı fareyle üzerine gelince dursun istersen: */
+  .brutal-marquee-container:hover .brutal-marquee-track {
+    animation-play-state: paused;
+  }
 }

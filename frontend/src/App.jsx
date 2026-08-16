@@ -598,7 +598,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
   <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
     <Routes>
       <Route path="/" element={
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', width: '100%' }}>
           
          {/* ⚡ DİNAMİK VE TIKLANABİLİR REKLAM / KAMPANYA BANNERI */}
                 {(() => {
@@ -644,6 +644,38 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
         );
       })()}
                 
+{/* BRUTALIST SONSUZ KAYAN MARQUEE ŞERİDİ */}
+<div 
+  className="brutal-marquee-container"
+  style={{
+    backgroundColor: '#ebde23', // İster neon yeşil (#06d6a0), ister fosforlu sarı (#ffd166)
+    borderTop: '1px solid #1a1a1a',
+    borderBottom: '1px solid #1a1a1a',
+    overflow: 'hidden',
+    padding: '12px 0',
+    margin: '5px -55px',
+    boxShadow: '0 4px 0px #1a1a1a',
+    userSelect: 'none',
+    width: '100vw',
+    border: '4px solid #1a1a1a', // 👈 Sadece üst-alt değil, 4 bir tarafına kalın çerçeve
+    boxShadow: '6px 6px 0px #1a1a1a', // 👈 Diğer kartlarla aynı brutalist gölge
+    boxSizing: 'border-box',
+    maskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+    WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)'
+    
+  }}
+>
+  <div className="brutal-marquee-track">
+    {/* Metni yan yana iki kez yazıyoruz ki döngü kusursuz ve kesintisiz aksın */}
+    <span style={{ fontSize: '1.1rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase', color: '#1a1a1a', whiteSpace: 'nowrap', paddingRight: '20px' }}>
+      🔥 HIZLI KARGO &nbsp;•&nbsp; ⚡ %100 ORİJİNAL BASKILAR &nbsp;•&nbsp; 📻 HER SİPARİŞTE VİNİL TEMİZLEME BEZİ HEDİYE &nbsp;•&nbsp; 💿 ANALOG SESİN SAF GÜCÜ &nbsp;•&nbsp; 📦 AHŞAP KORUMALI KIRILMAZ PAKETLEME &nbsp;•&nbsp;
+    </span>
+    <span style={{ fontSize: '1.1rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase', color: '#1a1a1a', whiteSpace: 'nowrap', paddingRight: '20px' }}>
+      🔥HIZLI KARGO &nbsp;•&nbsp; ⚡ %100 ORİJİNAL BASKILAR &nbsp;•&nbsp; 📻 HER SİPARİŞTE VİNİL TEMİZLEME BEZİ HEDİYE &nbsp;•&nbsp; 💿 ANALOG SESİN SAF GÜCÜ &nbsp;•&nbsp; 📦 AHŞAP KORUMALI KIRILMAZ PAKETLEME &nbsp;•&nbsp;
+    </span>
+  </div>
+</div>
+
 
 {/* 🔍 3. ARAMA VE SIRALAMA BAR */}
           {/* ARAMA BAR (CANLI SONUÇ DROPDOWN'LI) */}
