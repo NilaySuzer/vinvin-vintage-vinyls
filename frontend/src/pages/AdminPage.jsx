@@ -15,7 +15,7 @@ const AdminPage = () => {
 
   // Yeni Ürün State
   const [yeniPlak, setYeniPlak] = useState({
-    ad: '', sanatci: '', fiyat: '', kategori: 'Rock', stok: 10, resim: ''
+    ad: '', sanatci: '', fiyat: '', kategori: 'Rock', stok: 10, resim: '',
   });
 
   // --- VERİ ÇEKME FONKSİYONLARI ---
@@ -64,7 +64,6 @@ const AdminPage = () => {
         stok: Number(yeniPlak.stok || 10),
         kategori: yeniPlak.kategori || 'Rock',
         resim: yeniPlak.resim || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=500',
-        aciklama: 'Vintage Orijinal Baskı Plak'
       };
 
       await API.post('/products', gonderilecekVeri);
@@ -232,6 +231,7 @@ const AdminPage = () => {
       <span style={{ fontSize: '0.8rem', fontWeight: 'black', color: '#4caf50' }}>✓ Görsel Hazır!</span>
     </div>
   )}
+
 
             <select value={yeniPlak.kategori} onChange={e => setYeniPlak({ ...yeniPlak, kategori: e.target.value })} style={{ padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', backgroundColor: 'white' }}>
               <option value="Rock">Rock</option>

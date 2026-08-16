@@ -7,6 +7,7 @@ import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
 import CampaignsPage from './pages/CampaignsPage.jsx';
 import AccountPage from './pages/AccountPage.jsx';
+import SpotlightPlayer from './components/SpotlightPlayer';
 
 // --- ÜRÜN DETAY SAYFASI ---
 const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavorite }) => {
@@ -88,10 +89,10 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavor
             <h3 style={{ margin: '0 0 10px 0', textTransform: 'uppercase', borderBottom: '2px dashed #1a1a1a', paddingBottom: '5px' }}>PLAK ÖZELLİKLERİ</h3>
             <ul style={{ margin: 0, paddingLeft: '20px', lineHeight: '1.8', fontSize: '0.95rem', fontWeight: 'bold' }}>
               <li>Kategori: <span style={{ backgroundColor: '#ff9e00', padding: '2px 6px' }}>{plak.kategori}</span></li>
-              <li>Kondisyon: <span style={{ color: '#2b9348' }}>Pırıl Pırıl (NM / 9/10)</span></li>
+              <li>Kondisyon: <span style={{ color: '#2b9348' }}>Sıfır Ürün (NM / 9/10)</span></li>
               <li>Devir: 33 RPM (12" LP)</li>
-              <li>Baskı Yılı: Orijinal Retro Baskı</li>
-              <li>Kargo: Aynı Gün Korunaklı Kutuda Kargo 📦</li>
+              <li>Baskı Yılı: Orijinal Baskı</li>
+              <li>Kargo: Sipariş sonrası 1 ila 3 iş günü 📦</li>
             </ul>
           </div>
 
@@ -300,16 +301,103 @@ const AppContent = ({
     window.scrollTo(0, 0);
   }, [pathname]);
   
-// Ref ve Kaydırma Fonksiyonları
+  /* --- SLIDER VE OTOMATİK KAYMA MANTIĞI --- */
+ 
+// 1. Yeni Gelenler Slider
+const sliderRef = useRef(null);
+const slideLeft = () => sliderRef.current?.scrollBy({ left: -320, behavior: 'smooth' });
+  const slideRight = () => sliderRef.current?.scrollBy({ left: 320, behavior: 'smooth' });
+  
+  useEffect(() => {
+  const interval = setInterval(() => {
+    if (sliderRef.current) {
+      const { scrollLeft, clientWidth, scrollWidth } = sliderRef.current;
+      if (scrollLeft + clientWidth >= scrollWidth - 10) {
+        sliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        sliderRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+      }
+    }
+  }, 3000);
+  return () => clearInterval(interval);
+}, []);
+
+// 2. Editörün Seçtikleri Slider
 const editorSliderRef = useRef(null);
+const slideEditorLeft = () => editorSliderRef.current?.scrollBy({ left: -320, behavior: 'smooth' });
+const slideEditorRight = () => editorSliderRef.current?.scrollBy({ left: 320, behavior: 'smooth' });
+
+  useEffect(() => {
+  const interval = setInterval(() => {
+    if (editorSliderRef.current) {
+      const { scrollLeft, clientWidth, scrollWidth } = editorSliderRef.current;
+      if (scrollLeft + clientWidth >= scrollWidth - 10) {
+        editorSliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        editorSliderRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+      }
+    }
+  }, 3500);
+  return () => clearInterval(interval);
+}, []);
+  
+// 3. Fırsat Plakları Slider
 const firsatSliderRef = useRef(null);
+const slideFirsatLeft = () => firsatSliderRef.current?.scrollBy({ left: -330, behavior: 'smooth' });
+const slideFirsatRight = () => firsatSliderRef.current?.scrollBy({ left: 330, behavior: 'smooth' });
 
-const slideEditorLeft = () => editorSliderRef.current?.scrollBy({ left: -300, behavior: 'smooth' });
-const slideEditorRight = () => editorSliderRef.current?.scrollBy({ left: 300, behavior: 'smooth' });
+  useEffect(() => {
+  const interval = setInterval(() => {
+    if (firsatSliderRef.current) {
+      const { scrollLeft, clientWidth, scrollWidth } = firsatSliderRef.current;
+      if (scrollLeft + clientWidth >= scrollWidth - 10) {
+        firsatSliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        firsatSliderRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+      }
+    }
+  }, 4000);
+  return () => clearInterval(interval);
+}, []);
+  
+// 4. Metal Efsaneleri Slider
+const metalSliderRef = useRef(null);
+const slideMetalLeft = () => metalSliderRef.current?.scrollBy({ left: -320, behavior: 'smooth' });
+const slideMetalRight = () => metalSliderRef.current?.scrollBy({ left: 320, behavior: 'smooth' });
 
-const slideFirsatLeft = () => firsatSliderRef.current?.scrollBy({ left: -300, behavior: 'smooth' });
-const slideFirsatRight = () => firsatSliderRef.current?.scrollBy({ left: 300, behavior: 'smooth' });
+  useEffect(() => {
+  const interval = setInterval(() => {
+    if (metalSliderRef.current) {
+      const { scrollLeft, clientWidth, scrollWidth } = metalSliderRef.current;
+      if (scrollLeft + clientWidth >= scrollWidth - 10) {
+        metalSliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        metalSliderRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+      }
+    }
+  }, 4500);
+  return () => clearInterval(interval);
+}, []);
+  
+// 5. Türkçe Pop Kraliçeleri Slider
+const popSliderRef = useRef(null);
+const slidePopLeft = () => popSliderRef.current?.scrollBy({ left: -310, behavior: 'smooth' });
+const slidePopRight = () => popSliderRef.current?.scrollBy({ left: 310, behavior: 'smooth' });
 
+  useEffect(() => {
+  const interval = setInterval(() => {
+    if (popSliderRef.current) {
+      const { scrollLeft, clientWidth, scrollWidth } = popSliderRef.current;
+      if (scrollLeft + clientWidth >= scrollWidth - 10) {
+        popSliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        popSliderRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+      }
+    }
+  }, 5000);
+  return () => clearInterval(interval);
+}, []);
+  
   const [showNotifications, setShowNotifications] = useState(false);
 const [bildirimler, setBildirimler] = useState([
   { id: 1, baslik: '🔥 %20 İndirim Başladı!', mesaj: 'Seçili Rock plaklarında indirim fırsatı!', tarih: '1 saat önce' },
@@ -321,29 +409,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
   const guvenliIndirim = Number(indirimTutari) || 0;
   const guvenliOdenecek = Number(odenecekTutar) || guvenliToplam;
   
-  /* --- SLIDER VE OTOMATİK KAYMA MANTIĞI --- */
- const sliderRef = useRef(null); // 👈 React.useRef yerine useRef
 
-  const slideLeft = () => {
-    if (sliderRef.current) sliderRef.current.scrollBy({ left: -320, behavior: 'smooth' });
-  };
-
-  const slideRight = () => {
-    if (sliderRef.current) sliderRef.current.scrollBy({ left: 320, behavior: 'smooth' });
-  };
-
-  useEffect(() => { // 👈 React.useEffect yerine useEffect
-    const interval = setInterval(() => {
-      if (sliderRef.current) {
-        if (sliderRef.current.scrollLeft + sliderRef.current.clientWidth >= sliderRef.current.scrollWidth - 10) {
-          sliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          sliderRef.current.scrollBy({ left: 320, behavior: 'smooth' });
-        }
-      }
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
   const [user, setUser] = useState(() => {
     try {
       const savedUser = localStorage.getItem('user');
@@ -529,7 +595,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
   
 
   {/* 📍 2. SAĞ İÇERİK ALANI (Banner + Slider + Arama + Grid) */}
-  <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '25px' }}>
+  <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
     <Routes>
       <Route path="/" element={
         <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
@@ -681,7 +747,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
               style={{ display: 'flex', gap: '20px', overflowX: 'auto', scrollBehavior: 'smooth', paddingBottom: '10px', scrollbarWidth: 'none' }}
             >
               {/* filtrelenmisPlaklar yerine direkt ham 'plaklar' dizisini ters çevirip ilk 6'ini alıyoruz */}
-{(plaklar || []).slice().reverse().slice(0, 6).map(plak => {
+{(plaklar || []).slice().reverse().slice(0, 15).map(plak => {
   const pId = plak._id || plak.id;
   const isFav = favorites.some(f => (f._id || f.id) === pId);
 
@@ -728,11 +794,19 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
 })}
                   </div>
                 </div>
+
+
+<SpotlightPlayer 
+  plak={plaklar.find(p => p.ad === 'Fearless') || plaklar[0]} 
+  sepeteEkle={sepeteEkle} 
+/>
+
+
                 
 {/* SLIDER: EDİTÖRÜN ÖZEL SEÇTİKLERİ */}
 {(() => {
   // Manuel olarak öne çıkarmak istediğin plakların tam adları:
-  const secilenPlaklar = ['Fearless', '21', 'The Best Of Sade', '1989', 'Can Kırıkları', 'Lover'];
+  const secilenPlaklar = ['Reputation', '21', 'The Best Of Sade', 'A Night At The Opera', 'Use Your Illusion 2', 'Bad (25. Yıl)'];
   const editorListesi = (plaklar || []).filter(p => secilenPlaklar.includes(p.ad));
 
   return (
@@ -900,7 +974,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
 {/* SLIDER: METAL EFSANELERİ */}
 {(() => {
   // Manuel olarak öne çıkarmak istediğin plakların tam adları:
-  const secilenPlaklar = ['Rust In Peace', 'Master of Puppets', 'Meteora', 'Ride The Lightning', 'Metallica', 'Hybrid Theory'];
+  const secilenPlaklar = ['Rust In Peace', 'Master of Puppets', 'Meteora', 'Ride The Lightning', 'Metallica', 'Hybrid Theory', 'Load'];
   const editorListesi = (plaklar || []).filter(p => secilenPlaklar.includes(p.ad));
 
   return (
@@ -915,10 +989,10 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
 
         {/* YÖN OKLARI */}
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={slideEditorLeft} style={{ border: '3px solid #1a1a1a', backgroundColor: 'white', padding: '6px 10px', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
+          <button onClick={slideMetalLeft} style={{ border: '3px solid #1a1a1a', backgroundColor: 'white', padding: '6px 10px', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
             <ChevronLeft size={20} color="#1a1a1a" />
           </button>
-          <button onClick={slideEditorRight} style={{ border: '3px solid #1a1a1a', backgroundColor: '#1a1a1a', padding: '6px 10px', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
+          <button onClick={slideMetalRight} style={{ border: '3px solid #1a1a1a', backgroundColor: '#1a1a1a', padding: '6px 10px', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
             <ChevronRight size={20} color="white" />
           </button>
         </div>
@@ -926,7 +1000,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
 
       {/* SLIDER İÇERİĞİ */}
       <div 
-        ref={editorSliderRef}
+        ref={metalSliderRef}
         style={{ display: 'flex', gap: '20px', overflowX: 'auto', scrollBehavior: 'smooth', paddingBottom: '10px', scrollbarWidth: 'none' }}
       >
         {editorListesi.map(plak => {
@@ -985,25 +1059,25 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
 {/* SLIDER: TÜRKÇE POP KRALİÇELERİ */}
 {(() => {
   // Manuel olarak öne çıkarmak istediğin plakların tam adları:
-  const secilenPlaklar = [ 'Gülümse','Beni Durdursan Mı?','Selam Söyle', 'Handeye Neler Oluyor?', 'Of Of', 'Öptüm', ' Nilüfer LP'];
+  const secilenPlaklar = [ 'Gülümse','Beni Durdursan Mı?','Selam Söyle', 'Handeye Neler Oluyor?', 'Of Of', 'Öptüm', 'Nilüfer LP'];
   const editorListesi = (plaklar || []).filter(p => secilenPlaklar.includes(p.ad));
 
   return (
     <div className="brutal-card" style={{ backgroundColor: '#7e1818', border: '4px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a', width: '100%', boxSizing: 'border-box', marginTop: '0px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
         <div>
-          <h3 style={{ margin: 0, fontSize: '1.5rem', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Music2Icon size={30} color="#1a1a1a"/> TÜRKÇE POP KRALİÇELERİ <ChessQueenIcon size={22} color="yellow" /> 
+          <h3 style={{ margin: 0, fontSize: '1.5rem', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px', color:'white'}}>
+            <Music2Icon size={30} color="yellow"/> TÜRKÇE POP KRALİÇELERİ <ChessQueenIcon size={22} color="yellow" /> 
           </h3>
-          <p style={{ margin: '2px 0 0 0', fontWeight: 'bold', color: '#333', fontSize: '0.85rem' }}>Özel olarak seçilmiş plaklar</p>
+          <p style={{ margin: '2px 0 0 0', fontWeight: 'bold', color: '#fff1f1', fontSize: '0.85rem' }}>Özel olarak seçilmiş plaklar</p>
         </div>
 
         {/* YÖN OKLARI */}
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={slideEditorLeft} style={{ border: '3px solid #1a1a1a', backgroundColor: 'white', padding: '6px 10px', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
+          <button onClick={slidePopLeft} style={{ border: '3px solid #1a1a1a', backgroundColor: 'white', padding: '6px 10px', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
             <ChevronLeft size={20} color="#1a1a1a" />
           </button>
-          <button onClick={slideEditorRight} style={{ border: '3px solid #1a1a1a', backgroundColor: '#1a1a1a', padding: '6px 10px', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
+          <button onClick={slidePopRight} style={{ border: '3px solid #1a1a1a', backgroundColor: '#1a1a1a', padding: '6px 10px', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
             <ChevronRight size={20} color="white" />
           </button>
         </div>
@@ -1011,7 +1085,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
 
       {/* SLIDER İÇERİĞİ */}
       <div 
-        ref={editorSliderRef}
+        ref={popSliderRef}
         style={{ display: 'flex', gap: '20px', overflowX: 'auto', scrollBehavior: 'smooth', paddingBottom: '10px', scrollbarWidth: 'none' }}
       >
         {editorListesi.map(plak => {
@@ -1053,9 +1127,9 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
                 <button 
                   onClick={() => sepeteEkle(plak)}
                   className="brutal-btn"
-                  style={{ backgroundColor: '#ffd166', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem' }}
+                  style={{ backgroundColor: '#7e1818', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem' ,color: 'white' }}
                 >
-                  <ShoppingCart size={22} color="black" /> +
+                  <ShoppingCart size={22} color="white" /> +
                 </button>
               </div>
             </div>
@@ -1069,55 +1143,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
 
 
 
-           {/* 🖼️ 4. TÜM PLAKLAR LİSTESİ (Kart Yükseklikleri 220px'den 280px'e Çıkarıldı) */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '25px' }}>
-            {vitrinPlaklari.map(plak => {
-              const pId = plak._id || plak.id;
-              const isFav = favorites.some(f => (f._id || f.id) === pId);
-
-              return (
-                <div key={pId}  className="brutal-card" style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '15px', boxShadow: '6px 6px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                  <button 
-                    onClick={() => toggleFavorite(plak)}
-                    style={{ position: 'absolute', top: '10px', right: '10px', background: 'white', border: '2px solid #1a1a1a', borderRadius: '50%', padding: '6px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  >
-                    <Heart size={18} fill={isFav ? "#ff4d4d" : "none"} color={isFav ? "#ff4d4d" : "#1a1a1a"} />
-                  </button>
-
-                  <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
-                    {/* BÜYÜTÜLMÜŞ GÖRSEL ALANI (280px) */}
-                    <div
-                      className="brutal-img-container"
-                      style={{ position: 'relative', width: '100%', height: '280px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
-                      <img 
-                        src={plak.resim || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'} 
-                        alt={plak.ad} 
-                        referrerPolicy="no-referrer"
-                       onError={(e) => {
-      if (!e.target.dataset.fallback) {
-        e.target.dataset.fallback = "true";
-        e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=500';
-      }
-    }}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                      />
-                    </div>
-                    <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem', textTransform: 'uppercase' }}>{plak.ad}</h3>
-                    <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.9rem' }}>{plak.sanatci}</p>
-                  </Link>
-
-                  <div style={{ marginTop: 'auto', paddingTop: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontWeight: 'black', fontSize: '1.2rem' }}>{plak.fiyat} TL</span>
-                    <button onClick={() => sepeteEkle(plak)}
-                      className="brutal-btn"
-                      style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px 12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
-                      EKLE +
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-                </div>
+      
         </div>
       } />
 
