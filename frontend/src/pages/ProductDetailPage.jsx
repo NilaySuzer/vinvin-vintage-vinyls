@@ -1,31 +1,75 @@
-import React, { useState } from 'react';
-import { Star, MessageSquare, Sparkles, Send, User, Disc } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { Star, MessageSquare, Sparkles, Send, User, Disc, PenIcon } from 'lucide-react';
 
 const ProductReviews = ({ plakId, reviews = [], onReviewAdded, currentUser, isLoggedIn }) => {
+    const [localReviews, setLocalReviews] = useState(reviews);
   const [yorumMetni, setYorumMetni] = useState('');
   const [puan, setPuan] = useState(5);
   const [gonderiliyor, setGonderiliyor] = useState(false);
 
-  const handleYorumGonder = async (e) => {
+    const kullaniciGirisYapmis = Boolean(isLoggedIn || (currentUser && currentUser.adSoyad));
+
+    useEffect(() => {
+    setLocalReviews(reviews);
+    }, [reviews]);
+    
+    const handleYorumGonder = async (e) => {
     e.preventDefault();
+    if (!kullaniciGirisYapmis) {
+      alert("Yorum yapabilmek için lütfen önce giriş yapın!");
+      return;
+    }
     if (!yorumMetni.trim()) return;
 
-    
-      
+        
+        let bulunanIsim = "";
+
+  // A) Önce currentUser props'undan kontrol et
+  if (currentUser) {
+    if (typeof currentUser === "string") bulunanIsim = currentUser;
+    else if (currentUser.adSoyad) bulunanIsim = currentUser.adSoyad;
+    else if (currentUser.name) bulunanIsim = currentUser.name;
+    else if (currentUser.kullaniciAdi) bulunanIsim = currentUser.kullaniciAdi;
+  }
+
+  // B) Props boşsa localStorage'daki tüm olası yerleri tara
+  if (!bulunanIsim) {
+    const localUser = localStorage.getItem("user") || localStorage.getItem("currentUser");
+    if (localUser) {
+      try {
+        const parsed = JSON.parse(localUser);
+        bulunanIsim = parsed.adSoyad || parsed.name || parsed.kullaniciAdi || parsed.email;
+      } catch (err) {
+        bulunanIsim = localUser;
+      }
+    }
+  }
+
+  // C) Hâlâ bulunamadıysa doğrudan düz anahtarları dene
+  if (!bulunanIsim) {
+    bulunanIsim = localStorage.getItem("adSoyad") || localStorage.getItem("userName") || localStorage.getItem("email");
+  }
+        
+        
     setGonderiliyor(true);
     try {
       const response = await fetch(`http://localhost:5000/api/products/${plakId}/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          kullaniciAdi: currentUser.adSoyad,
+          kullaniciAdi: bulunanIsim,
           puan: puan,
           yorum: yorumMetni
         })
       });
 
       if (response.ok) {
-        const data = await response.json();
+          const data = await response.json();
+          
+          if (data.reviews) {
+          setLocalReviews(data.reviews);
+        } 
         setYorumMetni('');
         setPuan(5);
         if (onReviewAdded) onReviewAdded(data.reviews);
@@ -36,13 +80,14 @@ const ProductReviews = ({ plakId, reviews = [], onReviewAdded, currentUser, isLo
       setGonderiliyor(false);
     }
   };
+  
 
   // İsimden brutalist avatar rengi ve baş harf üretici
-  const getAvatarInfo = (name) => {
+  const getAvatarInfo = (bulunanIsim) => {
     const colors = ['#ffd166', '#06d6a0', '#118ab2', '#ff6b6b', '#a29bfe'];
-    const charCode = (name || 'A').charCodeAt(0);
+    const charCode = (bulunanIsim || 'A').charCodeAt(0);
     const color = colors[charCode % colors.length];
-    const initial = (name || 'K').charAt(0).toUpperCase();
+    const initial = (bulunanIsim || 'K').charAt(0).toUpperCase();
     return { color, initial };
   };
 
@@ -73,12 +118,10 @@ const ProductReviews = ({ plakId, reviews = [], onReviewAdded, currentUser, isLo
     boxShadow: '6px 6px 0px #1a1a1a', display: 'flex', flexDirection: 'column', gap: '15px'
   }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-      
-     
-        <span style={{ fontWeight: 'black', textTransform: 'uppercase', fontSize: '1.1rem' }}>
-        ✍️ Bu Plak Hakkında Ne Düşünüyorsun?
-        </span>
-                          
+      <span style={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '1.1rem' }}>
+        <PenIcon size={22} color="black" /> Bu Plak Hakkında Ne Düşünüyorsun?
+      </span>
+
       <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
         <span style={{ fontSize: '0.85rem', fontWeight: 'bold', marginRight: '5px' }}>PUANIN:</span>
         {[1, 2, 3, 4, 5].map((star) => (
@@ -148,12 +191,13 @@ const ProductReviews = ({ plakId, reviews = [], onReviewAdded, currentUser, isLo
       {/* YORUM LİSTESİ */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {reviews.length === 0 ? (
+          
           <div style={{
             backgroundColor: '#f8f9fa', border: '3px dashed #1a1a1a', padding: '30px',
             textAlign: 'center', fontWeight: 'bold', color: '#666'
           }}>
-                      <Disc size={22} color="black" />
-                      Bu plağa henüz yorum yapılmamış. İğneyi ilk koyan ve fikrini belirten sen ol!
+                      <Disc size={40} color="black" />
+                      <p>Bu plağa henüz yorum yapılmamış. İğneyi ilk koyan ve fikrini belirten sen ol!</p>
           </div>
         ) : (
           reviews.map((rev, idx) => {
@@ -168,7 +212,9 @@ const ProductReviews = ({ plakId, reviews = [], onReviewAdded, currentUser, isLo
                   boxShadow: '5px 5px 0px #1a1a1a',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '12px'
+                    gap: '12px',
+                    fontFamily: 'inherit',
+                  fontWeight: 'bold'
                 }}
               >
                 {/* ÜST BİLGİ: AVATAR, İSİM, ROZET VE TARİH */}
@@ -179,7 +225,7 @@ const ProductReviews = ({ plakId, reviews = [], onReviewAdded, currentUser, isLo
                       width: '42px', height: '42px', backgroundColor: avatar.color,
                       border: '2px solid #1a1a1a', borderRadius: '50%',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontWeight: 'black', fontSize: '1.2rem', color: '#1a1a1a',
+                      fontWeight: 'bold', fontSize: '1.2rem', color: '#1a1a1a',
                       boxShadow: '2px 2px 0px #1a1a1a'
                     }}>
                       {avatar.initial}
@@ -194,7 +240,7 @@ const ProductReviews = ({ plakId, reviews = [], onReviewAdded, currentUser, isLo
                           backgroundColor: '#ffd166', border: '1.5px solid #1a1a1a',
                           padding: '2px 6px', fontSize: '0.7rem', fontWeight: 'black'
                         }}>
-                          ONAYLI DİNLİYİCİ
+                          ONAYLI DİNLEYİCİ
                         </span>
                       </div>
                       <span style={{ fontSize: '0.75rem', color: '#777', fontWeight: 'bold' }}>
@@ -209,8 +255,12 @@ const ProductReviews = ({ plakId, reviews = [], onReviewAdded, currentUser, isLo
                       <Star
                         key={i}
                         size={25}
-                        fill={i < rev.puan ? '#ffd166' : 'none'}
-                            color={i < rev.puan ? '#ffd166' : '#666'}
+                             style={{
+              cursor: 'pointer',
+              fill: i < rev.puan ?'#ffd166' : 'none',
+              color: i < rev.puan ?'#1a1a1a' : '#bbb',
+              strokeWidth: '2.5px'
+            }}
                         
                       />
                     ))}

@@ -59,15 +59,15 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavor
           <h2 style={{ fontSize: '3rem', margin: 0, lineHeight: 1.1 }}>{plak.ad}</h2>
           <p style={{ fontSize: '1.5rem', color: '#666', margin: '5px 0 15px 0', fontWeight: 'bold' }}>{plak.sanatci}</p>
           
-          <div style={{ padding: '15px 25px', backgroundColor: '#e2f0cb', border: '3px solid #1a1a1a', display: 'inline-block', fontWeight: 'black', fontSize: '1.8rem', boxShadow: '4px 4px 0px #1a1a1a' }}>
+          <div style={{ padding: '15px 25px', backgroundColor: '#e2f0cb', border: '3px solid #1a1a1a', display: 'inline-block', fontWeight: 'bold', fontSize: '1.8rem', boxShadow: '4px 4px 0px #1a1a1a' }}>
             {plak.fiyat} TL
           </div>
 
           <div style={{ marginTop: '15px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <span style={{ backgroundColor: (plak.stok ?? 5) > 0 ? '#d4edda' : '#f8d7da', color: (plak.stok ?? 5) > 0 ? '#155724' : '#721c24', padding: '5px 10px', border: '2px solid #1a1a1a', fontWeight: 'bold', fontSize: '0.85rem' }}>
+            <span style={{ backgroundColor: (plak.stok ?? 5) > 0 ? '#0dae32' : '#c4101f', color: (plak.stok ?? 5) > 0 ? '#eff8f1' : '#eacbce', padding: '10px 15px', border: '2px solid #1a1a1a', fontWeight: 'bold', fontSize: '1.1rem' }}>
               {(plak.stok ?? 5) > 0 ? `STOKTA VAR (${plak.stok ?? 5} Adet)` : 'STOK TÜKENDİ'}
             </span>
-            <span style={{ backgroundColor: '#fff3cd', color: '#856404', padding: '5px 10px', border: '2px solid #1a1a1a', fontWeight: 'bold', fontSize: '0.85rem' }}>
+            <span style={{ backgroundColor: '#fff3cd', color: '#856404', padding: '10px 15px', border: '2px solid #1a1a1a', fontWeight: 'bold', fontSize: '1.1rem' }}>
               ORİJİNAL BASKI
             </span>
           </div>
