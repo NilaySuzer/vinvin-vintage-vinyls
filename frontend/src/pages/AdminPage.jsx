@@ -9,7 +9,7 @@ const AdminPage = () => {
   const [loading, setLoading] = useState(true);
   // AdminPage.jsx içine eklenecek Kampanya Yönetim Bölümü:
 const [kampanyalar, setKampanyalar] = useState([]);
-  const [yeniKampanya, setYeniKampanya] = useState({ baslik: '', detay: '', renk: '#ff9e00', kod: '', kategori: 'Tümü' });
+  const [yeniKampanya, setYeniKampanya] = useState({ baslik: '', detay: '', renk: '#ff9e00', kod: '', kategori: 'Tümü', sonTarih: '' });
   const [showCampaignForm, setShowCampaignForm] = useState(false);
 
 // Kampanyaları Çek
@@ -32,7 +32,7 @@ const handleAddCampaign = async (e) => {
   try {
     await API.post('/campaigns', yeniKampanya);
     alert("Kampanya ve Kupon Başarıyla Oluşturuldu! ⚡");
-    setYeniKampanya({ baslik: '', detay: '', renk: '#ff9e00', kod: '', kategori: 'Tümü' });
+    setYeniKampanya({ baslik: '', detay: '', renk: '#ff9e00', kod: '', kategori: 'Tümü', sonTarih: '' });
     fetchAdminKampanyalar();
   } catch (err) {
     alert("Kampanya eklenirken hata oluştu.");
@@ -143,7 +143,7 @@ useEffect(() => {
       {/* ADMİN BAŞLIK */}
       <div style={{ borderBottom: '4px solid #1a1a1a', paddingBottom: '20px', marginBottom: '25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '2.2rem', textTransform: 'uppercase' }}>🔑 ADMIN YÖNETİM PANELİ</h2>
+          <h2 style={{ margin: 0, fontSize: '2.2rem', textTransform: 'uppercase' }}>ADMIN YÖNETİM PANELİ</h2>
           <p style={{ margin: '5px 0 0 0', fontWeight: 'bold', color: '#666' }}>VinVin Vintage Vinyls Mağaza Kontrol Merkezi</p>
         </div>
       </div>
@@ -313,6 +313,16 @@ useEffect(() => {
           </select>
         </div>
 
+              <div>
+  <label style={{ fontWeight: 'black', fontSize: '0.8rem', display: 'block', marginBottom: '4px' }}>SON GEÇERLİLİK TARİHİ</label>
+  <input 
+    type="date" 
+    value={yeniKampanya.sonTarih} 
+    onChange={e => setYeniKampanya({ ...yeniKampanya, sonTarih: e.target.value })} 
+    style={{ width: '100%', padding: '9px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} 
+  />
+</div>
+              
         <div style={{ gridColumn: '1 / -1' }}>
           <label style={{ fontWeight: 'black', fontSize: '0.8rem', display: 'block', marginBottom: '4px' }}>DETAY AÇIKLAMASI</label>
           <input required placeholder="Örn: Tüm Rock plaklarında geçerli %20 indirim fırsatı!" value={yeniKampanya.detay} onChange={e => setYeniKampanya({ ...yeniKampanya, detay: e.target.value })} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} />

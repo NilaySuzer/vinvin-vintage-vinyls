@@ -432,7 +432,7 @@ const AppContent = ({
           
          {/* ⚡ DİNAMİK VE TIKLANABİLİR REKLAM / KAMPANYA BANNERI */}
                 {(() => {
-                  const renkPaleti = ['#c7f9cc', '#ffd166', '#a0c4ff', '#ffadad', '#bdb2ff'];
+                  const renkPaleti = [ '#c7f9cc', '#ffd166', '#a0c4ff', '#ffadad', '#bdb2ff'];
 
         const aktifKampanyalar = (kampanyalar || [])
           .filter(k => k.isAktif !== false)

@@ -6,7 +6,8 @@ const campaignSchema = new mongoose.Schema({
   renk: { type: String, default: '#ff9e00' },
   kod: { type: String, required: true, uppercase: true },
   kategori: { type: String, default: 'Tümü' },
-  isAktif: { type: Boolean, default: true } // 👈 Kuponun geçerli/geçersiz olma durumu!
+  isAktif: { type: Boolean, default: true }, // 👈 Kuponun geçerli/geçersiz olma durumu!
+  sonTarih: { type: String, default: '' }
 }, {
   timestamps: true
 });

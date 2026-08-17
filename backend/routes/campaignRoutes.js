@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
 // 2. Tüm Kampanyaları Getir (Sadece Admin İçin)
 router.get('/admin', protect, admin, async (req, res) => {
   try {
-    const campaigns = await Campaign.find({});
+   const campaigns = await Campaign.find({});
     res.json(campaigns);
   } catch (error) {
     res.status(500).json({ message: 'Kampanya listesi alınamadı' });
@@ -27,8 +27,8 @@ router.get('/admin', protect, admin, async (req, res) => {
 // 3. Yeni Kampanya Ekle (Admin)
 router.post('/', protect, admin, async (req, res) => {
   try {
-    const { baslik, detay, renk, kod, kategori } = req.body;
-    const campaign = new Campaign({ baslik, detay, renk, kod, kategori });
+    const { baslik, detay, renk, kod, kategori, sonTarih} = req.body;
+    const campaign = new Campaign({ baslik, detay, renk, kod, kategori, sonTarih });
     const createdCampaign = await campaign.save();
     res.status(201).json(createdCampaign);
   } catch (error) {

@@ -1,6 +1,8 @@
 import React from 'react';
 
 const CampaignsPage = ({ kampanyalar, setSelectedKampanya }) => {
+
+
   // En yeni eklenen en üstte olacak şekilde tüm kampanyalar (Aktif + Pasif)
   const siraliTumKampanyalar = (kampanyalar || []).slice().reverse();
 
@@ -67,7 +69,23 @@ const CampaignsPage = ({ kampanyalar, setSelectedKampanya }) => {
                   }}>
                     {k.isAktif !== false ? '✓ GEÇERLİ (AKTİF)' : '✕ GEÇERSİZ (SÜRESİ DOLDU)'}
                   </span>
-
+{/* 📅 SON GEÇERLİLİK TARİHİ ROZETİ */}
+  {k.sonTarih && (
+    <span style={{ 
+      backgroundColor: '#1a1a1a', 
+      color: '#ffd166', 
+      padding: '5px 12px', 
+      fontWeight: 'black', 
+      fontSize: '0.8rem', 
+      border: '2px solid #1a1a1a',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '5px'
+    }}>
+      ⏳ SON GÜN: {new Date(k.sonTarih).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+    </span>
+  )}
+                          
                   <span style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '5px 12px', fontWeight: 'black', fontSize: '0.8rem', border: '2px solid #1a1a1a' }}>
                     KATEGORİ: {k.kategori || 'Tümü'}
                   </span>
