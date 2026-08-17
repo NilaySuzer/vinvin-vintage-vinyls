@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Play, Pause, Disc, ShoppingBag, Sparkles, Volume2 } from 'lucide-react';
+import { Play, Pause, Disc, Sparkles, Volume2, ShoppingCart } from 'lucide-react';
 
 const SpotlightPlayer = ({ plak, sepeteEkle }) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -199,7 +199,7 @@ const SpotlightPlayer = ({ plak, sepeteEkle }) => {
               boxShadow: '3px 3px 0px #1a1a1a'
             }}
           >
-            <ShoppingBag size={18} /> SEPETE EKLE
+            <ShoppingCart size={18} /> SEPETE EKLE
           </button>
 
           <Link 

@@ -8,29 +8,16 @@ import AdminPage from './pages/AdminPage';
 import CampaignsPage from './pages/CampaignsPage.jsx';
 import AccountPage from './pages/AccountPage.jsx';
 import SpotlightPlayer from './components/SpotlightPlayer';
+import ProductReviews from './pages/ProductDetailPage.jsx';
 
 // --- ÜRÜN DETAY SAYFASI ---
-const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavorite }) => {
+const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavorite, setPlaklar, secilenPlak, currentUser }) => {
   const { id } = useParams();
   // MongoDB _id veya normal id kontrolü
   const plak = plaklar.find(p => (p._id || p.id) === id || (p.id && p.id === parseInt(id)));
 
-  const [yorumlar, setYorumlar] = useState([
-    { isim: "Ahmet Yılmaz", yıldız: 5, metin: "Harika bir baskı! Ses kalitesi çok net." },
-    { isim: "Zeynep K.", yıldız: 4, metin: "Kargo hızlıydı, plak çok temiz geldi." }
-  ]);
-  const [yeniYorum, setYeniYorum] = useState("");
-  const [yeniIsim, setYeniIsim] = useState("");
-  const [yeniYıldız, setYeniYıldız] = useState(5);
-
-  const yorumGonder = () => {
-    if (yeniYorum && yeniIsim) {
-      setYorumlar([{ isim: yeniIsim, yıldız: yeniYıldız, metin: yeniYorum }, ...yorumlar]);
-      setYeniYorum("");
-      setYeniIsim("");
-      setYeniYıldız(5);
-    }
-  };
+  
+  
 
   if (!plak) return <div style={{ padding: '100px', textAlign: 'center', fontWeight: 'bold', fontSize: '1.5rem' }}>Ürün bulunamadı veya yükleniyor... 💿</div>;
 
@@ -137,49 +124,26 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavor
           </div>
       </div>
 
-      {/* YORUMLAR */}
-      <div style={{ marginTop: '60px', borderTop: '4px solid #1a1a1a', paddingTop: '30px' }}>
-        <h3 style={{ textTransform: 'uppercase' }}>Kullanıcı Değerlendirmeleri 💬</h3>
-        <div style={{ border: '3px solid #1a1a1a', padding: '20px', backgroundColor: '#f9f9f9', marginBottom: '30px', boxShadow: '5px 5px 0px #1a1a1a' }}>
-          {isLoggedIn ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                <input value={yeniIsim} onChange={(e) => setYeniIsim(e.target.value)} placeholder="Adınız Soyadınız" style={{ flex: 2, padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} />
-                <select value={yeniYıldız} onChange={(e) => setYeniYıldız(parseInt(e.target.value))} style={{ flex: 1, padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', backgroundColor: 'white', cursor: 'pointer' }}>
-                  <option value="5">★ 5 / 5 - Mükemmel</option>
-                  <option value="4">★ 4 / 5 - Çok İyi</option>
-                  <option value="3">★ 3 / 5 - Ortalama</option>
-                  <option value="2">★ 2 / 5 - Zayıf</option>
-                  <option value="1">★ 1 / 5 - Çok Kötü</option>
-                </select>
-              </div>
-              <textarea value={yeniYorum} onChange={(e) => setYeniYorum(e.target.value)} placeholder="Yorumunuzu buraya yazın..." style={{ padding: '10px', border: '2px solid #1a1a1a', minHeight: '80px', fontFamily: 'inherit' }} />
-              <button onClick={yorumGonder} style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '12px', fontWeight: 'bold', cursor: 'pointer', textTransform: 'uppercase' }}>YORUMU GÖNDER</button>
-            </div>
-          ) : (
-            <div style={{ textAlign: 'center', padding: '10px' }}>
-              <p style={{ margin: 0, fontWeight: 'bold' }}>🔒 Yorum yapabilmek ve puan verebilmek için giriş yapmalısınız.</p>
-              <Link to="/login"><button style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px 15px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}>GİRİŞ YAP</button></Link>
-            </div>
-          )}
-        </div>
+      {/* YORUMLAR (YENİ BRUTALIST & KALICI SİSTEM) */}
+<ProductReviews 
+  plakId={plak?._id || plak?.id}
+  reviews={plak?.reviews || []}
+  isLoggedIn={isLoggedIn}
+  currentUser={currentUser} // Varsa giriş yapan kullanıcının adı/objesi
+  onReviewAdded={(guncelYorumlar) => {
+    // Plak listesindeki ilgili plağın yorumlarını anlık olarak günceller
+    if (setPlaklar) {
+      setPlaklar(prevPlaklar =>
+        prevPlaklar.map(p =>
+          (p._id === (plak?._id || plak?.id) || p.id === (plak?._id || plak?.id))
+            ? { ...p, reviews: guncelYorumlar }
+            : p
+        )
+      );
+    }
+  }}
+/>
 
-        <div style={{ display: 'grid', gap: '15px' }}>
-          {yorumlar.map((y, i) => (
-            <div key={i} style={{ border: '3px solid #1a1a1a', padding: '15px', backgroundColor: 'white', boxShadow: '4px 4px 0px #1a1a1a' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontWeight: 'bold', textTransform: 'uppercase' }}>👤 {y.isim}</span>
-                <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
-                  {[...Array(y.yıldız)].map((_, index) => (
-                    <Star key={index} size={18} fill="#ff9e00" color="#ff9e00" />
-                  ))}
-                </div>
-              </div>
-              <p style={{ margin: 0 }}>{y.metin}</p>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 };
@@ -301,6 +265,27 @@ const AppContent = ({
     window.scrollTo(0, 0);
   }, [pathname]);
   
+
+const handleReviewAdded = (guncelYorumlar) => {
+  // Eğer detay sayfası seçili bir plağı gösteriyorsa (örneğin secilenPlak veya product):
+  if (secilenPlak) {
+    setSecilenPlak(prev => ({
+      ...prev,
+      reviews: guncelYorumlar
+    }));
+  }
+
+  // Ana plaklar state'indeki ilgili plağın yorumlarını da günceller:
+  setPlaklar(prevPlaklar =>
+    prevPlaklar.map(p =>
+      (p._id === secilenPlak?._id || p.id === secilenPlak?.id)
+        ? { ...p, reviews: guncelYorumlar }
+        : p
+    )
+  );
+};
+
+
   /* --- SLIDER VE OTOMATİK KAYMA MANTIĞI --- */
  
 // 1. Yeni Gelenler Slider
@@ -580,7 +565,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
   </div>
 )}
           <Link to="/cart" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 12px', backgroundColor: 'white', boxShadow: '3px 3px 0px #1a1a1a' }}>
-            🛒 SEPET ({(cart || []).reduce((acc, curr) => acc + (curr.adet || 1), 0)})
+             <ShoppingBag size={20} color="black" /> SEPET ({(cart || []).reduce((acc, curr) => acc + (curr.adet || 1), 0)})
           </Link>
         </div>
       </nav>
@@ -648,7 +633,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
 <div 
   className="brutal-marquee-container"
   style={{
-    backgroundColor: '#ebde23', // İster neon yeşil (#06d6a0), ister fosforlu sarı (#ffd166)
+    backgroundColor: '#92cef7', // İster neon yeşil (#06d6a0), ister fosforlu sarı (#ffd166)
     borderTop: '1px solid #1a1a1a',
     borderBottom: '1px solid #1a1a1a',
     overflow: 'hidden',
@@ -1179,7 +1164,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
         </div>
       } />
 
-            <Route path="/product/:id" element={<ProductDetail plaklar={plaklar} sepeteEkle={sepeteEkle} isLoggedIn={isLoggedIn} favorites={favorites} toggleFavorite={toggleFavorite} />} />
+            <Route path="/product/:id" element={<ProductDetail  plaklar={plaklar} sepeteEkle={sepeteEkle} isLoggedIn={isLoggedIn} favorites={favorites} toggleFavorite={toggleFavorite} />} />
             <Route path="/admin" element={<AdminPage />} />
  <Route 
   path="/account" 

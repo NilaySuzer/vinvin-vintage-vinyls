@@ -68,4 +68,30 @@ router.patch('/:id/stock', protect, admin, async (req, res) => {
   }
 });
 
+// POST /api/products/:id/reviews
+router.post('/:id/reviews', async (req, res) => {
+  try {
+    const { kullaniciAdi, puan, yorum } = req.body;
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({ message: 'Plak bulunamadı' });
+    }
+
+    const yeniYorum = {
+      kullaniciAdi: kullaniciAdi || 'Anonim Koleksiyoner',
+      puan: Number(puan) || 5,
+      yorum,
+      tarih: new Date()
+    };
+
+    product.reviews.unshift(yeniYorum); // En yeni yorumu en başa ekler
+    await product.save();
+
+    res.status(201).json({ message: 'Yorum kaydedildi', reviews: product.reviews });
+  } catch (error) {
+    res.status(500).json({ message: 'Yorum kaydedilirken hata oluştu', error: error.message });
+  }
+});
+
 export default router;

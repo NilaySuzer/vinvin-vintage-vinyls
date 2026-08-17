@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 
-const commentSchema = new mongoose.Schema({
-  isim: { type: String, required: true },
-  yıldız: { type: Number, required: true, min: 1, max: 5 },
-  metin: { type: String, required: true },
+const reviewSchema = new mongoose.Schema({
+  kullaniciAdi: { type: String, required: true },
+  puan: { type: Number, required: true, min: 1, max: 5 },
+  yorum: { type: String, required: true },
   tarih: { type: Date, default: Date.now }
 });
 
@@ -18,8 +18,7 @@ const productSchema = new mongoose.Schema({
   baskiYili: { type: String, default: 'Orijinal Retro Baskı' },
   stok: { type: Number, required: true, default: 5 },
   resim: { type: String, default: '' },
-  
-  yorumlar: [commentSchema]
+  reviews: [reviewSchema]
 }, { timestamps: true });
 
 export default mongoose.model('Product', productSchema);
