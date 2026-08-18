@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useParams, useNavigate, Navigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
-import { LucideHandMetal, Music2Icon, LucideCreditCard, User2Icon, KeyIcon, Bell, ChevronLeft, ChevronRight, Search, X, Disc, Star, ShoppingCart, ShoppingBag, Heart, CheckCircle, ShieldCheck, Truck, CreditCard, User, LogOut, Filter, ArrowUpDown, ChessQueenIcon } from 'lucide-react';
+import { LucideHandMetal, Music2Icon, LucideCreditCard, User2Icon, KeyIcon, Bell, ChevronLeft, ChevronRight, Search, X, Disc, Star, ShoppingCart, ShoppingBag, Heart, CheckCircle, ShieldCheck, Truck, CreditCard, User, LogOut, Filter, ArrowUpDown, ChessQueenIcon, Tv2Icon, RadioIcon, LucideTv2, Music4Icon } from 'lucide-react';
 import API from './services/api';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
@@ -410,7 +410,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
       {/* NAVBAR */}
       <nav style={{ 
         display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
-        padding: '20px', border: '4px solid #1a1a1a', backgroundColor: '#ff9e00', 
+        padding: '20px', border: '4px solid #1a1a1a', backgroundColor: '#ffd166', 
         boxShadow: '8px 8px 0px #1a1a1a', marginBottom: '30px', position: 'relative' 
       }}>
         <Link to="/" style={{ textDecoration: 'none', color: '#1a1a1a' }}>
@@ -589,7 +589,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
           
          {/* ⚡ DİNAMİK VE TIKLANABİLİR REKLAM / KAMPANYA BANNERI */}
                 {(() => {
-                  const renkPaleti = [ '#c7f9cc', '#ffd166', '#a0c4ff', '#ffadad', '#bdb2ff'];
+                  const renkPaleti = [ '#c7f9cc', '#ffadad','#a0c4ff',  '#bdb2ff'];
 
         const aktifKampanyalar = (kampanyalar || [])
           .filter(k => k.isAktif !== false)
@@ -648,7 +648,9 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
     boxShadow: '6px 6px 0px #1a1a1a', // 👈 Diğer kartlarla aynı brutalist gölge
     boxSizing: 'border-box',
     maskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
-    WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)'
+    WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+   
+
     
   }}
 >
@@ -764,7 +766,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
   <>
                 
           {/* 🔥 YENİ GELEN PLAKLAR SLIDER */}
-          <div className="brutal-card" style={{ backgroundColor: '#e0a6bf', border: '4px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a', width: '100%', boxSizing: 'border-box' }}>
+          <div className="brutal-card" style={{ backgroundColor: '#e0a6bf', border: '4px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a', width: '100%', boxSizing: 'border-box', }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '1.5rem', textTransform: 'uppercase' }}><Music2Icon size={30} color="white"/> YENİ GELEN PLAKLAR</h3>
@@ -1203,7 +1205,8 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
         gap: '10px'
       }}
     >
-      <span>📻</span>
+      <span><Music4Icon size={22} color="black" /></span>
+                          
       <span>TÜM PLAKLARI VE ARŞİVİ GÖR</span>
       <span>→</span>
     </button>
@@ -1211,58 +1214,66 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
 )}
 
                     </>
-)}
+)} 
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '25px' }}>
-            { (tumPlaklariGoster ? filtrelenmisPlaklar : vitrinPlaklari).map(plak => {
-              const pId = plak._id || plak.id;
-              const isFav = favorites.some(f => (f._id || f.id) === pId);
+          {/* SADECE tumPlaklariGoster TRUE OLDUĞUNDA GÖZÜKÜR */}
+                {tumPlaklariGoster && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '25px', marginTop: '20px' }}>
+                    {filtrelenmisPlaklar.map(plak => {
+                      const pId = plak._id || plak.id;
+                      const isFav = favorites.some(f => (f._id || f.id) === pId);
 
-              return (
-                <div key={pId}  className="brutal-card" style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '15px', boxShadow: '6px 6px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                  <button 
-                    onClick={() => toggleFavorite(plak)}
-                    style={{ position: 'absolute', top: '10px', right: '10px', background: 'white', border: '2px solid #1a1a1a', borderRadius: '50%', padding: '6px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  >
-                    <Heart size={18} fill={isFav ? "#ff4d4d" : "none"} color={isFav ? "#ff4d4d" : "#1a1a1a"} />
-                  </button>
+                      return (
+                        <div key={pId} className="brutal-card" style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '15px', boxShadow: '6px 6px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                          <button
+                            onClick={() => toggleFavorite(plak)}
+                            style={{ position: 'absolute', top: '10px', right: '10px', background: 'white', border: '2px solid #1a1a1a', borderRadius: '50%', padding: '6px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          >
+                            <Heart size={18} fill={isFav ? "#ff4d4d" : "none"} color={isFav ? "#ff4d4d" : "#1a1a1a"} />
+                          </button>
 
-                  <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
-                    {/* BÜYÜTÜLMÜŞ GÖRSEL ALANI (280px) */}
-                    <div
-                      className="brutal-img-container"
-                      style={{ position: 'relative', width: '100%', height: '280px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
-                      <img 
-                        src={plak.resim || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'} 
-                        alt={plak.ad} 
-                        referrerPolicy="no-referrer"
-                       onError={(e) => {
-                       if (!e.target.dataset.fallback) {
-                       e.target.dataset.fallback = "true";
-                       e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=500';
-                      }
-                       }}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                      />
-                    </div>
-                    <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem', textTransform: 'uppercase' }}>{plak.ad}</h3>
-                    <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.9rem' }}>{plak.sanatci}</p>
-                  </Link>
+                          <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
+                            {/* BÜYÜTÜLMÜŞ GÖRSEL ALANI (280px) */}
+                            <div
+                              className="brutal-img-container"
+                              style={{ position: 'relative', width: '100%', height: '280px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
+                              <img
+                                src={plak.resim || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'}
+                                alt={plak.ad}
+                                referrerPolicy="no-referrer"
+                                onError={(e) => {
+                                  if (!e.target.dataset.fallback) {
+                                    e.target.dataset.fallback = "true";
+                                    e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=500';
+                                  }
+                                }}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              />
+                            </div>
+                            <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem', textTransform: 'uppercase' }}>{plak.ad}</h3>
+                            <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.9rem' }}>{plak.sanatci}</p>
+                          </Link>
 
-                  <div style={{ marginTop: 'auto', paddingTop: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontWeight: 'black', fontSize: '1.2rem' }}>{plak.fiyat} TL</span>
-                    <button onClick={() => sepeteEkle(plak)}
-                      className="brutal-btn"
-                      style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px 12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
-                      EKLE +
-                    </button>
+                          <div style={{ marginTop: 'auto', paddingTop: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontWeight: 'black', fontSize: '1.2rem' }}>{plak.fiyat} TL</span>
+                            <button onClick={() => sepeteEkle(plak)}
+                              className="brutal-btn"
+                              style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px 12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
+                              EKLE +
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                </div>
-              );
-            })}
-                </div>
-        </div>
-      } />
+                )}</div>
+  
+  } /> 
+
+
+                
+                
+          
 
             <Route path="/product/:id" element={<ProductDetail  plaklar={plaklar} sepeteEkle={sepeteEkle} isLoggedIn={isLoggedIn} favorites={favorites} toggleFavorite={toggleFavorite} />} />
             <Route path="/admin" element={<AdminPage />} />

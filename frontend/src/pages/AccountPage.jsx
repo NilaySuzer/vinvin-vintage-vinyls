@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { User, MapPin, Package, Trash2, Plus } from 'lucide-react';
+import { User, MapPin, Package, Trash2, Plus, Disc, XCircle, ShoppingBag, User2Icon } from 'lucide-react';
 import API from '../services/api';
 
 const AccountPage = ({ user, setUser }) => {
-  const [activeTab, setActiveTab] = useState('profile');
-  const [name, setName] = useState(user?.name || '');
+  const [activeTab, setActiveTab] = useState('orders'); // Varsayılan sekme siparişler
+  const [name, setName] = useState(user?.name || user?.adSoyad || '');
   const [email, setEmail] = useState(user?.email || '');
   const [password, setPassword] = useState('');
   
@@ -12,14 +12,15 @@ const AccountPage = ({ user, setUser }) => {
   const [yeniAdres, setYeniAdres] = useState({ baslik: '', sehir: '', ilce: '', acikAdres: '' });
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(true);
 
-  // Kullanıcı profilini ve kayıtlı adreslerini çek
+  // Kullanıcı profilini ve kayıtlı adreslerini çek (AccountPage'deki çalışan kod)
   const fetchProfile = async () => {
     try {
       const { data } = await API.get('/users/profile');
       if (data) {
         setAdresler(data.adresler || []);
-        setName(data.name || '');
+        setName(data.name || data.adSoyad || '');
         setEmail(data.email || '');
       }
     } catch (err) {
@@ -30,10 +31,13 @@ const AccountPage = ({ user, setUser }) => {
   // Kullanıcının siparişlerini çek
   const fetchOrders = async () => {
     try {
+      setLoadingOrders(true);
       const { data } = await API.get('/orders/myorders');
       setOrders(data || []);
     } catch (err) {
       console.error("Siparişler yüklenemedi", err);
+    } finally {
+      setLoadingOrders(false);
     }
   };
 
@@ -42,7 +46,7 @@ const AccountPage = ({ user, setUser }) => {
     fetchOrders();
   }, []);
 
-  // Profil & Şifre Güncelleme
+  // Profil & Şifre Güncelleme (AccountPage'deki çalışan kod)
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
@@ -50,7 +54,7 @@ const AccountPage = ({ user, setUser }) => {
       if (password.trim() !== '') payload.password = password;
       const { data } = await API.put('/users/profile', payload);
       if (setUser) setUser(data);
-      localStorage.setItem('user', JSON.stringify({ ...user, name: data.name, email: data.email }));
+      localStorage.setItem('user', JSON.stringify({ ...user, name: data.name || name, email: data.email || email }));
       alert('Bilgileriniz başarıyla güncellendi! ⚡');
       setPassword('');
     } catch (err) {
@@ -58,7 +62,7 @@ const AccountPage = ({ user, setUser }) => {
     }
   };
 
-  // Yeni Adres Ekleme
+  // Yeni Adres Ekleme (AccountPage'deki çalışan kod)
   const handleAddAddress = async (e) => {
     e.preventDefault();
     try {
@@ -72,7 +76,7 @@ const AccountPage = ({ user, setUser }) => {
     }
   };
 
-  // Adres Silme
+  // Adres Silme (AccountPage'deki çalışan kod)
   const handleDeleteAddress = async (addressId) => {
     if (!window.confirm('Bu adresi silmek istediğinize emin misiniz?')) return;
     try {
@@ -83,50 +87,127 @@ const AccountPage = ({ user, setUser }) => {
     }
   };
 
+  // Sipariş İptal Etme
+  const handleCancelOrder = async (orderId) => {
+    if (!window.confirm("Bu siparişi iptal etmek istediğinize emin misiniz?")) return;
+    try {
+      await API.put(`/orders/${orderId}/cancel`);
+      alert("Siparişiniz başarıyla iptal edildi.");
+      fetchOrders();
+    } catch (error) {
+      alert("Sipariş iptal edilirken bir hata oluştu.");
+    }
+  };
+
   return (
-    <div style={{ maxWidth: '1000px', margin: '30px auto', padding: '0 20px', width: '100%', boxSizing: 'border-box' }}>
+    <div style={{ width: '100%', maxWidth: '1200px', margin: '2px auto', padding: '0 20px', width: '100%', boxSizing: 'border-box' }}>
       
       {/* BAŞLIK */}
-      <div style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '25px', border: '4px solid #1a1a1a', boxShadow: '8px 8px 0px #ff9e00', marginBottom: '25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-        <h1 style={{ margin: 0, fontSize: '1.8rem', textTransform: 'uppercase' }}>👤 HESAP YÖNETİMİ</h1>
-        <span style={{ backgroundColor: '#ff9e00', color: '#1a1a1a', padding: '6px 12px', fontWeight: 'black', fontSize: '0.85rem' }}>{email || user?.email}</span>
+      <div style={{ backgroundColor: '#ff9e00', color: 'white', padding: '25px', border: '4px solid #1a1a1a', boxShadow: '8px 8px 0px black', marginBottom: '25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+        <h1 style={{ margin: 0, fontSize: '1.8rem', textTransform: 'uppercase' }}> <User2Icon size={24} color="blue" /> HESAP YÖNETİMİ</h1>
+        <span style={{ backgroundColor: 'black', color: '#ffff', padding: '6px 12px', fontWeight: 'black', fontSize: '0.85rem' }}>
+          {email || user?.email}
+        </span>
       </div>
 
       {/* SEKME BUTONLARI */}
       <div style={{ display: 'flex', gap: '10px', marginBottom: '25px', flexWrap: 'wrap' }}>
-        <button onClick={() => setActiveTab('profile')} className="brutal-btn" style={{ backgroundColor: activeTab === 'profile' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'black', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
-          <User size={18} /> ÜYELİK BİLGİLERİ & ŞİFRE
+        <button onClick={() => setActiveTab('orders')} className="brutal-btn" style={{ backgroundColor: activeTab === 'orders' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'black', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
+          <Package size={18} /> SİPARİŞLERİM ({orders.length})
         </button>
         <button onClick={() => setActiveTab('addresses')} className="brutal-btn" style={{ backgroundColor: activeTab === 'addresses' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'black', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
           <MapPin size={18} /> ADRESLERİM ({adresler.length})
         </button>
-        <button onClick={() => setActiveTab('orders')} className="brutal-btn" style={{ backgroundColor: activeTab === 'orders' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'black', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
-          <Package size={18} /> SİPARİŞLERİM ({orders.length})
+        <button onClick={() => setActiveTab('profile')} className="brutal-btn" style={{ backgroundColor: activeTab === 'profile' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'black', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
+          <User size={18} /> ÜYELİK BİLGİLERİ & ŞİFRE
         </button>
       </div>
 
-      {/* 1. ÜYELİK VE ŞİFRE BİLGİLERİ */}
-      {activeTab === 'profile' && (
-        <form onSubmit={handleUpdateProfile} style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '30px', boxShadow: '8px 8px 0px #1a1a1a', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          <div>
-            <label style={{ fontWeight: 'black', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>AD SOYAD</label>
-            <input required value={name} onChange={e => setName(e.target.value)} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} />
-          </div>
-          <div>
-            <label style={{ fontWeight: 'black', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>E-POSTA ADRESİ</label>
-            <input required type="email" value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} />
-          </div>
-          <div>
-            <label style={{ fontWeight: 'black', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>YENİ ŞİFRE (Değiştirmek istemiyorsanız boş bırakın)</label>
-            <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} />
-          </div>
-          <button type="submit" className="brutal-btn" style={{ backgroundColor: '#ff9e00', border: '3px solid #1a1a1a', padding: '12px', fontWeight: 'black', cursor: 'pointer', marginTop: '10px', fontSize: '1rem', fontFamily: 'inherit' }}>
-            BİLGİLERİ GÜNCELLE 💾
-          </button>
-        </form>
+      {/* 1. SİPARİŞLERİM SEKMESİ (siparisKalemleri ile çalışan yapı) */}
+      {activeTab === 'orders' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {loadingOrders ? (
+            <p style={{ fontWeight: 'bold' }}>Siparişleriniz yükleniyor...</p>
+          ) : orders.length === 0 ? (
+            <div style={{ backgroundColor: 'white', border: '3px dashed #1a1a1a', padding: '40px 20px', textAlign: 'center' }}>
+              <Disc size={50} color="#eeecec" style={{ marginBottom: '10px' }} />
+              <h3 style={{ textTransform: 'uppercase', margin: '0 0 5px 0' }}>Henüz hiç plak sipariş etmediniz!</h3>
+              <p style={{ fontWeight: 'bold', color: '#666', margin: 0 }}>Plak koleksiyonunuzu büyütmek için vitrinimize göz atın.</p>
+            </div>
+          ) : (
+            orders.map(order => (
+              <div key={order._id} style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a' }}>
+                
+                {/* SİPARİŞ ÜST BİLGİ */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #1a1a1a', paddingBottom: '12px', marginBottom: '15px', flexWrap: 'wrap', gap: '10px' }}>
+                  <div>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#666' }}>SİPARİŞ KODU</span>
+                    <div style={{ fontWeight: 'black', fontSize: '1.05rem' }}>#{order._id}</div>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#666' }}>TARİH</span>
+                    <div style={{ fontWeight: 'bold' }}>{new Date(order.createdAt).toLocaleDateString('tr-TR')}</div>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'black' }}>DURUM</span>
+                    <div>
+                      <span style={{ 
+                                    backgroundColor: order.durum === 'İptal Edildi' ? '#de1010' : order.durum === 'Kargoda' ? '#ff9e00' : order.durum === 'Teslim Edildi' ? '#4caf50' :
+                                        '#d4ed6e', 
+                        color: '#1a1a1a', padding: '10px 15px', border: '2px solid #1a1a1a', fontWeight: 'bold', fontSize: '0.85rem', display: 'inline-block', marginTop: '3px' 
+                      }}>
+                        {order.durum || 'Hazırlanıyor'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SİPARİŞ EDİLEN PLAKLAR (siparisKalemleri) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {(order.siparisKalemleri || []).map((item, idx) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px dashed #ccc', paddingBottom: '8px' }}>
+                      <span style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>
+                        📀 {item.ad} <span style={{ color: '#d97706' }}>(x{item.adet})</span>
+                      </span>
+                      <span style={{ fontWeight: 'black', fontSize: '1rem' }}>
+                        {(item.fiyat * item.adet).toFixed(2)} TL
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* ALT DETAYLAR VE İPTAL BUTONU */}
+                <div style={{ marginTop: '15px', paddingTop: '12px', borderTop: '2px solid #1a1a1a', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                  <div>
+                    {order.teslimatBilgileri?.adres && (
+                      <div>
+                        <span style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>Teslimat Adresi: </span>
+                        <span style={{ color: '#444', fontWeight: 'bold', fontSize: '0.85rem' }}>{order.teslimatBilgileri.adres}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>
+                      TOPLAM: {order.odenecekTutar || order.totalPrice} TL
+                    </div>
+                    {(order.durum === 'Hazırlanıyor' || !order.durum) && (
+                      <button 
+                        onClick={() => handleCancelOrder(order._id)} 
+                        style={{ backgroundColor: 'white', color: '#ff4d4d', border: '2px solid #ff4d4d', padding: '6px 12px', fontWeight: 'black', cursor: 'pointer', boxShadow: '2px 2px 0px #ff4d4d', display: 'flex', alignItems: 'center', gap: '4px' }}
+                      >
+                        <XCircle size={14} /> Siparişi İptal Et
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+              </div>
+            ))
+          )}
+        </div>
       )}
 
-      {/* 2. ADRESLERİM SEKMESİ */}
+      {/* 2. ADRESLERİM SEKMESİ (AccountPage'deki çalışan orijinal kod) */}
       {activeTab === 'addresses' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
@@ -176,40 +257,25 @@ const AccountPage = ({ user, setUser }) => {
         </div>
       )}
 
-      {/* 3. SİPARİŞLERİM SEKMESİ */}
-      {activeTab === 'orders' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          {orders.length === 0 ? (
-            <div style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '30px', textAlign: 'center', fontWeight: 'bold' }}>
-              Henüz verilmiş bir siparişiniz bulunmuyor.
-            </div>
-          ) : (
-            orders.map(ord => (
-              <div key={ord._id} style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #eee', paddingBottom: '10px', marginBottom: '10px' }}>
-                  <div>
-                    <span style={{ fontWeight: 'black' }}>Sipariş Kodu: #{ord._id.slice(-6).toUpperCase()}</span>
-                    <span style={{ display: 'block', fontSize: '0.8rem', color: '#666' }}>{new Date(ord.createdAt).toLocaleDateString('tr-TR')}</span>
-                  </div>
-                  <span style={{ backgroundColor: '#2196f3', color: 'white', padding: '4px 10px', fontWeight: 'black', fontSize: '0.8rem', border: '1px solid #1a1a1a' }}>
-                    {ord.isDelivered ? 'TESLİM EDİLDİ' : 'HAZIRLANIYOR'}
-                  </span>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {ord.orderItems?.map((item, idx) => (
-                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', fontWeight: 'bold' }}>
-                      <span>{item.ad} x {item.adet}</span>
-                      <span>{(item.fiyat * item.adet).toFixed(2)} TL</span>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ borderTop: '2px dashed #1a1a1a', marginTop: '10px', paddingTop: '8px', textAlign: 'right', fontWeight: 'black', fontSize: '1.1rem' }}>
-                  Toplam: {ord.totalPrice} TL
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+      {/* 3. ÜYELİK VE ŞİFRE BİLGİLERİ (AccountPage'deki çalışan orijinal kod) */}
+      {activeTab === 'profile' && (
+        <form onSubmit={handleUpdateProfile} style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '30px', boxShadow: '8px 8px 0px #1a1a1a', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <div>
+            <label style={{ fontWeight: 'black', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>AD SOYAD</label>
+            <input required value={name} onChange={e => setName(e.target.value)} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} />
+          </div>
+          <div>
+            <label style={{ fontWeight: 'black', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>E-POSTA ADRESİ</label>
+            <input required type="email" value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} />
+          </div>
+          <div>
+            <label style={{ fontWeight: 'black', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>YENİ ŞİFRE (Değiştirmek istemiyorsanız boş bırakın)</label>
+            <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} />
+          </div>
+          <button type="submit" className="brutal-btn" style={{ backgroundColor: '#ff9e00', border: '3px solid #1a1a1a', padding: '12px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px', fontSize: '1rem', fontFamily: 'inherit' }}>
+            BİLGİLERİ GÜNCELLE
+          </button>
+        </form>
       )}
 
     </div>
