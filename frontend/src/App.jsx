@@ -40,9 +40,25 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavor
   return (
     <div style={{ padding: '20px' }}>
       <div style={{ display: 'flex', gap: '50px', flexWrap: 'wrap' }}>
-        <div style={{ flex: '1', minWidth: '300px', border: '5px solid #1a1a1a', boxShadow: '15px 15px 0px #ff9e00', backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '5rem', aspectRatio: '1/1', position: 'relative' }}>
+        <div style={{
+          flex: '1', width: '100%', 
+    maxWidth: '480px',  border: '5px solid #1a1a1a', boxShadow: '15px 15px 0px #ff9e00', backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '5rem', aspectRatio: '1/1', position: 'relative'
+        }}>
     
-            <Disc size={120} color="#1a1a1a" strokeWidth={2.5} />
+          <img 
+            src={plak.resim || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'} 
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block'}}
+              alt={plak.ad} 
+              referrerPolicy="no-referrer"
+            onError={(e) => {
+      if (!e.target.dataset.fallback) {
+        e.target.dataset.fallback = "true";
+        e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=500';
+      }
+    }}
+            
+          />
+        
             <button 
               onClick={() => toggleFavorite(plak)}
               style={{ position: 'absolute', top: '15px', right: '15px', background: 'white', border: '3px solid #1a1a1a', borderRadius: '50%', padding: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -666,9 +682,15 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
           className="brutal-img-container"
           style={{ position: 'relative', width: '100%', height: '240px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
           <img 
-            src={plak.resim || plak.image || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'} 
+            src={plak.resim || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'} 
             alt={plak.ad} 
-            onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'; }}
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+      if (!e.target.dataset.fallback) {
+        e.target.dataset.fallback = "true";
+        e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=500';
+      }
+    }}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
           />
         </div>
@@ -711,9 +733,15 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
                       className="brutal-img-container"
                       style={{ position: 'relative', width: '100%', height: '280px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
                       <img 
-                        src={plak.resim || plak.image || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'} 
+                        src={plak.resim || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'} 
                         alt={plak.ad} 
-                        onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'; }}
+                        referrerPolicy="no-referrer"
+                       onError={(e) => {
+      if (!e.target.dataset.fallback) {
+        e.target.dataset.fallback = "true";
+        e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=500';
+      }
+    }}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                       />
                     </div>

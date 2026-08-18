@@ -193,7 +193,45 @@ const AdminPage = () => {
             <input required placeholder="Sanatçı" value={yeniPlak.sanatci} onChange={e => setYeniPlak({ ...yeniPlak, sanatci: e.target.value })} style={{ padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} />
             <input required type="number" placeholder="Fiyat (TL)" value={yeniPlak.fiyat} onChange={e => setYeniPlak({ ...yeniPlak, fiyat: e.target.value })} style={{ padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} />
             
-            <input placeholder="Resim Görsel URL (Örn: https://...)" value={yeniPlak.resim} onChange={e => setYeniPlak({ ...yeniPlak, resim: e.target.value })} style={{ padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} />
+            <input 
+    placeholder="Görsel URL Yapıştır (Örn: https://...)" 
+    value={yeniPlak.resim} 
+    onChange={e => setYeniPlak({ ...yeniPlak, resim: e.target.value })} 
+    style={{ padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} 
+  />
+
+  {/* İstersen Bilgisayardan Direkt Resim Seçme Butonu */}
+  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+    <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#666' }}>VEYA DOSYA SEÇ:</span>
+    <input 
+      type="file" 
+      accept="image/*"
+      onChange={(e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setYeniPlak({ ...yeniPlak, resim: reader.result }); // Resmi Base64 string'e çevirir, asla kırılmaz!
+          };
+          reader.readAsDataURL(file);
+        }
+      }}
+      style={{ fontSize: '0.8rem', fontWeight: 'bold' }}
+    />
+  </div>
+
+  {/* CANLI RESİM ÖNİZLEME KUTUSU */}
+  {yeniPlak.resim && (
+    <div style={{ marginTop: '5px', display: 'flex', alignItems: 'center', gap: '12px', padding: '8px', border: '2px dashed #1a1a1a', backgroundColor: '#fff' }}>
+      <img 
+        src={yeniPlak.resim} 
+                  alt="Önizleme" 
+                  referrerPolicy="no-referrer"
+        style={{ width: '60px', height: '60px', objectFit: 'cover', border: '2px solid #1a1a1a' }} 
+      />
+      <span style={{ fontSize: '0.8rem', fontWeight: 'black', color: '#4caf50' }}>✓ Görsel Hazır!</span>
+    </div>
+  )}
 
             <select value={yeniPlak.kategori} onChange={e => setYeniPlak({ ...yeniPlak, kategori: e.target.value })} style={{ padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', backgroundColor: 'white' }}>
               <option value="Rock">Rock</option>
@@ -217,11 +255,18 @@ const AdminPage = () => {
                 <div key={pId} style={{ border: '3px solid #1a1a1a', padding: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'white', flexWrap: 'wrap', gap: '15px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <img 
-                      src={p.resim || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=100'} 
+  src={p.resim || p.image || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=100'} 
                       alt={p.ad} 
-                      onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=100'; }}
-                      style={{ width: '50px', height: '50px', objectFit: 'cover', border: '2px solid #1a1a1a' }} 
-                    />
+                      referrerPolicy="no-referrer"
+  onError={(e) => {
+    // Sadece gerçekten kırık linkse ve henüz fallback atanmadıysa değiştir
+    if (!e.target.dataset.fallback) {
+      e.target.dataset.fallback = "true";
+      e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=100';
+    }
+  }}
+  style={{ width: '50px', height: '50px', objectFit: 'cover', border: '2px solid #1a1a1a', flexShrink: 0 }} 
+/>
                     <div>
                       <div style={{ fontWeight: 'black', fontSize: '1.05rem' }}>{p.ad}</div>
                       <div style={{ fontSize: '0.85rem', color: '#666', fontWeight: 'bold' }}>{p.sanatci} - <span style={{ color: '#1a1a1a' }}>{p.fiyat} TL</span> ({p.kategori})</div>

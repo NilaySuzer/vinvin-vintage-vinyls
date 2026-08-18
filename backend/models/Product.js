@@ -17,6 +17,7 @@ const productSchema = new mongoose.Schema({
   devir: { type: String, default: '33 RPM (12" LP)' },
   baskiYili: { type: String, default: 'Orijinal Retro Baskı' },
   stok: { type: Number, required: true, default: 5 },
+  resim: { type: String, default: '' },
   yorumlar: [commentSchema]
 }, { timestamps: true });
 
