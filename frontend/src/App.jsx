@@ -10,6 +10,7 @@ import AccountPage from './pages/AccountPage.jsx';
 import SpotlightPlayer from './components/SpotlightPlayer';
 import ProductReviews from './pages/ProductDetailPage.jsx';
 
+
 // --- ÜRÜN DETAY SAYFASI ---
 const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavorite, setPlaklar, secilenPlak, currentUser }) => {
   const { id } = useParams();
@@ -124,12 +125,12 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavor
           </div>
       </div>
 
-      {/* YORUMLAR (YENİ BRUTALIST & KALICI SİSTEM) */}
+      {/* YORUMLAR */}
 <ProductReviews 
   plakId={plak?._id || plak?.id}
   reviews={plak?.reviews || []}
   isLoggedIn={isLoggedIn}
-  currentUser={currentUser} // Varsa giriş yapan kullanıcının adı/objesi
+  currentUser={currentUser}
   onReviewAdded={(guncelYorumlar) => {
     // Plak listesindeki ilgili plağın yorumlarını anlık olarak günceller
     if (setPlaklar) {
@@ -265,6 +266,7 @@ const AppContent = ({
     window.scrollTo(0, 0);
   }, [pathname]);
   
+const [tumPlaklariGoster, setTumPlaklariGoster] = useState(false);
 
 const handleReviewAdded = (guncelYorumlar) => {
   // Eğer detay sayfası seçili bir plağı gösteriyorsa (örneğin secilenPlak veya product):
@@ -737,7 +739,29 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
             </div>
           </div>
 
-         
+                {tumPlaklariGoster && (
+                  <div style={{ margin: '10px 0' }}>
+                    <button
+                      onClick={() => {
+                        setTumPlaklariGoster(false);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      style={{
+                        backgroundColor: '#ff6b6b',
+                        border: '3px solid #1a1a1a',
+                        padding: '8px 16px',
+                        fontWeight: '900',
+                        cursor: 'pointer',
+                        boxShadow: '3px 3px 0px #1a1a1a'
+                      }}
+                    >
+                      ← VİTRİNE DÖN
+                    </button>
+                  </div>
+                )}
+
+         {!tumPlaklariGoster && (
+  <>
                 
           {/* 🔥 YENİ GELEN PLAKLAR SLIDER */}
           <div className="brutal-card" style={{ backgroundColor: '#e0a6bf', border: '4px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a', width: '100%', boxSizing: 'border-box' }}>
@@ -1155,17 +1179,94 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
       </div>
     </div>
   );
-})()}
+                    })()}
 
+{!tumPlaklariGoster && (
+  <div style={{ display: 'flex', justifyContent: 'center', margin: '40px 0' }}>
+    <button
+      onClick={() => {
+        setTumPlaklariGoster(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }}
+      style={{
+        backgroundColor: '#ffd166',
+        color: '#1a1a1a',
+        border: '4px solid #1a1a1a',
+        padding: '16px 32px',
+        fontSize: '1.2rem',
+        fontWeight: '900',
+        textTransform: 'uppercase',
+        cursor: 'pointer',
+        boxShadow: '6px 6px 0px #1a1a1a',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px'
+      }}
+    >
+      <span>📻</span>
+      <span>TÜM PLAKLARI VE ARŞİVİ GÖR</span>
+      <span>→</span>
+    </button>
+  </div>
+)}
 
+                    </>
+)}
 
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '25px' }}>
+            { (tumPlaklariGoster ? filtrelenmisPlaklar : vitrinPlaklari).map(plak => {
+              const pId = plak._id || plak.id;
+              const isFav = favorites.some(f => (f._id || f.id) === pId);
 
-      
+              return (
+                <div key={pId}  className="brutal-card" style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '15px', boxShadow: '6px 6px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                  <button 
+                    onClick={() => toggleFavorite(plak)}
+                    style={{ position: 'absolute', top: '10px', right: '10px', background: 'white', border: '2px solid #1a1a1a', borderRadius: '50%', padding: '6px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Heart size={18} fill={isFav ? "#ff4d4d" : "none"} color={isFav ? "#ff4d4d" : "#1a1a1a"} />
+                  </button>
+
+                  <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
+                    {/* BÜYÜTÜLMÜŞ GÖRSEL ALANI (280px) */}
+                    <div
+                      className="brutal-img-container"
+                      style={{ position: 'relative', width: '100%', height: '280px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
+                      <img 
+                        src={plak.resim || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'} 
+                        alt={plak.ad} 
+                        referrerPolicy="no-referrer"
+                       onError={(e) => {
+                       if (!e.target.dataset.fallback) {
+                       e.target.dataset.fallback = "true";
+                       e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=500';
+                      }
+                       }}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      />
+                    </div>
+                    <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem', textTransform: 'uppercase' }}>{plak.ad}</h3>
+                    <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.9rem' }}>{plak.sanatci}</p>
+                  </Link>
+
+                  <div style={{ marginTop: 'auto', paddingTop: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontWeight: 'black', fontSize: '1.2rem' }}>{plak.fiyat} TL</span>
+                    <button onClick={() => sepeteEkle(plak)}
+                      className="brutal-btn"
+                      style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px 12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
+                      EKLE +
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+                </div>
         </div>
       } />
 
             <Route path="/product/:id" element={<ProductDetail  plaklar={plaklar} sepeteEkle={sepeteEkle} isLoggedIn={isLoggedIn} favorites={favorites} toggleFavorite={toggleFavorite} />} />
             <Route path="/admin" element={<AdminPage />} />
+            
  <Route 
   path="/account" 
   element={<AccountPage user={user} setUser={setUser} />} 
