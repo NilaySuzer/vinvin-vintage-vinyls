@@ -118,7 +118,7 @@ const fetchAllPlaklar = async () => {
       
       {/* BAŞLIK */}
       <div style={{ backgroundColor: '#ff9e00', color: 'white', padding: '25px', border: '4px solid #1a1a1a', boxShadow: '8px 8px 0px black', marginBottom: '25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-        <h1 style={{ margin: 0, fontSize: '1.8rem', textTransform: 'uppercase' }}> <User2Icon size={24} color="blue" /> HESAP YÖNETİMİ</h1>
+        <h1 style={{ margin: 0, fontSize: '1.8rem', textTransform: 'uppercase' }}> <User2Icon size={24} color="blue" /> HESABIM </h1>
         <span style={{ backgroundColor: 'black', color: '#ffff', padding: '6px 12px', fontWeight: 'black', fontSize: '0.85rem' }}>
           {email || user?.email}
         </span>

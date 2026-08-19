@@ -18,7 +18,18 @@ const AdminPage = () => {
     ad: '', sanatci: '', fiyat: '', kategori: 'Rock', stok: 10, resim: '',
   });
 
+   const [allPlaklar, setAllPlaklar] = useState([]);
+  
   // --- VERİ ÇEKME FONKSİYONLARI ---
+
+const fetchAllPlaklar = async () => {
+  try {
+    const { data } = await API.get('/products'); // veya senin plakları çektiğin endpoint (/plaklar)
+    setAllPlaklar(data || []);
+  } catch (err) {
+    console.error("Plaklar çekilemedi:", err);
+  }
+};
 
   // Ürünleri ve Siparişleri Çek
   const fetchAdminData = async () => {
@@ -49,6 +60,7 @@ const AdminPage = () => {
   useEffect(() => {
     fetchAdminData();
     fetchAdminKampanyalar();
+    fetchAllPlaklar(); // Tüm plakları çek
   }, []);
 
   // --- ÜRÜN İŞLEMLERİ ---
@@ -318,17 +330,87 @@ const AdminPage = () => {
               <div key={order._id} style={{ border: '3px solid #1a1a1a', padding: '20px', backgroundColor: '#f9f9f9', boxShadow: '5px 5px 0px #1a1a1a' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #1a1a1a', paddingBottom: '10px', marginBottom: '10px', flexWrap: 'wrap', gap: '10px' }}>
                   <div>
-                    <div style={{ fontWeight: 'black' }}>SİPARİŞ #{order._id.slice(-6).toUpperCase()}</div>
-                    <div style={{ fontSize: '0.85rem', color: '#666' }}>Müşteri: {order.kullanici?.adSoyad || order.teslimatBilgileri?.adSoyad || 'Müşteri'}</div>
+                    <div style={{ fontWeight: 'bold', backgroundColor:'#ff9a17' }}>SİPARİŞ #{order._id.slice(-6).toUpperCase()}</div>
+                    <div style={{ fontSize: '1.1rem', color: '#666', fontWeight: 'bold', backgroundColor:'#efff60' }}>Müşteri: {order.kullanici?.adSoyad || order.teslimatBilgileri?.adSoyad || 'Müşteri'}</div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontWeight: 'black', fontSize: '1.2rem' }}>{order.totalPrice || order.odenecekTutar} TL</div>
+                    <div style={{ fontWeight: 'bold', fontSize: '1.2rem', backgroundColor:'#ff965a' }}>{order.totalPrice || order.odenecekTutar} TL</div>
                     <div style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>{new Date(order.createdAt).toLocaleDateString('tr-TR')}</div>
                   </div>
                 </div>
 
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {(order.siparisKalemleri || []).map((item, idx) => {
+      
+  const eslesenPlak = allPlaklar.find(p => 
+      (p._id && (p._id === item.plak || p._id === item._id || p._id === item.product)) ||
+      (p.ad && item.ad && p.ad.trim().toLowerCase() === item.ad.trim().toLowerCase())
+    );
+
+    // 2. Resim URL'si: item içindeki -> eslesenPlak içindeki -> sabit vinil ikonu
+    const resimUrl = item.resim || item.gorsel || eslesenPlak?.resim || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=150';
+    // Görsel kaynağını yakala (yoksa şık bir vinil yedek görseli)
+   
+    return (
+      <div 
+        key={idx} 
+        style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          borderBottom: '1px dashed #ccc', 
+          paddingBottom: '8px' 
+        }}
+      >
+        {/* Sol Kısım: Küçük Plak Resmi + İsim + Adet */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <img 
+            src={resimUrl} 
+            alt={item.ad} 
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              if (!e.target.dataset.fallback) {
+                e.target.dataset.fallback = "true";
+                e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=120';
+              }
+            }}
+            style={{ 
+              width: '42px', 
+              height: '42px', 
+              objectFit: 'cover', 
+              border: '2px solid #1a1a1a', 
+              backgroundColor: '#eee',
+              boxShadow: '2px 2px 0px #1a1a1a',
+              flexShrink: 0
+            }}
+          />
+          <span style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>
+            {item.ad} <span style={{ color: '#d97706', fontWeight: '900' }}>(x{item.adet})</span>
+          </span>
+        </div>
+
+        {/* Sağ Kısım: Tutar */}
+        <span style={{ fontWeight: 'black', fontSize: '1rem', whiteSpace: 'nowrap' }}>
+          {(item.fiyat * item.adet).toFixed(2)} TL
+        </span>
+      </div>
+    );
+  })}
+</div>
+
+                <div style={{ marginTop: '15px', paddingTop: '12px', borderTop: '2px solid #1a1a1a', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                  <div>
+                    {order.teslimatBilgileri?.adres && (
+                      <div>
+                        <span style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Teslimat Adresi: </span>
+                        <span style={{ color: '#444', fontWeight: 'bold', fontSize: '1.1rem' }}>{order.teslimatBilgileri.adres}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div style={{ marginTop: '15px', display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Durum Değiştir:</span>
+                  <span style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Durum Değiştir:</span>
                   {['Hazırlanıyor', 'Kargoda', 'Teslim Edildi', 'İptal Edildi'].map(st => (
                     <button 
                       key={st}
