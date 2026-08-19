@@ -159,6 +159,38 @@ const CheckoutPage = ({ total, sepetiBosalt, cart, indirimTutari, odenecekTutar 
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
+const [kayitliAdresler, setKayitliAdresler] = useState([]);
+const [secilenAdresId, setSecilenAdresId] = useState(null);
+
+useEffect(() => {
+  const fetchAdresler = async () => {
+    try {
+      const { data } = await API.get('/users/profile');
+      if (data && data.adresler) {
+        setKayitliAdresler(data.adresler);
+      }
+    } catch (err) {
+      console.error('Kayıtlı adresler alınamadı:', err);
+    }
+  };
+
+  // Kullanıcı oturumu açıksa adresleri çek
+  const token = localStorage.getItem('token') || (JSON.parse(localStorage.getItem('user') || '{}')).token;
+  if (token) {
+    fetchAdresler();
+  }
+}, []);
+
+// Adrese tıklandığında formu dolduran fonksiyon
+const handleAdresSec = (adr) => {
+  setSecilenAdresId(adr._id);
+  const tamFormatliAdres = `${adr.acikAdres} - ${adr.ilce} / ${adr.sehir}`;
+  setFormData(prev => ({
+    ...prev,
+    adres: tamFormatliAdres
+  }));
+};
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -202,51 +234,91 @@ const CheckoutPage = ({ total, sepetiBosalt, cart, indirimTutari, odenecekTutar 
   return (
     <div style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '30px', boxShadow: '10px 10px 0px #1a1a1a', maxWidth: '600px', margin: '0 auto' }}>
       <h2 style={{ textTransform: 'uppercase', borderBottom: '3px solid #ff9e00', paddingBottom: '10px', marginTop: 0 }}>Ödeme ve Teslimat Bilgileri</h2>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-          <div>
-            <label style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>AD SOYAD</label>
-            <input required type="text" name="adSoyad" value={formData.adSoyad} onChange={handleChange} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', marginTop: '5px', boxSizing: 'border-box' }} placeholder="Ahmet Yılmaz" />
-          </div>
-          <div>
-            <label style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>TELEFON</label>
-            <input required type="tel" name="telefon" value={formData.telefon} onChange={handleChange} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', marginTop: '5px', boxSizing: 'border-box' }} placeholder="0555 111 22 33" />
-          </div>
-        </div>
-
-        <div>
-          <label style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>TESLİMAT ADRESİ</label>
-          <textarea required rows={3} name="adres" value={formData.adres} onChange={handleChange} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', marginTop: '5px', boxSizing: 'border-box', fontFamily: 'inherit' }} placeholder="Mahalle, Sokak, No, İlçe / İl" />
-        </div>
-
-        <div style={{ borderTop: '2px dashed #1a1a1a', paddingTop: '15px', marginTop: '10px' }}>
-          <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '10px' }}>ÖDEME YÖNTEMİ</label>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button type="button" onClick={() => setOdemeYontemi('kart')} style={{ flex: 1, padding: '10px', border: '2px solid #1a1a1a', backgroundColor: odemeYontemi === 'kart' ? '#ff9e00' : 'white', fontWeight: 'bold', cursor: 'pointer' }}>Kredi Kartı</button>
-            <button type="button" onClick={() => setOdemeYontemi('havale')} style={{ flex: 1, padding: '10px', border: '2px solid #1a1a1a', backgroundColor: odemeYontemi === 'havale' ? '#ff9e00' : 'white', fontWeight: 'bold', cursor: 'pointer' }}>Havale / EFT</button>
-          </div>
-        </div>
-
-        {odemeYontemi === 'kart' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', backgroundColor: '#f9f9f9', padding: '15px', border: '2px solid #1a1a1a' }}>
-            <input required type="text" placeholder="Kart Üzerindeki İsim" style={{ padding: '8px', border: '2px solid #1a1a1a' }} />
-            <input required type="text" placeholder="Kart Numarası (16 Hane)" maxLength={16} style={{ padding: '8px', border: '2px solid #1a1a1a' }} />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <input required type="text" placeholder="A/Y (08/28)" style={{ padding: '8px', border: '2px solid #1a1a1a' }} />
-              <input required type="password" placeholder="CVV" maxLength={3} style={{ padding: '8px', border: '2px solid #1a1a1a' }} />
+<form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' }}>
+  
+  {/* KAYITLI ADRESLER KUTUSU (Varsa gösterilir) */}
+  {kayitliAdresler.length > 0 && (
+    <div style={{ backgroundColor: '#fff', border: '3px solid #1a1a1a', padding: '15px', boxShadow: '4px 4px 0px #1a1a1a' }}>
+      <label style={{ fontWeight: 'black', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
+        📍 KAYITLI ADRESLERİMDEN SEÇ
+      </label>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '10px' }}>
+        {kayitliAdresler.map(adr => {
+          const isSelected = secilenAdresId === adr._id;
+          return (
+            <div
+              key={adr._id}
+              onClick={() => handleAdresSec(adr)}
+              style={{
+                border: '2px solid #1a1a1a',
+                padding: '10px',
+                backgroundColor: isSelected ? '#ff9e00' : '#f9f9f9',
+                cursor: 'pointer',
+                boxShadow: isSelected ? '3px 3px 0px #1a1a1a' : 'none',
+                transition: 'all 0.1s ease'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: 'black', fontSize: '0.85rem', textTransform: 'uppercase' }}>{adr.baslik}</span>
+                {isSelected && <span style={{ fontSize: '0.75rem', fontWeight: 'black' }}>✓ SEÇİLDİ</span>}
+              </div>
+              <div style={{ fontSize: '0.8rem', fontWeight: 'bold', marginTop: '4px', color: isSelected ? '#1a1a1a' : '#555' }}>
+                {adr.ilce} / {adr.sehir}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: isSelected ? '#1a1a1a' : '#777', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {adr.acikAdres}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })}
+      </div>
+    </div>
+  )}
 
-        <div style={{ marginTop: '10px', padding: '15px', backgroundColor: '#e2f0cb', border: '2px dashed #1a1a1a', textAlign: 'center' }}>
-          <h3 style={{ margin: 0 }}>TOPLAM ÖDENECEK: {Number(total).toFixed(2)} TL</h3>
-        </div>
+  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+    <div>
+      <label style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>AD SOYAD</label>
+      <input required type="text" name="adSoyad" value={formData.adSoyad} onChange={handleChange} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', marginTop: '5px', boxSizing: 'border-box' }} placeholder="Ahmet Yılmaz" />
+    </div>
+    <div>
+      <label style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>TELEFON</label>
+      <input required type="tel" name="telefon" value={formData.telefon} onChange={handleChange} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', marginTop: '5px', boxSizing: 'border-box' }} placeholder="0555 111 22 33" />
+    </div>
+  </div>
 
-        <button type="submit" style={{ backgroundColor: '#ff9e00', border: '3px solid #1a1a1a', padding: '15px', fontWeight: 'black', cursor: 'pointer', fontSize: '1.1rem', boxShadow: '4px 4px 0px #1a1a1a' }}>
-          ÖDEMEYİ TAMAMLA VE SİPARİŞ VER <LucideCreditCard size={22} color="blue" /> 
-        </button>
-        <Link to="/cart" style={{ marginTop: '5px', textAlign: 'center', color: '#1a1a1a', display: 'block', fontWeight: 'bold' }}>← Sepete Geri Dön</Link>
-      </form>
+  <div>
+    <label style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>TESLİMAT ADRESİ</label>
+    <textarea required rows={3} name="adres" value={formData.adres} onChange={handleChange} style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', marginTop: '5px', boxSizing: 'border-box', fontFamily: 'inherit' }} placeholder="Mahalle, Sokak, No, İlçe / İl" />
+  </div>
+
+  <div style={{ borderTop: '2px dashed #1a1a1a', paddingTop: '15px', marginTop: '10px' }}>
+    <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '10px' }}>ÖDEME YÖNTEMİ</label>
+    <div style={{ display: 'flex', gap: '10px' }}>
+      <button type="button" onClick={() => setOdemeYontemi('kart')} style={{ flex: 1, padding: '10px', border: '2px solid #1a1a1a', backgroundColor: odemeYontemi === 'kart' ? '#ff9e00' : 'white', fontWeight: 'bold', cursor: 'pointer' }}>Kredi Kartı</button>
+      <button type="button" onClick={() => setOdemeYontemi('havale')} style={{ flex: 1, padding: '10px', border: '2px solid #1a1a1a', backgroundColor: odemeYontemi === 'havale' ? '#ff9e00' : 'white', fontWeight: 'bold', cursor: 'pointer' }}>Havale / EFT</button>
+    </div>
+  </div>
+
+  {odemeYontemi === 'kart' && (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', backgroundColor: '#f9f9f9', padding: '15px', border: '2px solid #1a1a1a' }}>
+      <input required type="text" placeholder="Kart Üzerindeki İsim" style={{ padding: '8px', border: '2px solid #1a1a1a' }} />
+      <input required type="text" placeholder="Kart Numarası (16 Hane)" maxLength={16} style={{ padding: '8px', border: '2px solid #1a1a1a' }} />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+        <input required type="text" placeholder="A/Y (08/28)" style={{ padding: '8px', border: '2px solid #1a1a1a' }} />
+        <input required type="password" placeholder="CVV" maxLength={3} style={{ padding: '8px', border: '2px solid #1a1a1a' }} />
+      </div>
+    </div>
+  )}
+
+  <div style={{ marginTop: '10px', padding: '15px', backgroundColor: '#e2f0cb', border: '2px dashed #1a1a1a', textAlign: 'center' }}>
+    <h3 style={{ margin: 0 }}>TOPLAM ÖDENECEK: {Number(total).toFixed(2)} TL</h3>
+  </div>
+
+  <button type="submit" style={{ backgroundColor: '#ff9e00', border: '3px solid #1a1a1a', padding: '15px', fontWeight: 'black', cursor: 'pointer', fontSize: '1.1rem', boxShadow: '4px 4px 0px #1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+    ÖDEMEYİ TAMAMLA VE SİPARİŞ VER <LucideCreditCard size={22} color="#1a1a1a" /> 
+  </button>
+  <Link to="/cart" style={{ marginTop: '5px', textAlign: 'center', color: '#1a1a1a', display: 'block', fontWeight: 'bold' }}>← Sepete Geri Dön</Link>
+</form>
     </div>
   );
 };
