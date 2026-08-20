@@ -338,7 +338,10 @@ const AppContent = ({
     window.scrollTo(0, 0);
   }, [pathname]);
   
-const [tumPlaklariGoster, setTumPlaklariGoster] = useState(false);
+  const [tumPlaklariGoster, setTumPlaklariGoster] = useState(false);
+   const { id } = useParams();
+  const plak = plaklar.find(p => (p._id || p.id) === id || (p.id && p.id === parseInt(id)));
+  
 
 const handleReviewAdded = (guncelYorumlar) => {
   // Eğer detay sayfası seçili bir plağı gösteriyorsa (örneğin secilenPlak veya product):
@@ -673,7 +676,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
         const mevcutIndex = currentSlide % aktifKampanyalar.length;
         const mevcutSlayt = aktifKampanyalar[currentSlide % aktifKampanyalar.length];
 
-                  const bannerRengi = renkPaleti[mevcutIndex % renkPaleti.length];
+        const bannerRengi = renkPaleti[mevcutIndex % renkPaleti.length];
         return (
           <div 
             onClick={() => setSelectedKampanya(mevcutSlayt)} 
@@ -784,7 +787,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
                 <div style={{ fontWeight: 'black', fontSize: '0.95rem' }}>{plak.ad}</div>
                 <div style={{ fontSize: '0.8rem', color: '#666', fontWeight: 'bold' }}>{plak.sanatci}</div>
               </div>
-              <div style={{ fontWeight: 'black', fontSize: '0.95rem', color: '#ff9e00', textShadow: '1px 1px 0px #1a1a1a' }}>
+              <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#ff9e00', textShadow: '1px 1px 0px #1a1a1a' }}>
                 {plak.fiyat} TL
               </div>
             </Link>
@@ -1342,11 +1345,6 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
   
   } /> 
 
-
-                
-                
-          
-
             <Route path="/product/:id" element={<ProductDetail  plaklar={plaklar} sepeteEkle={sepeteEkle} isLoggedIn={isLoggedIn} favorites={favorites} toggleFavorite={toggleFavorite} />} />
             <Route path="/admin" element={<AdminPage />} />
             
@@ -1369,32 +1367,167 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
   } 
 />
             
-            {/* FAVORİLER */}
-            <Route path="/favorites" element={
-              <div style={{ padding: '20px', border: '4px solid #1a1a1a', backgroundColor: 'white', boxShadow: '10px 10px 0px #1a1a1a' }}>
-                <h2 style={{ borderBottom: '3px solid #1a1a1a', paddingBottom: '10px', textTransform: 'uppercase' }}>FAVORİ PLAKLARIM ({favorites.length})</h2>
-                {favorites.length === 0 ? (
-                  <p style={{ fontWeight: 'bold', padding: '20px 0' }}>Henüz favorilere bir plak eklemediniz. ❤️</p>
-                ) : (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px', marginTop: '20px' }}>
-                    {favorites.map(plak => {
-                      const pId = plak._id || plak.id;
-                      return (
-                        <div key={pId} style={{ border: '3px solid #1a1a1a', padding: '15px', backgroundColor: 'white', boxShadow: '4px 4px 0px #1a1a1a' }}>
-                          <div style={{ textAlign: 'center', marginBottom: '10px' }}><Disc size={60} color="#1a1a1a" /></div>
-                          <h4 style={{ margin: 0 }}>{plak.ad}</h4>
-                          <p style={{ margin: '5px 0', fontSize: '0.85rem', color: '#666' }}>{plak.sanatci}</p>
-                          <div style={{ fontWeight: 'bold', margin: '10px 0' }}>{plak.fiyat} TL</div>
-                          <button onClick={() => sepeteEkle(plak)} style={{ width: '100%', backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px', fontWeight: 'bold', cursor: 'pointer' }}>SEPETE EKLE</button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-                <Link to="/" style={{ display: 'inline-block', marginTop: '20px', fontWeight: 'bold', color: '#1a1a1a' }}>← Alışverişe Dön</Link>
-              </div>
-            } />
+             {/* FAVORİLER */}
+<Route
+  path="/favorites"
+  element={
+    <div style={{ padding: '20px', border: '4px solid #1a1a1a', backgroundColor: 'white', boxShadow: '10px 10px 0px #1a1a1a' }}>
+      <h2 style={{ borderBottom: '3px solid #1a1a1a', paddingBottom: '10px', textTransform: 'uppercase' }}>
+        FAVORİ PLAKLARIM ({favorites.length})
+      </h2>
+      
+      {favorites.length === 0 ? (
+        <p style={{ fontWeight: 'bold', padding: '20px 0' }}>Henüz favorilere bir plak eklemediniz. ❤️</p>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px', marginTop: '20px' }}>
+          {favorites.filter(Boolean).map((plak) => {
+  const pId = plak._id || plak.id;
 
+  // 1. Ana ürün listesinden bu plağın GÜNCEL/CANLI verisini bul
+  const guncelPlak = (typeof plaklar !== 'undefined' ? plaklar : []).find(p => 
+    (p?._id && pId && p._id.toString() === pId.toString()) ||
+    (p?.id && pId && p.id.toString() === pId.toString()) ||
+    (p?.ad && plak?.ad && p.ad.trim().toLowerCase() === plak.ad.trim().toLowerCase())
+  ) || plak;
+
+  // 2. Canlı stoğu kontrol et
+  const stokMiktari = Number(guncelPlak?.stok ?? guncelPlak?.stock ?? guncelPlak?.adet ?? 0);
+  const stokBittiMi = stokMiktari <= 0;
+
+  return (
+    <div 
+      key={pId || Math.random()} 
+      style={{ border: '3px solid #1a1a1a', padding: '12px', backgroundColor: '#fff', boxShadow: '4px 4px 0px #1a1a1a', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
+    >
+   
+
+
+
+      {/* Plak Detay Linki */}
+      <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+        <div
+          className="brutal-img-container"
+          style={{ position: 'relative', width: '100%', height: '200px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}
+        > {/* FAVORİLERDEN ÇIKAR BUTONU (Sağ Üst Köşe) */}
+                <button
+                  type="button"
+                  title="Favorilerden Kaldır"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleFavorite(guncelPlak);
+                  }}
+                  style={{
+                    position: 'absolute',
+                    top: '2px',
+                    right: '2px',
+                    zIndex: 10,
+                    color: 'black',
+                    backgroundColor: '#ff4f4f',
+                    border: '2px solid #1a1a1a',
+                    fontWeight: 'black',
+                    cursor: 'pointer',
+                  }}
+                >
+                  ✕
+                </button>
+          <img 
+            src={guncelPlak.resim || plak.resim} 
+            alt={guncelPlak.ad || plak.ad} 
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              if (!e.target.dataset.fallback) {
+                e.target.dataset.fallback = "true";
+                e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=500';
+              }
+            }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          />
+          {stokBittiMi && (
+            <span style={{ position: 'absolute', top: '8px', left: '5px', backgroundColor: '#ff4d4d', color: 'white', border: '2px solid #1a1a1a', padding: '4px 12px', fontWeight: '900', fontSize: '1.0rem' }}>
+              TÜKENDİ
+            </span>
+          )}
+        </div>
+        <h4 style={{ margin: '0 0 3px 0', fontSize: '1.05rem', textTransform: 'uppercase', lineHeight: '1.2' }}>{guncelPlak.ad || plak.ad}</h4>
+        <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.85rem' }}>{guncelPlak.sanatci || plak.sanatci}</p>
+        <div style={{ fontWeight: 'black', margin: '8px 0', fontSize: '1.1rem' }}>{guncelPlak.fiyat || plak.fiyat} TL</div>
+      </Link>
+
+      {/* Dinamik Buton */}
+      <div style={{ marginTop: '8px' }}>
+        {stokBittiMi ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              alert(`"${guncelPlak.ad || plak.ad}" stoğa girdiğinde size haber vereceğiz! 🔔`);
+            }}
+            className="brutal-btn"
+            style={{
+              width: '100%',
+              backgroundColor: '#008500',
+              color: 'white',
+              border: '2px solid #1a1a1a',
+              padding: '8px 10px',
+              fontWeight: '900',
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              boxShadow: '3px 3px 0px #1a1a1a',
+              fontFamily: 'inherit',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}
+          >
+            <Bell size={16} color="yellow"/> GELİNCE HABER VER
+          </button>
+        ) : (
+            <button
+            type="button"
+            onClick={(e) => {
+                sepeteEkle(guncelPlak)
+              e.stopPropagation();
+              if (typeof handleAddToCart === 'function') handleAddToCart(guncelPlak);
+            }}
+            className="brutal-btn"
+            style={{
+              width: '100%',
+              backgroundColor: '#ff9e00',
+              color: '#1a1a1a',
+              border: '2px solid #1a1a1a',
+              padding: '8px 10px',
+              fontWeight: '900',
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              boxShadow: '3px 3px 0px #1a1a1a',
+              fontFamily: 'inherit',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}
+          >
+            <ShoppingCart size={16} color="#1a1a1a"/> SEPETE EKLE
+          </button>
+        )}
+      </div>
+
+    </div>
+  );
+})}
+        </div>
+      )}
+
+      <Link to="/" style={{ display: 'inline-block', marginTop: '20px', fontWeight: 'bold', color: '#1a1a1a' }}>
+        ← Alışverişe Dön
+      </Link>
+    </div>
+  }
+/>
+
+            
             {/* SEPET */}
             <Route path="/cart" element={
               <div style={{ padding: '20px', border: '4px solid #1a1a1a', backgroundColor: 'white', boxShadow: '10px 10px 0px #1a1a1a' }}>
@@ -1730,7 +1863,10 @@ function App() {
   
   const [aramaMetni, setAramaMetni] = useState('');
   const [sirallama, setSirallama] = useState('varsayilan');
-  const [favorites, setFavorites] = useState([]);
+  const [favorites, setFavorites] = useState(() => {
+  const kayitli = localStorage.getItem('favorites');
+  return kayitli ? JSON.parse(kayitli) : [];
+});
   const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('token'));
   const [kampanyalar, setKampanyalar] = useState([]); // 👈 Sabit dizi silindi, boş başlatıldı
 
@@ -1744,14 +1880,32 @@ function App() {
   const [uygulananIndirim, setUygulananIndirim] = useState(0);
   const [kuponMesaji, setKuponMesaji] = useState('');
 
-  const toggleFavorite = (plak) => {
-    const plakId = plak._id || plak.id;
-    setFavorites(prev => {
-      const varMi = prev.some(f => (f._id || f.id) === plakId);
-      if (varMi) return prev.filter(f => (f._id || f.id) !== plakId);
-      return [...prev, plak];
-    });
-  };
+ const toggleFavorite = async (plak) => {
+  const plakId = plak._id || plak.id;
+
+  setFavorites(prev => {
+    const varMi = prev.some(f => (f._id || f.id) === plakId);
+    const yeniFavoriler = varMi 
+      ? prev.filter(f => (f._id || f.id) !== plakId) 
+      : [...prev, plak];
+
+    // 1. Tarayıcı hafızasına (localStorage) kalıcı olarak yaz
+    localStorage.setItem('favorites', JSON.stringify(yeniFavoriler));
+    return yeniFavoriler;
+  });
+
+  // 2. Kullanıcı giriş yapmışsa veritabanına da kaydet
+  try {
+    const token = localStorage.getItem('token') || JSON.parse(localStorage.getItem('user') || '{}').token;
+    if (token) {
+      await API.put('/users/favorites', { 
+        plakId: plakId 
+      });
+    }
+  } catch (err) {
+    console.error("Favori veritabanına kaydedilemedi:", err);
+  }
+};
 
   const toplamTutar = (cart || []).reduce((acc, item) => {
     const gelenFiyat = item.fiyat || item.price || 0;
