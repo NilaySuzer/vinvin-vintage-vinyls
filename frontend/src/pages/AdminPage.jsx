@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import API from '../services/api';
-import { PlusCircle, Trash2, Package, Disc, ShoppingBag, Tag, Plus, Check, X, RefreshCw } from 'lucide-react';
+import { MessageSquareQuote, PlusCircle, Trash2, Package, Disc, ShoppingBag, Tag, Plus, Check, X, RefreshCw, User2Icon } from 'lucide-react';
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('products'); // 'products', 'orders', 'campaigns'
@@ -19,8 +19,29 @@ const AdminPage = () => {
   });
 
    const [allPlaklar, setAllPlaklar] = useState([]);
-  
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [loadingFeedbacks, setLoadingFeedbacks] = useState(false);
   // --- VERİ ÇEKME FONKSİYONLARI ---
+
+    const fetchFeedbacks = async () => {
+      try {
+        const { data } = await API.get('/feedbacks');
+        setFeedbacks(data || []);
+      } catch (err) {
+        console.error("Görüşler yüklenemedi", err);
+      }
+    };
+
+    const handleDelete = async (id) => {
+      if (!window.confirm("Bu mesajı silmek istiyor musunuz?")) return;
+      try {
+        await API.delete(`/feedbacks/${id}`);
+        setFeedbacks(feedbacks.filter(f => f._id !== id));
+      } catch (err) {
+        alert("Silinemedi.");
+      }
+    };
+  
 
 const fetchAllPlaklar = async () => {
   try {
@@ -61,6 +82,7 @@ const fetchAllPlaklar = async () => {
     fetchAdminData();
     fetchAdminKampanyalar();
     fetchAllPlaklar(); // Tüm plakları çek
+    fetchFeedbacks(); // Tüm görüşleri çek
   }, []);
 
   // --- ÜRÜN İŞLEMLERİ ---
@@ -162,7 +184,7 @@ const fetchAllPlaklar = async () => {
         <button 
           onClick={() => { fetchAdminData(); fetchAdminKampanyalar(); }} 
           className="brutal-btn" 
-          style={{ backgroundColor: '#ff9e00', border: '3px solid #1a1a1a', padding: '10px 16px', fontWeight: 'black', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+          style={{ backgroundColor: '#ff9e00', border: '3px solid #1a1a1a', padding: '10px 16px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
         >
           <RefreshCw size={18} /> YENİLE
         </button>
@@ -172,24 +194,35 @@ const fetchAllPlaklar = async () => {
       <div style={{ display: 'flex', gap: '15px', marginBottom: '30px', flexWrap: 'wrap' }}>
         <button 
           onClick={() => setActiveTab('products')} 
-          style={{ flex: 1, minWidth: '180px', padding: '15px', border: '3px solid #1a1a1a', backgroundColor: activeTab === 'products' ? '#ff9e00' : 'white', fontWeight: 'black', cursor: 'pointer', boxShadow: activeTab === 'products' ? '5px 5px 0px #1a1a1a' : 'none' }}
+          className="brutal-btn"
+          style={{ flex: 1, minWidth: '180px', padding: '15px', border: '3px solid #1a1a1a', backgroundColor: activeTab === 'products' ? '#ff9e00' : 'white', fontWeight: 'bold', fontsize: '1.1rem',cursor: 'pointer', boxShadow: activeTab === 'products' ? '5px 5px 0px #1a1a1a' : 'none' }}
         >
-          💿 PLAK KATALOĞU & STOK ({products.length})
+          PLAK KATALOĞU & STOK ({products.length})
         </button>
         
         <button 
           onClick={() => setActiveTab('campaigns')} 
-          style={{ flex: 1, minWidth: '180px', padding: '15px', border: '3px solid #1a1a1a', backgroundColor: activeTab === 'campaigns' ? '#ff9e00' : 'white', fontWeight: 'black', cursor: 'pointer', boxShadow: activeTab === 'campaigns' ? '5px 5px 0px #1a1a1a' : 'none' }}
+          className="brutal-btn"
+          style={{ flex: 1, minWidth: '180px', padding: '15px', border: '3px solid #1a1a1a', backgroundColor: activeTab === 'campaigns' ? '#ff9e00' : 'white', fontWeight: 'bold', fontsize: '1.1rem', cursor: 'pointer', boxShadow: activeTab === 'campaigns' ? '5px 5px 0px #1a1a1a' : 'none' }}
         >
-          ⚡ KAMPANYALAR & KUPONLAR ({kampanyalar.length})
+          KAMPANYALAR & KUPONLAR ({kampanyalar.length})
         </button>
         
         <button 
           onClick={() => setActiveTab('orders')} 
-          style={{ flex: 1, minWidth: '180px', padding: '15px', border: '3px solid #1a1a1a', backgroundColor: activeTab === 'orders' ? '#ff9e00' : 'white', fontWeight: 'black', cursor: 'pointer', boxShadow: activeTab === 'orders' ? '5px 5px 0px #1a1a1a' : 'none' }}
+          className="brutal-btn"
+          style={{ flex: 1, minWidth: '180px', padding: '15px', border: '3px solid #1a1a1a', backgroundColor: activeTab === 'orders' ? '#ff9e00' : 'white', fontWeight: 'bold', fontsize: '1.1rem', cursor: 'pointer', boxShadow: activeTab === 'orders' ? '5px 5px 0px #1a1a1a' : 'none' }}
         >
-          📦 MÜŞTERİ SİPARİŞLERİ ({orders.length})
+           MÜŞTERİ SİPARİŞLERİ ({orders.length})
         </button>
+        <button
+  type="button"
+  onClick={() => setActiveTab('feedbacks')}
+  className="brutal-btn"
+  style={{ flex: 1, minWidth: '180px', padding: '15px', border: '3px solid #1a1a1a', backgroundColor: activeTab === 'feedbacks' ? '#ff9e00' : 'white', fontWeight: 'bold', fontsize: '1.1rem', cursor: 'pointer', boxShadow: activeTab === 'feedbacks' ? '5px 5px 0px #1a1a1a' : 'none' }}
+>
+  GÖRÜŞ & ÖNERİLER ({feedbacks.length})
+</button>
       </div>
 
       {/* SEKME 1: PLAKLARI YÖNET VE YENİ EKLE */}
@@ -429,6 +462,99 @@ const fetchAllPlaklar = async () => {
           )}
         </div>
       )}
+
+      {/* GÖRÜŞ VE ÖNERİLER SEKMESİ */}
+{activeTab === 'feedbacks' && (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #1a1a1a', paddingBottom: '12px' }}>
+      <h3 style={{ margin: 0, fontSize: '1.4rem', textTransform: 'uppercase' }}>
+        <MessageSquareQuote size={24} /> KULLANICI GÖRÜŞ VE ÖNERİLERİ ({feedbacks.length})
+      </h3>
+      <button 
+        type="button"
+        onClick={fetchFeedbacks} 
+        className="brutal-btn"
+        style={{ backgroundColor: '#fff', border: '2px solid #1a1a1a', padding: '6px 12px', fontWeight: 'bold', cursor: 'pointer' }}
+      >
+        YENİLE 🔄
+      </button>
+    </div>
+
+    {loadingFeedbacks ? (
+      <p style={{ fontWeight: 'bold' }}>Görüşler yükleniyor...</p>
+    ) : feedbacks.length === 0 ? (
+      <div style={{ backgroundColor: 'white', border: '3px dashed #1a1a1a', padding: '40px 20px', textAlign: 'center', fontWeight: 'bold' }}>
+        <MessageSquareQuote size={48} style={{ color: '#888', marginBottom: '10px' }} />
+        <p style={{ margin: 0, fontSize: '1.1rem' }}>Henüz gelen bir görüş veya öneri bulunmuyor.</p>
+      </div>
+    ) : (
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+        {feedbacks.map(f => (
+          <div 
+            key={f._id} 
+            style={{ 
+              backgroundColor: 'white', 
+              border: '4px solid #1a1a1a', 
+              padding: '18px', 
+              boxShadow: '6px 6px 0px #1a1a1a', 
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              gap: '12px'
+            }}
+          >
+            {/* Silme Butonu */}
+            <button 
+              type="button"
+              onClick={() => handleDeleteFeedback(f._id)}
+              style={{ 
+                position: 'absolute', 
+                top: '14px', 
+                right: '14px', 
+                backgroundColor: '#ff4d4d', 
+                color: 'white', 
+                border: '2px solid #1a1a1a', 
+                padding: '5px', 
+                cursor: 'pointer',
+                boxShadow: '2px 2px 0px #1a1a1a'
+              }}
+              title="Mesajı Sil"
+            >
+              <Trash2 size={16} />
+            </button>
+
+            {/* Gönderen Bilgisi ve Tarih */}
+            <div>
+              <div style={{ fontWeight: '900', fontSize: '1.05rem', color: '#1a1a1a', paddingRight: '35px' }}>
+                <User2Icon size={20} style={{ marginRight: '8px' }} />
+                {f.adSoyad}
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#666', fontWeight: 'bold', marginTop: '4px' }}>
+                📅 {new Date(f.createdAt).toLocaleDateString('tr-TR')} - {new Date(f.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+              </div>
+            </div>
+
+            {/* Mesaj İçeriği */}
+            <div style={{ 
+              backgroundColor: '#f9f9f9', 
+              border: '2px solid #1a1a1a', 
+              padding: '12px', 
+              fontWeight: 'bold',
+              fontSize: '0.9rem', 
+              color: '#222',
+              lineHeight: '1.4',
+              whiteSpace: 'pre-wrap'
+            }}>
+              "{f.mesaj}"
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
+
 
       {/* SEKME 3: KAMPANYALAR & KUPONLAR */}
       {activeTab === 'campaigns' && (

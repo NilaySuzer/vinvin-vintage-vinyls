@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, MapPin, Package, Trash2, Plus, Disc, XCircle, ShoppingBag, User2Icon } from 'lucide-react';
+import { User, MapPin, Package, Trash2, Plus, Disc, XCircle, ShoppingBag, User2Icon, MessageSquareQuote } from 'lucide-react';
 import API from '../services/api';
 
 const AccountPage = ({ user, setUser }) => {
@@ -15,7 +15,30 @@ const AccountPage = ({ user, setUser }) => {
   const [loadingOrders, setLoadingOrders] = useState(true);
 
     
-  const [allPlaklar, setAllPlaklar] = useState([]);
+    const [allPlaklar, setAllPlaklar] = useState([]);
+    const [feedbackMesaj, setFeedbackMesaj] = useState('');
+    const [feedbackLoading, setFeedbackLoading] = useState(false);
+
+
+const handleSendFeedback = async (e) => {
+  e.preventDefault();
+  if (!feedbackMesaj.trim()) return;
+
+  setFeedbackLoading(true);
+  try {
+    await API.post('/feedbacks', {
+      adSoyad: name || user?.name || 'Anonim Kullanıcı',
+      mesaj: feedbackMesaj,
+      userId: user?._id || user?.id
+    });
+    alert('Görüş ve öneriniz başarıyla bize ulaştı! Teşekkür ederiz. 💌');
+    setFeedbackMesaj('');
+  } catch (err) {
+    alert('Geri bildirim gönderilirken bir hata oluştu.');
+  } finally {
+    setFeedbackLoading(false);
+  }
+};
 
 // Tüm plakları arka planda çek (Görsel eşleştirmesi için)
 const fetchAllPlaklar = async () => {
@@ -134,7 +157,14 @@ const fetchAllPlaklar = async () => {
         </button>
         <button onClick={() => setActiveTab('profile')} className="brutal-btn" style={{ backgroundColor: activeTab === 'profile' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'black', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
           <User size={18} /> ÜYELİK BİLGİLERİ & ŞİFRE
-        </button>
+            </button>
+            <button 
+  onClick={() => setActiveTab('feedback')} 
+  className="brutal-btn" 
+  style={{ backgroundColor: activeTab === 'feedback' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'black', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit'  }}
+>
+  <MessageSquareQuote size={18} /> GÖRÜŞ & ÖNERİLER
+</button>
       </div>
 
       {/* 1. SİPARİŞLERİM SEKMESİ (siparisKalemleri ile çalışan yapı) */}
@@ -340,6 +370,61 @@ const fetchAllPlaklar = async () => {
           </button>
         </form>
       )}
+
+          {/* 4. GÖRÜŞ VE ÖNERİLER SEKMESİ */}
+{activeTab === 'feedback' && (
+  <form onSubmit={handleSendFeedback} style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '30px', boxShadow: '8px 8px 0px #1a1a1a', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+    <div style={{ borderBottom: '2px solid #1a1a1a', paddingBottom: '10px', marginBottom: '5px' }}>
+      <h3 style={{ margin: 0, textTransform: 'uppercase', fontSize: '1.2rem' }}><MessageSquareQuote size={22} color="black" /> BİZE FİKİRLERİNİZİ YAZIN</h3>
+      <p style={{ margin: '5px 0 0 0', fontSize: '0.85rem', color: '#555', fontWeight: 'bold' }}>
+        Plak koleksiyonumuz veya sitemiz hakkındaki görüş, öneri ve istek plaklarınızı bizimle paylaşabilirsiniz.
+      </p>
+    </div>
+
+    <div>
+      <label style={{ fontWeight: 'black', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>AD SOYAD</label>
+      <input 
+        required 
+        type="text" 
+        value={name} 
+        onChange={e => setName(e.target.value)} 
+        style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} 
+      />
+    </div>
+
+    <div>
+      <label style={{ fontWeight: 'bold', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>GÖRÜŞ, ÖNERİ VEYA İSTEK PLAKLARINIZ</label>
+      <textarea 
+        required 
+        rows={5} 
+        placeholder="Düşüncelerinizi buraya yazabilirsiniz..." 
+        value={feedbackMesaj} 
+        onChange={e => setFeedbackMesaj(e.target.value)} 
+        style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box', fontFamily: 'inherit' }} 
+      />
+    </div>
+
+    <button 
+      type="submit" 
+      disabled={feedbackLoading}
+      className="brutal-btn" 
+      style={{ 
+        backgroundColor: '#4caf50', 
+        color: 'white', 
+        border: '3px solid #1a1a1a', 
+        padding: '12px', 
+        fontWeight: 'bold', 
+        cursor: 'pointer', 
+        marginTop: '5px', 
+        fontSize: '1rem', 
+        fontFamily: 'inherit',
+        boxShadow: '4px 4px 0px #1a1a1a'
+      }}
+    >
+      {feedbackLoading ? 'GÖNDERİLİYOR...' : 'GÖRÜŞÜ GÖNDER '}
+    </button>
+  </form>
+)}
 
     </div>
   );
