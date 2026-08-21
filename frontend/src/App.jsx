@@ -506,16 +506,30 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
         </Link>
         
        {/* Giriş yapılmış ve rolü 'admin' ise göster */}
+       {/* Giriş yapılmış ve admin ise göster */}
 {isLoggedIn && (() => {
   try {
     const user = JSON.parse(localStorage.getItem('user'));
-    return user && user.role === 'admin';
+    return user && (user.isAdmin === true || user.role === 'admin');
   } catch (e) {
     return false;
   }
 })() && (
-  <Link to="/admin" style={{ textDecoration: 'none', color: 'white', backgroundColor: '#1a1a1a', border: '2px solid #1a1a1a', padding: '5px 10px', fontWeight: 'bold' }}>
-  <KeyIcon size={22} color="yellow" />  ADMIN
+  <Link 
+    to="/admin" 
+    style={{ 
+      textDecoration: 'none', 
+      color: 'white', 
+      backgroundColor: '#1a1a1a', 
+      border: '2px solid #1a1a1a', 
+      padding: '5px 10px', 
+      fontWeight: 'bold',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '6px'
+    }}
+  >
+    <KeyIcon size={22} color="yellow" /> ADMIN
   </Link>
 )}
 
@@ -1919,27 +1933,66 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
                   const sifre = e.target.sifre.value;
 
                   try {
-                    const { data } = await API.post('/auth/login', { 
-                      email, 
-                      sifre, 
-                      password: sifre 
-                    });
-                    
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data));
-                    
-                    setIsLoggedIn(true);
-                    alert(`Hoş geldin, ${data.adSoyad || 'Kullanıcı'}! 💿`);
-                    window.location.href = "/";
-                  } catch (error) {
-                    alert(error.response?.data?.message || "Giriş hatası! Lütfen bilgilerinizi kontrol edin.");
-                  }
+  const { data } = await API.post('/auth/login', { 
+    email, 
+    sifre, 
+    password: sifre 
+  });
+  
+  localStorage.setItem('token', data.token);
+  localStorage.setItem('user', JSON.stringify(data));
+  
+  setIsLoggedIn(true);
+
+  // İsmi data veya data.user içindeki tüm olası alanlardan yakala
+  const kullaniciAdi = 
+    data.name || 
+    data.adSoyad || 
+    data.ad || 
+    data.user?.name || 
+    data.user?.adSoyad || 
+    data.user?.ad || 
+    'Kullanıcı';
+
+  alert(`Hoş geldin, ${kullaniciAdi}! 💿`);
+  window.location.href = "/";
+} catch (error) {
+  alert(error.response?.data?.message || "Giriş hatası! Lütfen bilgilerinizi kontrol edin.");
+}
+
                 }} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                   <label style={{ fontWeight: 'bold' }}>E-POSTA</label>
                   <input required name="email" type="email" placeholder="ornek@mail.com" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
                   
                   <label style={{ fontWeight: 'bold' }}>ŞİFRE</label>
                   <input required name="sifre" type="password" placeholder="******" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
+                  {/* Şifre Inputunun Altına: */}
+<div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '5px' }}>
+  <button
+    type="button"
+    onClick={() => {
+      const email = prompt("Şifre sıfırlama bağlantısı için kayıtlı e-posta adresinizi girin:");
+      if (email) {
+        // Backend'e şifre sıfırlama isteği gönder
+        API.post('/users/forgot-password', { email })
+          .then(() => alert("Şifre sıfırlama talimatları e-posta adresinize gönderildi! 📬"))
+          .catch(() => alert("Bu e-posta adresine ait bir hesap bulunamadı."));
+      }
+    }}
+    style={{
+      background: 'none',
+      border: 'none',
+      color: '#1a1a1a',
+      fontWeight: 'bold',
+      fontSize: '0.8rem',
+      textDecoration: 'underline',
+      cursor: 'pointer',
+      padding: '0'
+    }}
+  >
+    Şifremi Unuttum?
+  </button>
+</div>
                   
                   <button type="submit" style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '15px', fontWeight: 'bold', border: 'none', cursor: 'pointer', marginTop: '10px' }}>DÜKKANA GİRİŞ YAP</button>
                 </form>
@@ -2162,18 +2215,15 @@ useEffect(() => {
  
   const [kampanyalar, setKampanyalar] = useState([]); // 👈 Sabit dizi silindi, boş başlatıldı
 
- const handleLogout = () => {
+  const handleLogout = () => {
+  alert('Başarıyla çıkış yapıldı.');
+  window.location.href = "/";
   localStorage.removeItem('token');
   localStorage.removeItem('user');
   setIsLoggedIn(false);
   setUser(null);
-  
-  // Çıkış yapıldığında misafir favorilerini geri getir
   const guestFavs = JSON.parse(localStorage.getItem('guest_favorites') || '[]');
   setFavorites(guestFavs);
-
-  alert('Başarıyla çıkış yapıldı.');
-  window.location.href = "/";
 };
   
   const [uygulananIndirim, setUygulananIndirim] = useState(0);

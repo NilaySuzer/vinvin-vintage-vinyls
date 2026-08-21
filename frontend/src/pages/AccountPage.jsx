@@ -5,11 +5,17 @@ import {
 import API from '../services/api';
 
 const AccountPage = ({ user, setUser }) => {
-  const [activeTab, setActiveTab] = useState('orders'); // Varsayılan sekme siparişler
-  const [name, setName] = useState(user?.name || user?.adSoyad || '');
-  const [email, setEmail] = useState(user?.email || '');
+    const [activeTab, setActiveTab] = useState('orders'); // Varsayılan sekme siparişler
+    const [name, setName] = useState(() => {
+    const u = JSON.parse(localStorage.getItem('user') || '{}');
+  return u.name || u.adSoyad || '';
+});
+  const [email, setEmail] = useState(() => {
+  const u = JSON.parse(localStorage.getItem('user') || '{}');
+  return u.email || '';
+});
+
   const [password, setPassword] = useState('');
-  
   const [adresler, setAdresler] = useState([]);
   const [yeniAdres, setYeniAdres] = useState({ baslik: '', sehir: '', ilce: '', acikAdres: '' });
   const [showAddressModal, setShowAddressModal] = useState(false);
@@ -85,22 +91,48 @@ const fetchAllPlaklar = async () => {
       fetchAllPlaklar(); // Tüm plakları çek
   }, []);
 
-  // Profil & Şifre Güncelleme (AccountPage'deki çalışan kod)
-  const handleUpdateProfile = async (e) => {
-    e.preventDefault();
-    try {
-      const payload = { name, email };
-      if (password.trim() !== '') payload.password = password;
-      const { data } = await API.put('/users/profile', payload);
-      if (setUser) setUser(data);
-      localStorage.setItem('user', JSON.stringify({ ...user, name: data.name || name, email: data.email || email }));
-      alert('Bilgileriniz başarıyla güncellendi! ⚡');
-      setPassword('');
-    } catch (err) {
-      alert('Güncelleme sırasında hata oluştu.');
-    }
-  };
+    // Profil & Şifre Güncelleme (AccountPage'deki çalışan kod)
 
+    const handleUpdateProfile = async (e) => {
+  e.preventDefault();
+
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const userId = currentUser._id || currentUser.id || user?._id || user?.id;
+
+  if (!userId) {
+    alert('Oturum bilgisi bulunamadı, lütfen tekrar giriş yapın.');
+    return;
+  }
+
+  try {
+    // Backend'e tam olarak formdaki isimlerle gönderiyoruz
+    const { data } = await API.put('/users/profile', {
+      userId: userId,
+      name: name.trim(),
+      email: email.trim(),
+      password: password.trim() ? password.trim() : undefined // 👈 Boşsa gönderme
+    });
+
+    // LocalStorage ve state'i güncelle (token ve rolü koru)
+    const updatedUser = {
+      ...currentUser,
+      ...(data.user || {}),
+      name: name.trim(),
+      email: email.trim()
+    };
+
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    if (typeof setUser === 'function') {
+      setUser(updatedUser);
+    }
+
+    alert('Bilgileriniz başarıyla güncellendi! 🎉');
+    setPassword(''); // Şifre alanını temizle
+  } catch (err) {
+    console.error("Güncelleme hatası:", err);
+    alert(err.response?.data?.message || 'Güncelleme başarısız oldu.');
+  }
+};
   // Yeni Adres Ekleme (AccountPage'deki çalışan kod)
   const handleAddAddress = async (e) => {
     e.preventDefault();
