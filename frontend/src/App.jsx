@@ -1860,52 +1860,101 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [bildirim, setBildirim] = useState(null);
-  
+  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('token'));
   const [aramaMetni, setAramaMetni] = useState('');
   const [sirallama, setSirallama] = useState('varsayilan');
-  const [favorites, setFavorites] = useState(() => {
-  const kayitli = localStorage.getItem('favorites');
+ const [favorites, setFavorites] = useState(() => {
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const storageKey = user ? `user_favorites_${user._id || user.id}` : 'guest_favorites';
+  const kayitli = localStorage.getItem(storageKey);
   return kayitli ? JSON.parse(kayitli) : [];
 });
-  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('token'));
+
+// 2. Kullanıcı Giriş Yaptığında veya Sayfa Yüklendiğinde DB'den Çek
+useEffect(() => {
+  const syncFavorites = async () => {
+    const rawUser = localStorage.getItem('user');
+    const currentUser = rawUser ? JSON.parse(rawUser) : null;
+    const token = localStorage.getItem('token') || currentUser?.token;
+
+    if (token && currentUser) {
+      try {
+        // Backend'den kullanıcının GERÇEK favorilerini al
+        const { data } = await API.get('/users/profile');
+        if (data && data.favorites) {
+          const userFavs = data.favorites;
+          setFavorites(userFavs);
+          localStorage.setItem(`user_favorites_${currentUser._id || currentUser.id}`, JSON.stringify(userFavs));
+        }
+      } catch (err) {
+        console.error("Favoriler yüklenemedi:", err);
+      }
+    } else {
+      // Misafir modundaysa sadece misafirin yerel verisini yükle
+      const guestFavs = JSON.parse(localStorage.getItem('guest_favorites') || '[]');
+      setFavorites(guestFavs);
+    }
+  };
+
+  syncFavorites();
+}, [isLoggedIn]); // 
+ 
   const [kampanyalar, setKampanyalar] = useState([]); // 👈 Sabit dizi silindi, boş başlatıldı
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setIsLoggedIn(false);
-    window.location.href = "/";
-  };
+ const handleLogout = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  setIsLoggedIn(false);
+  setUser(null);
+  
+  // Çıkış yapıldığında misafir favorilerini geri getir
+  const guestFavs = JSON.parse(localStorage.getItem('guest_favorites') || '[]');
+  setFavorites(guestFavs);
+
+  alert('Başarıyla çıkış yapıldı.');
+  window.location.href = "/";
+};
   
   const [uygulananIndirim, setUygulananIndirim] = useState(0);
   const [kuponMesaji, setKuponMesaji] = useState('');
 
  const toggleFavorite = async (plak) => {
   const plakId = plak._id || plak.id;
+  const token = localStorage.getItem('token') || (JSON.parse(localStorage.getItem('user') || '{}')).token;
+  const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
 
+  // Güncel state hesabı
+  let yeniFavoriler = [];
   setFavorites(prev => {
     const varMi = prev.some(f => (f._id || f.id) === plakId);
-    const yeniFavoriler = varMi 
+    yeniFavoriler = varMi 
       ? prev.filter(f => (f._id || f.id) !== plakId) 
       : [...prev, plak];
 
-    // 1. Tarayıcı hafızasına (localStorage) kalıcı olarak yaz
-    localStorage.setItem('favorites', JSON.stringify(yeniFavoriler));
+    // Oturum açıksa kullanıcının storage'ına, kapalıysa misafir storage'ına yaz
+    if (currentUser) {
+      localStorage.setItem(`user_favorites_${currentUser._id || currentUser.id}`, JSON.stringify(yeniFavoriler));
+    } else {
+      localStorage.setItem('guest_favorites', JSON.stringify(yeniFavoriler));
+    }
+
     return yeniFavoriler;
   });
 
-  // 2. Kullanıcı giriş yapmışsa veritabanına da kaydet
-  try {
-    const token = localStorage.getItem('token') || JSON.parse(localStorage.getItem('user') || '{}').token;
-    if (token) {
+  // Kullanıcı giriş yapmışsa SADECE kendi hesabının veritabanına kaydet
+  if (token) {
+    try {
       await API.put('/users/favorites', { 
         plakId: plakId 
       });
+    } catch (err) {
+      console.error("Favori veritabanına kaydedilemedi:", err);
     }
-  } catch (err) {
-    console.error("Favori veritabanına kaydedilemedi:", err);
   }
 };
+  // 2. Kullanıcı giriş yapmışsa veritabanına da kaydet
+    
+
 
   const toplamTutar = (cart || []).reduce((acc, item) => {
     const gelenFiyat = item.fiyat || item.price || 0;
