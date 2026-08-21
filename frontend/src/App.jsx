@@ -894,19 +894,65 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
     }}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
           />
+        {/* TÜKENDİ ROZETİ */}
+      {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 && (
+        <span
+          style={{
+            position: 'absolute',
+            top: '8px',
+            left: '8px',
+            backgroundColor: '#ff4d4d',
+            color: 'white',
+            border: '2px solid #1a1a1a',
+            padding: '4px 12px',
+            fontWeight: '900',
+            fontSize: '1.1rem',
+            boxShadow: '2px 2px 0px #1a1a1a'
+          }}
+        >
+          TÜKENDİ
+        </span>
+      )}
         </div>
         <h4 style={{ margin: '0 0 3px 0', fontSize: '1.1rem', textTransform: 'uppercase', lineHeight: '1.2' }}>{plak.ad}</h4>
         <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.85rem' }}>{plak.sanatci}</p>
       </Link>
 
-      <div style={{ marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
-        <button onClick={() => sepeteEkle(plak)}
-          className="brutal-btn"
-          style={{ backgroundColor: '#e0a6bf', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem' }}>
-          <ShoppingCart size={22} color="black" /> +
-        </button>
-      </div>
+      {/* 3. DİNAMİK BUTON (STOK VARSA SEPETE EKLE / BİTTİYSE GELİNCE HABER VER) */}
+      <div style={{  marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'  }}>
+      <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
+  {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        alert(`"${plak.ad}" stoğa girdiğinde size haber vereceğiz! 🔔`);
+      }}
+      className="brutal-btn"
+      style={{
+      backgroundColor: '#306a04', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem'
+      }}
+    >
+      <Bell size={22} color="yellow" />
+    </button>
+  ) : (
+    <button
+      type="button"
+      onClick={(e) => {
+        sepeteEkle(plak);
+        e.stopPropagation();
+        handleAddToCart(plak);
+      }}
+      className="brutal-btn"
+      style={{
+         backgroundColor: '#e0a6bf', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem'
+      }}
+    >
+      <ShoppingCart size={22} color="black" /> +
+    </button>
+  )}
+</div>
+
     </div>
   );
 })}
@@ -982,21 +1028,65 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
                     }}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                   />
+                {/* TÜKENDİ ROZETİ */}
+      {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 && (
+        <span
+          style={{
+            position: 'absolute',
+            top: '8px',
+            left: '8px',
+            backgroundColor: '#ff4d4d',
+            color: 'white',
+            border: '2px solid #1a1a1a',
+            padding: '4px 12px',
+            fontWeight: '900',
+            fontSize: '1.1rem',
+            boxShadow: '2px 2px 0px #1a1a1a'
+          }}
+        >
+          TÜKENDİ
+        </span>
+      )}
                 </div>
                 <h4 style={{ margin: '0 0 3px 0', fontSize: '1.1rem', textTransform: 'uppercase', lineHeight: '1.2' }}>{plak.ad}</h4>
                 <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.85rem' }}>{plak.sanatci}</p>
               </Link>
 
-              <div style={{ marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
-                <button 
-                  onClick={() => sepeteEkle(plak)}
-                  className="brutal-btn"
-                  style={{ backgroundColor: '#ffd166', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem' }}
-                >
-                  <ShoppingCart size={22} color="black" /> +
-                </button>
-              </div>
+                {/* 3. DİNAMİK BUTON (STOK VARSA SEPETE EKLE / BİTTİYSE GELİNCE HABER VER) */}
+      <div style={{  marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'  }}>
+      <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
+  {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        alert(`"${plak.ad}" stoğa girdiğinde size haber vereceğiz! 🔔`);
+      }}
+      className="brutal-btn"
+      style={{
+      backgroundColor: '#306a04', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem'
+      }}
+    >
+      <Bell size={22} color="yellow" />
+    </button>
+  ) : (
+    <button
+      type="button"
+      onClick={(e) => {
+        sepeteEkle(plak);
+        e.stopPropagation();
+        handleAddToCart(plak);
+      }}
+      className="brutal-btn"
+      style={{
+         backgroundColor: '#ffd166', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem'
+      }}
+    >
+      <ShoppingCart size={22} color="black" /> +
+    </button>
+  )}
+</div>
+              
             </div>
           );
         })}
@@ -1066,21 +1156,64 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
                     }}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                   />
+                 {/* TÜKENDİ ROZETİ */}
+      {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 && (
+        <span
+          style={{
+            position: 'absolute',
+            top: '8px',
+            left: '8px',
+            backgroundColor: '#ff4d4d',
+            color: 'white',
+            border: '2px solid #1a1a1a',
+            padding: '4px 12px',
+            fontWeight: '900',
+            fontSize: '1.1rem',
+            boxShadow: '2px 2px 0px #1a1a1a'
+          }}
+        >
+          TÜKENDİ
+        </span>
+      )}
+
                 </div>
                 <h4 style={{ margin: '0 0 3px 0', fontSize: '1.1rem', textTransform: 'uppercase', lineHeight: '1.2' }}>{plak.ad}</h4>
                 <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.85rem' }}>{plak.sanatci}</p>
               </Link>
-
-              <div style={{ marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 'black', fontSize: '1.1rem', color: 'black' }}>{plak.fiyat} TL</span>
-                <button 
-                  onClick={() => sepeteEkle(plak)}
-                  className="brutal-btn"
-                  style={{ backgroundColor: '#06d6a0', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem' }}
-                >
-                  <ShoppingCart size={22} color="black" /> +
-                </button>
-              </div>
+            {/* 3. DİNAMİK BUTON (STOK VARSA SEPETE EKLE / BİTTİYSE GELİNCE HABER VER) */}
+      <div style={{  marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'  }}>
+      <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
+  {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        alert(`"${plak.ad}" stoğa girdiğinde size haber vereceğiz! 🔔`);
+      }}
+      className="brutal-btn"
+      style={{
+      backgroundColor: '#306a04', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem'
+      }}
+    >
+      <Bell size={22} color="yellow" />
+    </button>
+  ) : (
+    <button
+      type="button"
+      onClick={(e) => {
+        sepeteEkle(plak);
+        e.stopPropagation();
+        handleAddToCart(plak);
+      }}
+      className="brutal-btn"
+      style={{
+         backgroundColor: '#06d6a0', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem'
+      }}
+    >
+      <ShoppingCart size={22} color="black" /> +
+    </button>
+  )}
+</div>
             </div>
           );
         })}
@@ -1150,21 +1283,64 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
                     }}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                   />
+                 {/* TÜKENDİ ROZETİ */}
+      {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 && (
+        <span
+          style={{
+            position: 'absolute',
+            top: '8px',
+            left: '8px',
+            backgroundColor: '#ff4d4d',
+            color: 'white',
+            border: '2px solid #1a1a1a',
+            padding: '4px 12px',
+            fontWeight: '900',
+            fontSize: '1.1rem',
+            boxShadow: '2px 2px 0px #1a1a1a'
+          }}
+        >
+          TÜKENDİ
+        </span>
+      )}
+
                 </div>
                 <h4 style={{ margin: '0 0 3px 0', fontSize: '1.1rem', textTransform: 'uppercase', lineHeight: '1.2' }}>{plak.ad}</h4>
                 <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.85rem' }}>{plak.sanatci}</p>
               </Link>
-
-              <div style={{ marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
-                <button 
-                  onClick={() => sepeteEkle(plak)}
-                  className="brutal-btn"
-                  style={{ backgroundColor: 'black', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem', color: 'white'}}
-                >
-                  <ShoppingCart size={22} color="white" /> +
-                </button>
-              </div>
+              {/* 3. DİNAMİK BUTON (STOK VARSA SEPETE EKLE / BİTTİYSE GELİNCE HABER VER) */}
+      <div style={{  marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'  }}>
+      <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
+  {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        alert(`"${plak.ad}" stoğa girdiğinde size haber vereceğiz! 🔔`);
+      }}
+      className="brutal-btn"
+      style={{
+      backgroundColor: '#306a04', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem'
+      }}
+    >
+      <Bell size={22} color="yellow" />
+    </button>
+  ) : (
+    <button
+      type="button"
+      onClick={(e) => {
+        sepeteEkle(plak);
+        e.stopPropagation();
+        handleAddToCart(plak);
+      }}
+      className="brutal-btn"
+      style={{
+         backgroundColor: 'black', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem', color:"white"
+      }}
+    >
+      <ShoppingCart size={22} color="white" /> +
+    </button>
+  )}
+</div>
             </div>
           );
         })}
@@ -1235,21 +1411,63 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
                     }}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                   />
+                  {/* TÜKENDİ ROZETİ */}
+      {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 && (
+        <span
+          style={{
+            position: 'absolute',
+            top: '8px',
+            left: '8px',
+            backgroundColor: '#ff4d4d',
+            color: 'white',
+            border: '2px solid #1a1a1a',
+            padding: '4px 12px',
+            fontWeight: '900',
+            fontSize: '1.1rem',
+            boxShadow: '2px 2px 0px #1a1a1a'
+          }}
+        >
+          TÜKENDİ
+        </span>
+      )}
                 </div>
                 <h4 style={{ margin: '0 0 3px 0', fontSize: '1.1rem', textTransform: 'uppercase', lineHeight: '1.2' }}>{plak.ad}</h4>
                 <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.85rem' }}>{plak.sanatci}</p>
               </Link>
-
-              <div style={{ marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
-                <button 
-                  onClick={() => sepeteEkle(plak)}
-                  className="brutal-btn"
-                  style={{ backgroundColor: '#7e1818', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem' ,color: 'white' }}
-                >
-                  <ShoppingCart size={22} color="white" /> +
-                </button>
-              </div>
+            {/* 3. DİNAMİK BUTON (STOK VARSA SEPETE EKLE / BİTTİYSE GELİNCE HABER VER) */}
+      <div style={{  marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'  }}>
+      <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
+  {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        alert(`"${plak.ad}" stoğa girdiğinde size haber vereceğiz! 🔔`);
+      }}
+      className="brutal-btn"
+      style={{
+      backgroundColor: '#306a04', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem'
+      }}
+    >
+      <Bell size={22} color="yellow" />
+    </button>
+  ) : (
+    <button
+      type="button"
+      onClick={(e) => {
+        sepeteEkle(plak);
+        e.stopPropagation();
+        handleAddToCart(plak);
+      }}
+      className="brutal-btn"
+      style={{
+         backgroundColor: '#7e1818', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem'
+      }}
+    >
+      <ShoppingCart size={22} color="black" /> +
+    </button>
+  )}
+</div>
             </div>
           );
         })}
@@ -1324,26 +1542,72 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
                                 }}
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                               />
+                             {/* TÜKENDİ ROZETİ */}
+      {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 && (
+        <span
+          style={{
+            position: 'absolute',
+            top: '8px',
+            left: '8px',
+            backgroundColor: '#ff4d4d',
+            color: 'white',
+            border: '2px solid #1a1a1a',
+            padding: '4px 12px',
+            fontWeight: '900',
+            fontSize: '1.1rem',
+            boxShadow: '2px 2px 0px #1a1a1a'
+          }}
+        >
+          TÜKENDİ
+        </span>
+      )}
                             </div>
                             <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem', textTransform: 'uppercase' }}>{plak.ad}</h3>
                             <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.9rem' }}>{plak.sanatci}</p>
                           </Link>
-
-                          <div style={{ marginTop: 'auto', paddingTop: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontWeight: 'black', fontSize: '1.2rem' }}>{plak.fiyat} TL</span>
-                            <button onClick={() => sepeteEkle(plak)}
-                              className="brutal-btn"
-                              style={{ backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px 12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}>
-                              EKLE +
-                            </button>
-                          </div>
+                         {/* 3. DİNAMİK BUTON (STOK VARSA SEPETE EKLE / BİTTİYSE GELİNCE HABER VER) */}
+      <div style={{  marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'  }}>
+      <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
+  {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        alert(`"${plak.ad}" stoğa girdiğinde size haber vereceğiz! 🔔`);
+      }}
+      className="brutal-btn"
+      style={{
+      backgroundColor: '#06d6a0', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem'
+      }}
+    >
+      <Bell size={22} color="yellow" />
+    </button>
+  ) : (
+    <button
+      type="button"
+      onClick={(e) => {
+        sepeteEkle(plak);
+        e.stopPropagation();
+        handleAddToCart(plak);
+      }}
+      className="brutal-btn"
+      style={{
+        backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px 12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' 
+      }}
+    >
+    SEPETE EKLE
+    </button>
+  )}
+</div>
+                         
                         </div>
                       );
                     })}
                   </div>
                 )}</div>
   
-  } /> 
+  } />  
+                              
 
             <Route path="/product/:id" element={<ProductDetail  plaklar={plaklar} sepeteEkle={sepeteEkle} isLoggedIn={isLoggedIn} favorites={favorites} toggleFavorite={toggleFavorite} />} />
             <Route path="/admin" element={<AdminPage />} />
@@ -1399,10 +1663,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
       key={pId || Math.random()} 
       style={{ border: '3px solid #1a1a1a', padding: '12px', backgroundColor: '#fff', boxShadow: '4px 4px 0px #1a1a1a', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
     >
-   
-
-
-
+  
       {/* Plak Detay Linki */}
       <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
         <div
@@ -1863,7 +2124,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('token'));
   const [aramaMetni, setAramaMetni] = useState('');
   const [sirallama, setSirallama] = useState('varsayilan');
- const [favorites, setFavorites] = useState(() => {
+  const [favorites, setFavorites] = useState(() => {
   const user = JSON.parse(localStorage.getItem('user') || 'null');
   const storageKey = user ? `user_favorites_${user._id || user.id}` : 'guest_favorites';
   const kayitli = localStorage.getItem(storageKey);
