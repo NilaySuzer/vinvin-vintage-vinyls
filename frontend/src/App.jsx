@@ -93,15 +93,32 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavor
             <ShoppingCart size={22} color="white" /> SEPETE EKLE +
         </button>
       ) : (
-        <button 
-          onClick={() => alert(`"${plak.ad}" yeniden stoklara girdiğinde e-posta bildirimi alacaksınız! 🔔`)} 
-          className="brutal-btn" 
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%', padding: '20px', backgroundColor: 'rgb(51, 135, 51)', color: 'white', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '1.2rem', boxShadow: '5px 5px 0px #000000' }}>
-        
-          GELİNCE HABER VER <Bell size={22} color="yellow" /> 
+       <button
+  type="button"
+  onClick={async (e) => {
+    e.stopPropagation();
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const userId = currentUser._id || currentUser.id;
 
+    if (!userId) {
+      alert('Stok bildirimlerinden haberdar olmak için lütfen giriş yapın! 🔑');
+      return;
+    }
 
-        </button>
+    try {
+      await API.post('/notifications/subscribe-stock', {
+        userId,
+        plakId: plak._id || plak.id
+      });
+      alert(`"${plak.ad}" stoğa girdiğinde bildirim kutunuza haber vereceğiz! 🔔`);
+    } catch (err) {
+      alert('İşlem gerçekleştirilemedi.');
+    }
+  }}
+  className="brutal-btn"
+  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%', padding: '20px', backgroundColor: 'rgb(51, 135, 51)', color: 'white', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '1.2rem', boxShadow: '5px 5px 0px #000000' }}>
+  GELİNCE HABER VER <Bell size={22} color="yellow" /> 
+</button>
       )}
 
         </div>
@@ -460,11 +477,47 @@ const slidePopRight = () => popSliderRef.current?.scrollBy({ left: 310, behavior
   return () => clearInterval(interval);
 }, []);
   
-  const [showNotifications, setShowNotifications] = useState(false);
-const [bildirimler, setBildirimler] = useState([
-  { id: 1, baslik: '🔥 %20 İndirim Başladı!', mesaj: 'Seçili Rock plaklarında indirim fırsatı!', tarih: '1 saat önce' },
-  { id: 2, baslik: '📦 Stok Güncellemesi', mesaj: 'Tükenen plaklar yeniden stoklarda!', tarih: 'Dün' }
-]);
+const [notifications, setNotifications] = useState([]);
+const [showNotifMenu, setShowNotifMenu] = useState(false);
+
+const fetchNotifications = async () => {
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const userId = currentUser._id || currentUser.id;
+  if (!userId) return;
+
+  try {
+    const { data } = await API.get(`/notifications?userId=${userId}`);
+    setNotifications(data || []);
+  } catch (err) {
+    console.error('Bildirimler çekilemedi:', err);
+  }
+};
+
+useEffect(() => {
+  fetchNotifications();
+  // İsteğe bağlı: 30 saniyede bir yeni bildirim kontrolü
+  const interval = setInterval(fetchNotifications, 30000);
+  return () => clearInterval(interval);
+}, []);
+
+// Bildirimi okundu yap
+const handleMarkAsRead = async (notifId) => {
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const userId = currentUser._id || currentUser.id;
+  try {
+    await API.put(`/notifications/${notifId}/read`, { userId });
+    setNotifications(prev =>
+      prev.map(n => n._id === notifId ? { ...n, okundu: true } : n)
+    );
+  } catch (err) {
+    console.error('Okundu işaretlenemedi:', err);
+  }
+};
+
+const unreadCount = notifications.filter(n => !n.okundu).length;
+  
+  
+  
   // Arama çubuğunda hepsi görünsün ama vitrinde sadece stoğu > 0 olanlar görünsün:
 const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 10) > 0);
   const guvenliToplam = Number(toplamTutar) || 0;
@@ -505,7 +558,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
         <User2Icon size={22} color="gray" /> HESABIM
         </Link>
         
-       {/* Giriş yapılmış ve rolü 'admin' ise göster */}
+       
        {/* Giriş yapılmış ve admin ise göster */}
 {isLoggedIn && (() => {
   try {
@@ -622,38 +675,108 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
           {/* NAVBAR İÇİNDE BİLDİRİM ZİLİ */}
 {user && (
   <div style={{ position: 'relative' }}>
-    <button 
-      onClick={() => setShowNotifications(!showNotifications)}
-      className="brutal-btn"
-      style={{ backgroundColor: showNotifications ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '8px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', position: 'relative' }}
-    >
-      <Bell size={20} color="#1a1a1a" />
-      {bildirimler.length > 0 && (
-        <span style={{ position: 'absolute', top: '-6px', right: '-6px', backgroundColor: '#ff4d4d', color: 'white', borderRadius: '50%', width: '18px', height: '18px', fontSize: '0.7rem', fontWeight: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #1a1a1a' }}>
-          {bildirimler.length}
-        </span>
-      )}
-    </button>
+  {/* ZİL BUTONU */}
+  <button
+    type="button"
+    onClick={() => setShowNotifMenu(!showNotifMenu)}
+    className="brutal-btn"
+    style={{
+      backgroundColor: 'white',
+      border: '2px solid #1a1a1a',
+      padding: '8px',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      position: 'relative'
+    }}
+  >
+    <Bell size={20} color="#1a1a1a" />
+    {unreadCount > 0 && (
+      <span
+        style={{
+          position: 'absolute',
+          top: '-6px',
+          right: '-6px',
+          backgroundColor: '#ff4d4d',
+          color: 'white',
+          borderRadius: '50%',
+          width: '18px',
+          height: '18px',
+          fontSize: '0.75rem',
+          fontWeight: '900',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          border: '1.5px solid #1a1a1a'
+        }}
+      >
+        {unreadCount}
+      </span>
+    )}
+  </button>
 
-    {/* BİLDİRİMLER AÇILIR KUTUSU */}
-    {showNotifications && (
-      <div style={{ position: 'absolute', top: 'calc(100% + 10px)', right: 0, backgroundColor: 'white', border: '4px solid #1a1a1a', boxShadow: '8px 8px 0px #1a1a1a', width: '280px', zIndex: 1000, padding: '15px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #1a1a1a', paddingBottom: '8px', marginBottom: '10px' }}>
-          <span style={{ fontWeight: 'black', fontSize: '0.9rem' }}>🔔 BİLDİRİMLER</span>
-          <span style={{ fontSize: '0.75rem', color: '#666', fontWeight: 'bold' }}>{bildirimler.length} Yeni</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '250px', overflowY: 'auto' }}>
-          {bildirimler.map(b => (
-            <div key={b.id} style={{ borderBottom: '1px solid #eee', paddingBottom: '8px' }}>
-              <div style={{ fontWeight: 'black', fontSize: '0.85rem', color: '#ff9e00' }}>{b.baslik}</div>
-              <p style={{ margin: '3px 0', fontSize: '0.8rem', color: '#333', fontWeight: 'bold' }}>{b.mesaj}</p>
-              <span style={{ fontSize: '0.7rem', color: '#888' }}>{b.tarih}</span>
+  {/* AÇILIR BİLDİRİM KUTUSU (DROPDOWN) */}
+  {showNotifMenu && (
+    <div
+      style={{
+        position: 'absolute',
+        top: '45px',
+        right: 0,
+        width: '320px',
+        maxHeight: '400px',
+        overflowY: 'auto',
+        backgroundColor: 'white',
+        border: '3px solid #1a1a1a',
+        boxShadow: '6px 6px 0px #1a1a1a',
+        zIndex: 1000,
+        padding: '12px'
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #1a1a1a', paddingBottom: '8px', marginBottom: '10px' }}>
+        <strong style={{ fontSize: '0.9rem', textTransform: 'uppercase' }}>🔔 Bildirimler ({unreadCount})</strong>
+        <button
+          type="button"
+          onClick={() => setShowNotifMenu(false)}
+          style={{ background: 'none', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}
+        >
+          ✕
+        </button>
+      </div>
+
+      {notifications.length === 0 ? (
+        <p style={{ fontSize: '0.85rem', color: '#666', textAlign: 'center', margin: '20px 0' }}>Henüz bildiriminiz yok.</p>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {notifications.map(n => (
+            <div
+              key={n._id}
+              onClick={() => !n.okundu && handleMarkAsRead(n._id)}
+              style={{
+                backgroundColor: n.okundu ? '#f9f9f9' : '#fff3cd',
+                border: '1.5px solid #1a1a1a',
+                padding: '10px',
+                cursor: 'pointer',
+                transition: '0.2s'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <strong style={{ fontSize: '0.85rem', color: '#1a1a1a' }}>{n.baslik}</strong>
+                {!n.okundu && (
+                  <span style={{ fontSize: '0.65rem', backgroundColor: '#ff4d4d', color: 'white', padding: '2px 4px', fontWeight: 'bold' }}>YENİ</span>
+                )}
+              </div>
+              <p style={{ margin: '4px 0 0 0', fontWeight: 'bold', fontSize: '1.0rem', color: '#444' }}>{n.mesaj}</p>
+              <span style={{ fontSize: '0.80rem', color: '#161515', display: 'block', marginTop: '4px' }}>
+                {new Date(n.createdAt).toLocaleDateString('tr-TR')} - {new Date(n.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+              </span>
             </div>
           ))}
         </div>
-      </div>
-    )}
-  </div>
+      )}
+    </div>
+  )}
+</div>
 )}
           <Link to="/cart" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 12px', backgroundColor: 'white', boxShadow: '3px 3px 0px #1a1a1a' }}>
              <ShoppingBag size={20} color="black" /> SEPET ({(cart || []).reduce((acc, curr) => acc + (curr.adet || 1), 0)})

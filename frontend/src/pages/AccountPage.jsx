@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  PhoneCall, Mail, Clock, Send, User, MapPin, Package, Trash2, Plus, Disc, XCircle, ShoppingBag, User2Icon, MessageSquareQuote
+  PhoneCall, Bell, Mail, Clock, Send, User, MapPin, Package, Trash2, Plus, Disc, XCircle, ShoppingBag, User2Icon, MessageSquareQuote
 } from 'lucide-react';
 import API from '../services/api';
 
@@ -27,6 +27,42 @@ const AccountPage = ({ user, setUser }) => {
   const [allPlaklar, setAllPlaklar] = useState([]);
   const [feedbackMesaj, setFeedbackMesaj] = useState('');
   const [feedbackLoading, setFeedbackLoading] = useState(false);
+
+const [notifications, setNotifications] = useState([]);
+const [loadingNotifs, setLoadingNotifs] = useState(false);
+
+const fetchNotifications = async () => {
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const userId = currentUser._id || currentUser.id || user?._id || user?.id;
+  if (!userId) return;
+
+  try {
+    setLoadingNotifs(true);
+    const { data } = await API.get(`/notifications?userId=${userId}`);
+    setNotifications(data || []);
+  } catch (err) {
+    console.error('Bildirimler yüklenemedi:', err);
+  } finally {
+    setLoadingNotifs(false);
+  }
+};
+
+useEffect(() => {
+  fetchNotifications();
+}, []);
+
+const handleMarkAsRead = async (notifId) => {
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const userId = currentUser._id || currentUser.id || user?._id || user?.id;
+  try {
+    await API.put(`/notifications/${notifId}/read`, { userId });
+    setNotifications(prev =>
+      prev.map(n => n._id === notifId ? { ...n, okundu: true } : n)
+    );
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   // user prop'u güncellendiğinde inputları senkronize et
   useEffect(() => {
@@ -208,6 +244,13 @@ const AccountPage = ({ user, setUser }) => {
         <button onClick={() => setActiveTab('profile')} className="brutal-btn" style={{ backgroundColor: activeTab === 'profile' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
           <User size={18} color="blue" /> ÜYELİK BİLGİLERİ & ŞİFRE
         </button>
+        {/* SEKME BUTONLARI ARASINA: */}
+<button 
+  onClick={() => setActiveTab('notifications')} 
+  className="brutal-btn" 
+  style={{ backgroundColor: activeTab === 'notifications' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
+  <Bell size={18} color="#e63946" /> BİLDİRİMLERİM ({notifications.filter(n => !n.okundu).length})
+</button>
         <button onClick={() => setActiveTab('feedback')} className="brutal-btn" style={{ backgroundColor: activeTab === 'feedback' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
           <MessageSquareQuote size={18} color="green" /> GÖRÜŞ & ÖNERİLER
         </button>
@@ -389,6 +432,86 @@ const AccountPage = ({ user, setUser }) => {
         </form>
       )}
 
+      {/* BİLDİRİMLERİM SEKMESİ */}
+{activeTab === 'notifications' && (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+    <div style={{ backgroundColor: '#ffd166', border: '3px solid #1a1a1a', padding: '15px 20px', boxShadow: '5px 5px 0px #1a1a1a', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <h3 style={{ margin: 0, fontSize: '1.2rem', textTransform: 'uppercase' }}> <Bell size={24} color="#1a1a1a" /> BİLDİRİM VE DUYURULARINIZ</h3>
+      <span style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>
+        Toplam: {notifications.length} ({notifications.filter(n => !n.okundu).length} Okunmamış)
+      </span>
+    </div>
+
+    {loadingNotifs ? (
+      <p style={{ fontWeight: 'bold' }}>Bildirimler yükleniyor...</p>
+    ) : notifications.length === 0 ? (
+      <div style={{ backgroundColor: 'white', border: '3px dashed #1a1a1a', padding: '40px 20px', textAlign: 'center' }}>
+        <Bell size={48} color="#ccc" style={{ marginBottom: '10px' }} />
+        <h4 style={{ margin: 0, textTransform: 'uppercase' }}>Henüz bir bildiriminiz yok</h4>
+        <p style={{ margin: '5px 0 0 0', color: '#666', fontWeight: 'bold' }}>Stoğu tükenen plaklar geldiğinde veya kampanyalar başladığında buradan haberdar olacaksınız.</p>
+      </div>
+    ) : (
+      notifications.map(item => (
+        <div
+          key={item._id}
+          style={{
+            backgroundColor: item.okundu ? 'white' : '#fff8e7',
+            border: '3px solid #1a1a1a',
+            padding: '18px',
+            boxShadow: '4px 4px 0px #1a1a1a',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: '15px',
+            flexWrap: 'wrap'
+          }}
+        >
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px' }}>
+              <span style={{ 
+                backgroundColor: item.tur === 'stok' ? '#3a86ff' : '#ff9e00', 
+                color: 'white', 
+                fontSize: '0.75rem', 
+                fontWeight: '900', 
+                padding: '2px 8px', 
+                border: '1.5px solid #1a1a1a' 
+              }}>
+                {item.tur === 'stok' ? 'STOK ALARMI' : 'GENEL DUYURU'}
+              </span>
+              <strong style={{ fontSize: '1rem' }}>{item.baslik}</strong>
+            </div>
+            <p style={{ margin: '5px 0', fontSize: '0.9rem', color: '#333', fontWeight: 'bold' }}>{item.mesaj}</p>
+            <span style={{ fontSize: '0.75rem', color: '#777', fontWeight: 'bold' }}>
+              🕒 {new Date(item.createdAt).toLocaleDateString('tr-TR')} {new Date(item.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
+
+          {!item.okundu && (
+            <button
+              type="button"
+              onClick={() => handleMarkAsRead(item._id)}
+              className="brutal-btn"
+              style={{
+                backgroundColor: '#06d6a0',
+                color: '#1a1a1a',
+                border: '2px solid #1a1a1a',
+                padding: '6px 12px',
+                fontWeight: '900',
+                cursor: 'pointer',
+                fontSize: '0.8rem'
+              }}
+            >
+              ✓ OKUNDU İŞARETLE
+            </button>
+          )}
+        </div>
+      ))
+    )}
+  </div>
+)}
+
+
+      
       {/* 4. GÖRÜŞ VE ÖNERİLER SEKMESİ */}
       {activeTab === 'feedback' && (
         <form onSubmit={handleSendFeedback} style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '30px', boxShadow: '8px 8px 0px #1a1a1a', display: 'flex', flexDirection: 'column', gap: '15px' }}>

@@ -18,7 +18,11 @@ const productSchema = new mongoose.Schema({
   baskiYili: { type: String, default: 'Orijinal Retro Baskı' },
   stok: { type: Number, required: true, default: 5 },
   resim: { type: String, default: '' },
-  reviews: [reviewSchema]
+  reviews: [reviewSchema],
+  stokHaberVerListesi: [{
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'User'
+}]
 }, { timestamps: true });
 
 export default mongoose.model('Product', productSchema);

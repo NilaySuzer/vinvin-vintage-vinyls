@@ -21,6 +21,9 @@ const AdminPage = () => {
    const [allPlaklar, setAllPlaklar] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
   const [loadingFeedbacks, setLoadingFeedbacks] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [bildirimBaslik, setBildirimBaslik] = useState('');
+  const [bildirimMesaj, setBildirimMesaj] = useState('');
   // --- VERİ ÇEKME FONKSİYONLARI ---
 
     const fetchFeedbacks = async () => {
@@ -133,6 +136,8 @@ const fetchAllPlaklar = async () => {
     }
   };
 
+
+
   // --- SİPARİŞ İŞLEMLERİ ---
 
   // Sipariş Durumu Güncelleme
@@ -171,6 +176,22 @@ const fetchAllPlaklar = async () => {
       alert("Durum değiştirilemedi.");
     }
   };
+
+  const handleSendGlobalNotification = async (e) => {
+  e.preventDefault();
+  try {
+    await API.post('/notifications/send-global', {
+      baslik: bildirimBaslik,
+      mesaj: bildirimMesaj,
+      tur: 'kampanya'
+    });
+    alert('📢 Duyuru tüm kullanıcılara başarıyla iletildi!');
+    setBildirimBaslik('');
+    setBildirimMesaj('');
+  } catch (err) {
+    alert('Bildirim gönderilirken hata oluştu.');
+  }
+};
 
   return (
     <div style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '30px', boxShadow: '12px 12px 0px #1a1a1a' }}>
@@ -215,6 +236,15 @@ const fetchAllPlaklar = async () => {
         >
            MÜŞTERİ SİPARİŞLERİ ({orders.length})
         </button>
+          <button
+  type="button"
+  onClick={() => setActiveTab('notifications')}
+  className="brutal-btn"
+  style={{ flex: 1, minWidth: '180px', padding: '15px', border: '3px solid #1a1a1a', backgroundColor: activeTab === 'notifications' ? '#ff9e00' : 'white', fontWeight: 'bold', fontsize: '1.1rem', cursor: 'pointer', boxShadow: activeTab === 'notifications' ? '5px 5px 0px #1a1a1a' : 'none' }}
+>
+  BİLDİRİM GÖNDER ({notifications.length})
+        </button>
+
         <button
   type="button"
   onClick={() => setActiveTab('feedbacks')}
@@ -222,7 +252,7 @@ const fetchAllPlaklar = async () => {
   style={{ flex: 1, minWidth: '180px', padding: '15px', border: '3px solid #1a1a1a', backgroundColor: activeTab === 'feedbacks' ? '#ff9e00' : 'white', fontWeight: 'bold', fontsize: '1.1rem', cursor: 'pointer', boxShadow: activeTab === 'feedbacks' ? '5px 5px 0px #1a1a1a' : 'none' }}
 >
   GÖRÜŞ & ÖNERİLER ({feedbacks.length})
-</button>
+        </button>
       </div>
 
       {/* SEKME 1: PLAKLARI YÖNET VE YENİ EKLE */}
@@ -554,6 +584,36 @@ const fetchAllPlaklar = async () => {
     )}
   </div>
 )}
+      {activeTab === 'notifications' && (
+             <form onSubmit={handleSendGlobalNotification} style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '20px', boxShadow: '5px 5px 0px #1a1a1a', marginBottom: '25px' }}>
+  <h3 style={{ margin: '0 0 15px 0', textTransform: 'uppercase' }}>📢 TÜM KULLANICILARA DUYURU / BİLDİRİM GÖNDER</h3>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    <input 
+      required
+      placeholder="Bildirim Başlığı (Örn: Hafta Sonu %20 İndirim Başladı! 🎸)" 
+      value={bildirimBaslik} 
+      onChange={e => setBildirimBaslik(e.target.value)} 
+      style={{ padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} 
+    />
+    <textarea 
+      required
+      rows={3} 
+      placeholder="Bildirim Açıklaması..." 
+      value={bildirimMesaj} 
+      onChange={e => setBildirimMesaj(e.target.value)} 
+      style={{ padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', fontFamily: 'inherit' }} 
+    />
+    <button 
+      type="submit" 
+      className="brutal-btn" 
+      style={{ backgroundColor: '#ff9e00', color: '#1a1a1a', border: '2px solid #1a1a1a', padding: '10px', fontWeight: 'black', cursor: 'pointer' }}
+    >
+      BİLDİRİMİ YAYINLA
+    </button>
+  </div>
+</form>
+            )}
+      
 
 
       {/* SEKME 3: KAMPANYALAR & KUPONLAR */}

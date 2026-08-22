@@ -1,7 +1,8 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import Product from '../models/Product.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
-
+import Notification from '../models/Notification.js';
 const router = express.Router();
 
 // 1. Tüm Ürünleri Getir (GET /api/products)
@@ -51,22 +52,7 @@ router.delete('/:id', protect, admin, async (req, res) => {
   }
 });
 
-// Admin Hızlı Stok Güncelleme
-router.patch('/:id/stock', protect, admin, async (req, res) => {
-  try {
-    const { stok } = req.body;
-    const product = await Product.findById(req.params.id);
-    if (product) {
-      product.stok = Number(stok);
-      const updatedProduct = await product.save();
-      res.json(updatedProduct);
-    } else {
-      res.status(404).json({ message: 'Ürün bulunamadı' });
-    }
-  } catch (err) {
-    res.status(500).json({ message: 'Stok güncellenemedi' });
-  }
-});
+
 
 // POST /api/products/:id/reviews
 router.post('/:id/reviews', async (req, res) => {
@@ -91,6 +77,82 @@ router.post('/:id/reviews', async (req, res) => {
     res.status(201).json({ message: 'Yorum kaydedildi', reviews: product.reviews });
   } catch (error) {
     res.status(500).json({ message: 'Yorum kaydedilirken hata oluştu', error: error.message });
+  }
+});
+
+router.patch('/:id/stock', async (req, res) => {
+  console.log(`[GELEN ISTEK] PATCH /products/${req.params.id}/stock -> Body:`, req.body);
+  try {
+    const { id } = req.params;
+    const { stok, stock, adet } = req.body;
+    const yeniStok = Number(stok ?? stock ?? adet ?? 0);
+
+    const plak = await Product.findById(id);
+    if (!plak) return res.status(404).json({ message: 'Ürün bulunamadı.' });
+
+    console.log(`[STOK LOG] Plak: ${plak.ad} | Yeni Stok: ${yeniStok} | Bekleyen Abone Sayısı: ${plak.stokHaberVerListesi?.length || 0}`);
+
+    // Şartı esnettik: Yeni stok 0'dan büyükse ve abone varsa bildirimi gönder
+    if (yeniStok > 0 && plak.stokHaberVerListesi && plak.stokHaberVerListesi.length > 0) {
+      const bildirimler = plak.stokHaberVerListesi.map(kullaniciId => ({
+        userId: new mongoose.Types.ObjectId(kullaniciId),
+        baslik: '🔔 Beklediğin Plak Yeniden Stokta!',
+        mesaj: `"${plak.ad}" adlı plak yeniden stoklarımıza girdi. Tükenmeden hemen kap! 💿`,
+        tur: 'stok',
+        plakId: plak._id,
+        okundu: false
+      }));
+
+      await Notification.insertMany(bildirimler);
+      console.log(`🎉 [BİLDİRİM GÖNDERİLDİ] ${bildirimler.length} kullanıcıya bildirim MongoDB'ye kaydedildi!`);
+
+      plak.stokHaberVerListesi = [];
+    }
+
+    plak.stok = yeniStok;
+    await plak.save();
+
+    res.json({ message: 'Stok güncellendi! 📦', product: plak });
+  } catch (err) {
+    console.error('Stok güncelleme hatası:', err);
+    res.status(500).json({ message: 'Stok güncellenemedi.' });
+  }
+});
+
+// 4. FORM İLE DÜZENLEME (Admin PUT)
+router.put('/:id', async (req, res) => {
+  console.log(`[GELEN ISTEK] PUT /products/${req.params.id} -> Body:`, req.body);
+  try {
+    const plak = await Product.findById(req.params.id);
+    if (!plak) return res.status(404).json({ message: 'Ürün bulunamadı.' });
+
+    const gelenStok = req.body.stok ?? req.body.stock ?? req.body.adet;
+    const yeniStok = gelenStok !== undefined ? Number(gelenStok) : Number(plak.stok || 0);
+
+    if (yeniStok > 0 && plak.stokHaberVerListesi && plak.stokHaberVerListesi.length > 0) {
+      const bildirimler = plak.stokHaberVerListesi.map(kullaniciId => ({
+        userId: new mongoose.Types.ObjectId(kullaniciId),
+        baslik: '🔔 Beklediğin Plak Yeniden Stokta!',
+        mesaj: `"${plak.ad}" adlı plak yeniden stoklarımıza girdi. Tükenmeden hemen kap! 💿`,
+        tur: 'stok',
+        plakId: plak._id,
+        okundu: false
+      }));
+
+      await Notification.insertMany(bildirimler);
+      console.log(`🎉 [BİLDİRİM GÖNDERİLDİ] ${bildirimler.length} kullanıcıya bildirim MongoDB'ye kaydedildi!`);
+
+      plak.stokHaberVerListesi = [];
+    }
+
+    Object.assign(plak, req.body);
+    if (gelenStok !== undefined) plak.stok = yeniStok;
+
+    await plak.save();
+    res.json({ message: 'Ürün güncellendi.', product: plak });
+  } catch (err) {
+    console.error('Ürün güncelleme hatası:', err);
+    res.status(500).json({ message: 'Güncellenemedi.' });
   }
 });
 
