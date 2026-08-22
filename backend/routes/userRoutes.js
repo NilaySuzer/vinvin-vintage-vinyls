@@ -1,30 +1,52 @@
 import express from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
+// 1. GET /api/users/profile (Kullanıcı profili ve favorileri getirme)
+router.get('/profile', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    let userId = req.query.userId;
 
-// Profil Bilgilerini ve Şifreyi Güncelleme
-// 1. Kullanıcı Profilini Getir
-router.get('/profile', protect, async (req, res) => {
-  const user = await User.findById(req.user._id);
-  if (user) {
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'gizli_anahtar');
+        userId = decoded.id || decoded._id;
+      } catch (e) {
+        // Token geçersizse query parametresini dene
+      }
+    }
+
+    if (!userId) {
+      return res.status(400).json({ message: 'Kullanıcı kimliği bulunamadı.' });
+    }
+
+    const user = await User.findById(userId).populate('favorites');
+    if (!user) {
+      return res.status(404).json({ message: 'Kullanıcı bulunamadı.' });
+    }
+
     res.json({
       _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      adresler: user.adresler || [],
-      bildirimler: user.bildirimler || []
+      name: user.name || user.adSoyad || user.ad,
+      adSoyad: user.adSoyad || user.name,
+      email: user.email || user.eposta,
+      role: user.role || (user.isAdmin ? 'admin' : 'user'),
+      isAdmin: user.isAdmin || user.role === 'admin',
+      favorites: user.favorites || []
     });
-  } else {
-    res.status(404).json({ message: 'Kullanıcı bulunamadı' });
+  } catch (err) {
+    console.error('Profil getirme hatası:', err);
+    res.status(500).json({ message: 'Sunucu hatası: Profil yüklenemedi.' });
   }
 });
 
-// 2. Profil ve Şifre Güncelle
-// KULLANICI PROFİL VE ŞİFRE GÜNCELLEME
+// 2. PUT /api/users/profile (Profil, E-posta ve Şifre Güncelleme)
 router.put('/profile', async (req, res) => {
   try {
     const { userId, name, email, password } = req.body;
@@ -38,28 +60,32 @@ router.put('/profile', async (req, res) => {
       return res.status(404).json({ message: 'Kullanıcı bulunamadı.' });
     }
 
-    // 1. İsim Güncelle
-    if (name) {
-      user.name = name;
-      if (user.adSoyad !== undefined) user.adSoyad = name;
+    // İsim Güncelle
+    if (name && name.trim()) {
+      user.name = name.trim();
+      user.adSoyad = name.trim();
     }
 
-    // 2. E-Posta Güncelle
-    if (email && email.toLowerCase() !== user.email) {
-      const emailVarMi = await User.findOne({ 
-        email: email.toLowerCase(), 
-        _id: { $ne: user._id } 
+    // E-Posta Güncelle
+    if (email && email.trim() && email.toLowerCase().trim() !== (user.email || user.eposta)) {
+      const targetEmail = email.toLowerCase().trim();
+      const emailVarMi = await User.findOne({
+        $or: [{ email: targetEmail }, { eposta: targetEmail }],
+        _id: { $ne: user._id }
       });
       if (emailVarMi) {
         return res.status(400).json({ message: 'Bu e-posta adresi zaten kullanımda!' });
       }
-      user.email = email.toLowerCase();
+      user.email = targetEmail;
+      user.eposta = targetEmail;
     }
 
-    // 3. Şifre Güncelle (Eğer yeni şifre girilmişse)
+    // Şifre Güncelle
     if (password && password.trim().length > 0) {
       const salt = await bcrypt.genSalt(10);
-      user.sifre = await bcrypt.hash(password.trim(), salt);
+      const hashedPassword = await bcrypt.hash(password.trim(), salt);
+      user.sifre = hashedPassword;
+      user.password = hashedPassword;
     }
 
     await user.save();
@@ -69,18 +95,62 @@ router.put('/profile', async (req, res) => {
       user: {
         _id: user._id,
         name: user.name || user.adSoyad,
-        email: user.email,
+        adSoyad: user.adSoyad || user.name,
+        email: user.email || user.eposta,
         role: user.role || (user.isAdmin ? 'admin' : 'user'),
         isAdmin: user.isAdmin || user.role === 'admin'
       }
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Sunucu hatası: Güncellenemedi.' });
+    console.error('Profil güncelleme hatası:', err);
+    res.status(500).json({ message: 'Sunucu hatası: Bilgiler güncellenemedi.' });
   }
 });
 
-// 3. Yeni Adres Ekle
+// 3. PUT /api/users/favorites (Favorileri Kaydetme / Senkronize Etme)
+router.put('/favorites', async (req, res) => {
+  try {
+    const { userId, favorites, plakId } = req.body;
+    let targetUserId = userId;
+
+    const authHeader = req.headers.authorization;
+    if (!targetUserId && authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'gizli_anahtar');
+        targetUserId = decoded.id || decoded._id;
+      } catch (e) {}
+    }
+
+    if (!targetUserId) {
+      return res.status(400).json({ message: 'Kullanıcı kimliği bulunamadı.' });
+    }
+
+    const user = await User.findById(targetUserId);
+    if (!user) {
+      return res.status(404).json({ message: 'Kullanıcı bulunamadı.' });
+    }
+
+    if (favorites && Array.isArray(favorites)) {
+      user.favorites = favorites.map(f => f._id || f.id || f);
+    } else if (plakId) {
+      const index = user.favorites.indexOf(plakId);
+      if (index > -1) {
+        user.favorites.splice(index, 1);
+      } else {
+        user.favorites.push(plakId);
+      }
+    }
+
+    await user.save();
+    res.json({ message: 'Favoriler güncellendi.', favorites: user.favorites });
+  } catch (err) {
+    console.error('Favori güncelleme hatası:', err);
+    res.status(500).json({ message: 'Favoriler güncellenemedi.' });
+  }
+});
+
+// 4. Adres Ekleme ve Silme
 router.post('/address', protect, async (req, res) => {
   const user = await User.findById(req.user._id);
   if (user) {
@@ -93,7 +163,6 @@ router.post('/address', protect, async (req, res) => {
   }
 });
 
-// 4. Adres Sil
 router.delete('/address/:addressId', protect, async (req, res) => {
   const user = await User.findById(req.user._id);
   if (user) {

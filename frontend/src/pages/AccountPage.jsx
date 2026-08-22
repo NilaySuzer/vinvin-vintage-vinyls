@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import {
-    PhoneCall, Mail, Clock, Send, User, MapPin, Package, Trash2, Plus, Disc, XCircle, ShoppingBag, User2Icon, MessageSquareQuote
+  PhoneCall, Mail, Clock, Send, User, MapPin, Package, Trash2, Plus, Disc, XCircle, ShoppingBag, User2Icon, MessageSquareQuote
 } from 'lucide-react';
 import API from '../services/api';
 
 const AccountPage = ({ user, setUser }) => {
-    const [activeTab, setActiveTab] = useState('orders'); // Varsayılan sekme siparişler
-    const [name, setName] = useState(() => {
+  const [activeTab, setActiveTab] = useState('orders'); // Varsayılan sekme siparişler
+  
+  const [name, setName] = useState(() => {
     const u = JSON.parse(localStorage.getItem('user') || '{}');
-  return u.name || u.adSoyad || '';
-});
+    return u.name || u.adSoyad || '';
+  });
+  
   const [email, setEmail] = useState(() => {
-  const u = JSON.parse(localStorage.getItem('user') || '{}');
-  return u.email || '';
-});
+    const u = JSON.parse(localStorage.getItem('user') || '{}');
+    return u.email || '';
+  });
 
   const [password, setPassword] = useState('');
   const [adresler, setAdresler] = useState([]);
@@ -22,46 +24,58 @@ const AccountPage = ({ user, setUser }) => {
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
 
+  const [allPlaklar, setAllPlaklar] = useState([]);
+  const [feedbackMesaj, setFeedbackMesaj] = useState('');
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+
+  // user prop'u güncellendiğinde inputları senkronize et
+  useEffect(() => {
+    if (user) {
+      if (user.name || user.adSoyad) setName(user.name || user.adSoyad);
+      if (user.email) setEmail(user.email);
+    }
+  }, [user]);
+
+  const handleSendFeedback = async (e) => {
+    e.preventDefault();
+    if (!feedbackMesaj.trim()) return;
+
+    setFeedbackLoading(true);
+    try {
+      await API.post('/feedbacks', {
+        adSoyad: name || user?.name || 'Anonim Kullanıcı',
+        mesaj: feedbackMesaj,
+        userId: user?._id || user?.id || JSON.parse(localStorage.getItem('user') || '{}')._id
+      });
+      alert('Görüş ve öneriniz başarıyla bize ulaştı! Teşekkür ederiz. 💌');
+      setFeedbackMesaj('');
+    } catch (err) {
+      alert('Geri bildirim gönderilirken bir hata oluştu.');
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
+
+  // Tüm plakları çek
+  const fetchAllPlaklar = async () => {
+    try {
+      const { data } = await API.get('/products');
+      setAllPlaklar(data || []);
+    } catch (err) {
+      console.error("Plaklar çekilemedi:", err);
+    }
+  };
     
-    const [allPlaklar, setAllPlaklar] = useState([]);
-    const [feedbackMesaj, setFeedbackMesaj] = useState('');
-    const [feedbackLoading, setFeedbackLoading] = useState(false);
-
-
-const handleSendFeedback = async (e) => {
-  e.preventDefault();
-  if (!feedbackMesaj.trim()) return;
-
-  setFeedbackLoading(true);
-  try {
-    await API.post('/feedbacks', {
-      adSoyad: name || user?.name || 'Anonim Kullanıcı',
-      mesaj: feedbackMesaj,
-      userId: user?._id || user?.id
-    });
-    alert('Görüş ve öneriniz başarıyla bize ulaştı! Teşekkür ederiz. 💌');
-    setFeedbackMesaj('');
-  } catch (err) {
-    alert('Geri bildirim gönderilirken bir hata oluştu.');
-  } finally {
-    setFeedbackLoading(false);
-  }
-};
-
-// Tüm plakları arka planda çek (Görsel eşleştirmesi için)
-const fetchAllPlaklar = async () => {
-  try {
-    const { data } = await API.get('/products'); // veya senin plakları çektiğin endpoint (/plaklar)
-    setAllPlaklar(data || []);
-  } catch (err) {
-    console.error("Plaklar çekilemedi:", err);
-  }
-};
-    
-  // Kullanıcı profilini ve kayıtlı adreslerini çek (AccountPage'deki çalışan kod)
+  // Kullanıcı profilini ve kayıtlı adreslerini çek (userId parametresi eklendi)
   const fetchProfile = async () => {
     try {
-      const { data } = await API.get('/users/profile');
+      const rawUser = localStorage.getItem('user');
+      const currentUser = rawUser ? JSON.parse(rawUser) : null;
+      const targetId = currentUser?._id || currentUser?.id || user?._id || user?.id;
+
+      if (!targetId) return;
+
+      const { data } = await API.get(`/users/profile?userId=${targetId}`);
       if (data) {
         setAdresler(data.adresler || []);
         setName(data.name || data.adSoyad || '');
@@ -87,53 +101,53 @@ const fetchAllPlaklar = async () => {
 
   useEffect(() => {
     fetchProfile();
-      fetchOrders();
-      fetchAllPlaklar(); // Tüm plakları çek
+    fetchOrders();
+    fetchAllPlaklar();
   }, []);
 
-    // Profil & Şifre Güncelleme (AccountPage'deki çalışan kod)
+  // Profil & Şifre Güncelleme
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
 
-    const handleUpdateProfile = async (e) => {
-  e.preventDefault();
+    const rawUser = localStorage.getItem('user');
+    const currentUser = rawUser ? JSON.parse(rawUser) : null;
+    const userId = currentUser?._id || currentUser?.id || user?._id || user?.id;
 
-  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-  const userId = currentUser._id || currentUser.id || user?._id || user?.id;
-
-  if (!userId) {
-    alert('Oturum bilgisi bulunamadı, lütfen tekrar giriş yapın.');
-    return;
-  }
-
-  try {
-    // Backend'e tam olarak formdaki isimlerle gönderiyoruz
-    const { data } = await API.put('/users/profile', {
-      userId: userId,
-      name: name.trim(),
-      email: email.trim(),
-      password: password.trim() ? password.trim() : undefined // 👈 Boşsa gönderme
-    });
-
-    // LocalStorage ve state'i güncelle (token ve rolü koru)
-    const updatedUser = {
-      ...currentUser,
-      ...(data.user || {}),
-      name: name.trim(),
-      email: email.trim()
-    };
-
-    localStorage.setItem('user', JSON.stringify(updatedUser));
-    if (typeof setUser === 'function') {
-      setUser(updatedUser);
+    if (!userId) {
+      alert('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+      return;
     }
 
-    alert('Bilgileriniz başarıyla güncellendi! 🎉');
-    setPassword(''); // Şifre alanını temizle
-  } catch (err) {
-    console.error("Güncelleme hatası:", err);
-    alert(err.response?.data?.message || 'Güncelleme başarısız oldu.');
-  }
-};
-  // Yeni Adres Ekleme (AccountPage'deki çalışan kod)
+    try {
+      const { data } = await API.put('/users/profile', {
+        userId,
+        name: name.trim(),
+        email: email.trim(),
+        password: password.trim() || undefined
+      });
+
+      // LocalStorage ve mevcut state'i birleştirip güncelle
+      const updatedUser = {
+        ...currentUser,
+        ...(data.user || data),
+        token: currentUser?.token || localStorage.getItem('token')
+      };
+
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      if (typeof setUser === 'function') {
+        setUser(updatedUser);
+      }
+
+      alert('Bilgileriniz başarıyla güncellendi! 🎉');
+      setPassword(''); // Şifre kutusunu sıfırla
+    } catch (err) {
+      console.error('Güncelleme hatası:', err);
+      alert(err.response?.data?.message || 'Güncelleme başarısız oldu.');
+    }
+  };
+
+  // Yeni Adres Ekleme
   const handleAddAddress = async (e) => {
     e.preventDefault();
     try {
@@ -147,7 +161,7 @@ const fetchAllPlaklar = async () => {
     }
   };
 
-  // Adres Silme (AccountPage'deki çalışan kod)
+  // Adres Silme
   const handleDeleteAddress = async (addressId) => {
     if (!window.confirm('Bu adresi silmek istediğinize emin misiniz?')) return;
     try {
@@ -171,12 +185,14 @@ const fetchAllPlaklar = async () => {
   };
 
   return (
-    <div style={{ width: '100%', maxWidth: '1200px', margin: '2px auto', padding: '0 20px', width: '100%', boxSizing: 'border-box' }}>
+    <div style={{ width: '100%', maxWidth: '1200px', margin: '2px auto', padding: '0 20px', boxSizing: 'border-box' }}>
       
       {/* BAŞLIK */}
       <div style={{ backgroundColor: '#ff9e00', color: 'white', padding: '25px', border: '4px solid #1a1a1a', boxShadow: '8px 8px 0px black', marginBottom: '25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-        <h1 style={{ margin: 0, fontSize: '1.8rem', textTransform: 'uppercase' }}> <User2Icon size={24} color="blue" /> HESABIM </h1>
-        <span style={{ backgroundColor: 'black', color: '#ffff', padding: '6px 12px', fontWeight: 'black', fontSize: '0.85rem' }}>
+        <h1 style={{ margin: 0, fontSize: '1.8rem', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <User2Icon size={28} color="black" /> HESABIM
+        </h1>
+        <span style={{ backgroundColor: 'black', color: '#ffff', padding: '6px 12px', fontWeight: 'bold', fontSize: '0.85rem' }}>
           {email || user?.email}
         </span>
       </div>
@@ -191,25 +207,16 @@ const fetchAllPlaklar = async () => {
         </button>
         <button onClick={() => setActiveTab('profile')} className="brutal-btn" style={{ backgroundColor: activeTab === 'profile' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
           <User size={18} color="blue" /> ÜYELİK BİLGİLERİ & ŞİFRE
-            </button>
-            <button 
-  onClick={() => setActiveTab('feedback')} 
-  className="brutal-btn" 
-  style={{ backgroundColor: activeTab === 'feedback' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit'  }}
->
-  <MessageSquareQuote size={18} color="green" /> GÖRÜŞ & ÖNERİLER
-              </button>
-              <button 
-  type="button"
-  onClick={() => setActiveTab('contact')} 
-  className="brutal-btn" 
- style={{ backgroundColor: activeTab === 'contact' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit'  }}
->
-  <PhoneCall size={18} color="purple" /> BİZE ULAŞIN
-</button>
+        </button>
+        <button onClick={() => setActiveTab('feedback')} className="brutal-btn" style={{ backgroundColor: activeTab === 'feedback' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
+          <MessageSquareQuote size={18} color="green" /> GÖRÜŞ & ÖNERİLER
+        </button>
+        <button type="button" onClick={() => setActiveTab('contact')} className="brutal-btn" style={{ backgroundColor: activeTab === 'contact' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
+          <PhoneCall size={18} color="purple" /> BİZE ULAŞIN
+        </button>
       </div>
 
-      {/* 1. SİPARİŞLERİM SEKMESİ (siparisKalemleri ile çalışan yapı) */}
+      {/* 1. SİPARİŞLERİM SEKMESİ */}
       {activeTab === 'orders' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {loadingOrders ? (
@@ -223,8 +230,6 @@ const fetchAllPlaklar = async () => {
           ) : (
             orders.map(order => (
               <div key={order._id} style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a' }}>
-                
-                {/* SİPARİŞ ÜST BİLGİ */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #1a1a1a', paddingBottom: '12px', marginBottom: '15px', flexWrap: 'wrap', gap: '10px' }}>
                   <div>
                     <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#666' }}>SİPARİŞ KODU</span>
@@ -238,8 +243,7 @@ const fetchAllPlaklar = async () => {
                     <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'black' }}>DURUM</span>
                     <div>
                       <span style={{ 
-                                    backgroundColor: order.durum === 'İptal Edildi' ? '#de1010' : order.durum === 'Kargoda' ? '#ff9e00' : order.durum === 'Teslim Edildi' ? '#4caf50' :
-                                        '#d4ed6e', 
+                        backgroundColor: order.durum === 'İptal Edildi' ? '#de1010' : order.durum === 'Kargoda' ? '#ff9e00' : order.durum === 'Teslim Edildi' ? '#4caf50' : '#d4ed6e', 
                         color: '#1a1a1a', padding: '10px 15px', border: '2px solid #1a1a1a', fontWeight: 'bold', fontSize: '0.85rem', display: 'inline-block', marginTop: '3px' 
                       }}>
                         {order.durum || 'Hazırlanıyor'}
@@ -248,70 +252,42 @@ const fetchAllPlaklar = async () => {
                   </div>
                 </div>
 
-                
-                    {/* SİPARİŞ EDİLEN PLAKLAR (siparisKalemleri) */}
-<div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        {(order.siparisKalemleri || []).map((item, idx) => {
-      
-  const eslesenPlak = allPlaklar.find(p => 
-      (p._id && (p._id === item.plak || p._id === item._id || p._id === item.product)) ||
-      (p.ad && item.ad && p.ad.trim().toLowerCase() === item.ad.trim().toLowerCase())
-    );
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {(order.siparisKalemleri || []).map((item, idx) => {
+                    const eslesenPlak = allPlaklar.find(p => 
+                      (p._id && (p._id === item.plak || p._id === item._id || p._id === item.product)) ||
+                      (p.ad && item.ad && p.ad.trim().toLowerCase() === item.ad.trim().toLowerCase())
+                    );
 
-    // 2. Resim URL'si: item içindeki -> eslesenPlak içindeki -> sabit vinil ikonu
-    const resimUrl = item.resim || item.gorsel || eslesenPlak?.resim || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=150';
-    // Görsel kaynağını yakala (yoksa şık bir vinil yedek görseli)
-   
-    return (
-      <div 
-        key={idx} 
-        style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          borderBottom: '1px dashed #ccc', 
-          paddingBottom: '8px' 
-        }}
-      >
-        {/* Sol Kısım: Küçük Plak Resmi + İsim + Adet */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <img 
-            src={resimUrl} 
-            alt={item.ad} 
-            referrerPolicy="no-referrer"
-            onError={(e) => {
-              if (!e.target.dataset.fallback) {
-                e.target.dataset.fallback = "true";
-                e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=120';
-              }
-            }}
-            style={{ 
-              width: '42px', 
-              height: '42px', 
-              objectFit: 'cover', 
-              border: '2px solid #1a1a1a', 
-              backgroundColor: '#eee',
-              boxShadow: '2px 2px 0px #1a1a1a',
-              flexShrink: 0
-            }}
-          />
-          <span style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>
-            {item.ad} <span style={{ color: '#d97706', fontWeight: '900' }}>(x{item.adet})</span>
-          </span>
-        </div>
+                    const resimUrl = item.resim || item.gorsel || eslesenPlak?.resim || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=150';
 
-        {/* Sağ Kısım: Tutar */}
-        <span style={{ fontWeight: 'black', fontSize: '1rem', whiteSpace: 'nowrap' }}>
-          {(item.fiyat * item.adet).toFixed(2)} TL
-        </span>
-      </div>
-    );
-  })}
-</div>
+                    return (
+                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px dashed #ccc', paddingBottom: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <img 
+                            src={resimUrl} 
+                            alt={item.ad} 
+                            referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              if (!e.target.dataset.fallback) {
+                                e.target.dataset.fallback = "true";
+                                e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=120';
+                              }
+                            }}
+                            style={{ width: '42px', height: '42px', objectFit: 'cover', border: '2px solid #1a1a1a', backgroundColor: '#eee', boxShadow: '2px 2px 0px #1a1a1a', flexShrink: 0 }}
+                          />
+                          <span style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>
+                            {item.ad} <span style={{ color: '#d97706', fontWeight: '900' }}>(x{item.adet})</span>
+                          </span>
+                        </div>
+                        <span style={{ fontWeight: 'black', fontSize: '1rem', whiteSpace: 'nowrap' }}>
+                          {(item.fiyat * item.adet).toFixed(2)} TL
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
 
-
-
-                {/* ALT DETAYLAR VE İPTAL BUTONU */}
                 <div style={{ marginTop: '15px', paddingTop: '12px', borderTop: '2px solid #1a1a1a', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                   <div>
                     {order.teslimatBilgileri?.adres && (
@@ -342,7 +318,7 @@ const fetchAllPlaklar = async () => {
         </div>
       )}
 
-      {/* 2. ADRESLERİM SEKMESİ (AccountPage'deki çalışan orijinal kod) */}
+      {/* 2. ADRESLERİM SEKMESİ */}
       {activeTab === 'addresses' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
@@ -392,7 +368,7 @@ const fetchAllPlaklar = async () => {
         </div>
       )}
 
-      {/* 3. ÜYELİK VE ŞİFRE BİLGİLERİ (AccountPage'deki çalışan orijinal kod) */}
+      {/* 3. ÜYELİK VE ŞİFRE BİLGİLERİ */}
       {activeTab === 'profile' && (
         <form onSubmit={handleUpdateProfile} style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '30px', boxShadow: '8px 8px 0px #1a1a1a', display: 'flex', flexDirection: 'column', gap: '15px' }}>
           <div>
@@ -413,220 +389,147 @@ const fetchAllPlaklar = async () => {
         </form>
       )}
 
-          {/* 4. GÖRÜŞ VE ÖNERİLER SEKMESİ */}
-{activeTab === 'feedback' && (
-  <form onSubmit={handleSendFeedback} style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '30px', boxShadow: '8px 8px 0px #1a1a1a', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-    <div style={{ borderBottom: '2px solid #1a1a1a', paddingBottom: '10px', marginBottom: '5px' }}>
-      <h3 style={{ margin: 0, textTransform: 'uppercase', fontSize: '1.2rem' }}><MessageSquareQuote size={22} color="black" /> BİZE FİKİRLERİNİZİ YAZIN</h3>
-      <p style={{ margin: '5px 0 0 0', fontSize: '0.85rem', color: '#555', fontWeight: 'bold' }}>
-        Plak koleksiyonumuz veya sitemiz hakkındaki görüş, öneri ve istek plaklarınızı bizimle paylaşabilirsiniz.
-      </p>
-    </div>
-
-    <div>
-      <label style={{ fontWeight: 'bold', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>AD SOYAD</label>
-      <input 
-        required 
-        type="text" 
-        value={name} 
-        onChange={e => setName(e.target.value)} 
-        style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} 
-      />
-    </div>
-
-    <div>
-      <label style={{ fontWeight: 'bold', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>GÖRÜŞ, ÖNERİ VEYA İSTEK PLAKLARINIZ</label>
-      <textarea 
-        required 
-        rows={5} 
-        placeholder="Düşüncelerinizi buraya yazabilirsiniz..." 
-        value={feedbackMesaj} 
-        onChange={e => setFeedbackMesaj(e.target.value)} 
-        style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box', fontFamily: 'inherit' }} 
-      />
-    </div>
-
-    <button 
-      type="submit" 
-      disabled={feedbackLoading}
-      className="brutal-btn" 
-      style={{ 
-        backgroundColor: '#4caf50', 
-        color: 'white', 
-        border: '3px solid #1a1a1a', 
-        padding: '12px', 
-        fontWeight: 'bold', 
-        cursor: 'pointer', 
-        marginTop: '5px', 
-        fontSize: '1rem', 
-        fontFamily: 'inherit',
-        boxShadow: '4px 4px 0px #1a1a1a'
-      }}
-    >
-      {feedbackLoading ? 'GÖNDERİLİYOR...' : 'GÖRÜŞÜ GÖNDER '}
-    </button>
-  </form>
-          )}
-          {/* 5. BİZE ULAŞIN SEKMESİ */}
-{activeTab === 'contact' && (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-    
-    {/* ÜST BAŞLIK KARTI */}
-    <div style={{ 
-      backgroundColor: '#ffd166', 
-      border: '4px solid #1a1a1a', 
-      padding: '20px', 
-      boxShadow: '6px 6px 0px #1a1a1a' 
-    }}>
-      <h3 style={{ margin: 0, fontSize: '1.4rem', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        BİZİMLE İLETİŞİME GEÇİN
-      </h3>
-      <p style={{ margin: '6px 0 0 0', fontWeight: 'bold', fontSize: '0.9rem', color: '#1a1a1a' }}>
-        Siparişleriniz, plak kondisyonları veya merak ettiğiniz her konuda bize aşağıdaki kanallardan dilediğiniz zaman ulaşabilirsiniz.
-      </p>
-    </div>
-
-    {/* İLETİŞİM BİLGİ KARTLARI (GRID) */}
-    <div style={{ 
-      display: 'grid', 
-      gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
-      gap: '15px' 
-    }}>
-      
-      {/* 1. Müşteri Destek / E-Posta */}
-      <div style={{ 
-        backgroundColor: 'white', 
-        border: '3px solid #1a1a1a', 
-        padding: '20px', 
-        boxShadow: '5px 5px 0px #1a1a1a',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ backgroundColor: '#118ab2', color: 'white', padding: '8px', border: '2px solid #1a1a1a' }}>
-            <Mail size={20} />
+      {/* 4. GÖRÜŞ VE ÖNERİLER SEKMESİ */}
+      {activeTab === 'feedback' && (
+        <form onSubmit={handleSendFeedback} style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '30px', boxShadow: '8px 8px 0px #1a1a1a', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <div style={{ borderBottom: '2px solid #1a1a1a', paddingBottom: '10px', marginBottom: '5px' }}>
+            <h3 style={{ margin: 0, textTransform: 'uppercase', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <MessageSquareQuote size={22} color="black" /> BİZE FİKİRLERİNİZİ YAZIN
+            </h3>
+            <p style={{ margin: '5px 0 0 0', fontSize: '0.85rem', color: '#555', fontWeight: 'bold' }}>
+              Plak koleksiyonumuz veya sitemiz hakkındaki görüş, öneri ve istek plaklarınızı bizimle paylaşabilirsiniz.
+            </p>
           </div>
-          <strong style={{ fontSize: '1rem', textTransform: 'uppercase' }}>E-POSTA DESTEK</strong>
-        </div>
-        <p style={{ margin: 0, fontSize: '0.85rem', color: '#555', fontWeight: 'bold' }}>Tüm sorularınız için bize yazın:</p>
-        <a 
-          href="mailto:destek@vinvin.com" 
-          style={{ fontWeight: '900', color: '#1a1a1a', textDecoration: 'none', backgroundColor: '#eee', padding: '6px 10px', border: '1.5px solid #1a1a1a', textAlign: 'center' }}
-        >
-          destek@vinvin.com ✉️
-        </a>
-      </div>
 
-      {/* 2. Telefon & WhatsApp */}
-      <div style={{ 
-        backgroundColor: 'white', 
-        border: '3px solid #1a1a1a', 
-        padding: '20px', 
-        boxShadow: '5px 5px 0px #1a1a1a',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ backgroundColor: '#06d6a0', color: '#1a1a1a', padding: '8px', border: '2px solid #1a1a1a' }}>
-            <PhoneCall size={20} />
+          <div>
+            <label style={{ fontWeight: 'bold', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>AD SOYAD</label>
+            <input 
+              required 
+              type="text" 
+              value={name} 
+              onChange={e => setName(e.target.value)} 
+              style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} 
+            />
           </div>
-          <strong style={{ fontSize: '1rem', textTransform: 'uppercase' }}>TELEFON & WHATSAPP</strong>
-        </div>
-        <p style={{ margin: 0, fontSize: '0.85rem', color: '#555', fontWeight: 'bold' }}>Müşteri Hizmetleri Hattı:</p>
-        <a 
-          href="tel:+905551234567" 
-          style={{ fontWeight: '900', color: '#1a1a1a', textDecoration: 'none', backgroundColor: '#eee', padding: '6px 10px', border: '1.5px solid #1a1a1a', textAlign: 'center' }}
-        >
-          +90 (555) 123 45 67 
-        </a>
-      </div>
 
-      {/* 3. Çalışma Saatleri */}
-      <div style={{ 
-        backgroundColor: 'white', 
-        border: '3px solid #1a1a1a', 
-        padding: '20px', 
-        boxShadow: '5px 5px 0px #1a1a1a',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ backgroundColor: '#ff9e00', color: '#1a1a1a', padding: '8px', border: '2px solid #1a1a1a' }}>
-            <Clock size={20} />
+          <div>
+            <label style={{ fontWeight: 'bold', fontSize: '0.85rem', display: 'block', marginBottom: '5px' }}>GÖRÜŞ, ÖNERİ VEYA İSTEK PLAKLARINIZ</label>
+            <textarea 
+              required 
+              rows={5} 
+              placeholder="Düşüncelerinizi buraya yazabilirsiniz..." 
+              value={feedbackMesaj} 
+              onChange={e => setFeedbackMesaj(e.target.value)} 
+              style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box', fontFamily: 'inherit' }} 
+            />
           </div>
-          <strong style={{ fontSize: '1rem', textTransform: 'uppercase' }}>ÇALIŞMA SAATLERİ</strong>
-        </div>
-        <p style={{ margin: 0, fontSize: '0.85rem', color: '#555', fontWeight: 'bold' }}>Hafta İçi & Cumartesi:</p>
-        <div style={{ fontWeight: '900', color: '#1a1a1a', backgroundColor: '#eee', padding: '6px 10px', border: '1.5px solid #1a1a1a', textAlign: 'center', fontSize: '0.85rem' }}>
-          09:00 - 19:00 (Pazar Kapalı)
-        </div>
-      </div>
 
-      {/* 4. Fiziksel Mağaza / Dükkan */}
-      <div style={{ 
-        backgroundColor: 'white', 
-        border: '3px solid #1a1a1a', 
-        padding: '20px', 
-        boxShadow: '5px 5px 0px #1a1a1a',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ backgroundColor: '#ef476f', color: 'white', padding: '8px', border: '2px solid #1a1a1a' }}>
-            <MapPin size={20} />
+          <button 
+            type="submit" 
+            disabled={feedbackLoading}
+            className="brutal-btn" 
+            style={{ 
+              backgroundColor: '#4caf50', 
+              color: 'white', 
+              border: '3px solid #1a1a1a', 
+              padding: '12px', 
+              fontWeight: 'bold', 
+              cursor: 'pointer', 
+              marginTop: '5px', 
+              fontSize: '1rem', 
+              fontFamily: 'inherit', 
+              boxShadow: '4px 4px 0px #1a1a1a' 
+            }}
+          >
+            {feedbackLoading ? 'GÖNDERİLİYOR...' : 'GÖRÜŞÜ GÖNDER '}
+          </button>
+        </form>
+      )}
+
+      {/* 5. BİZE ULAŞIN SEKMESİ */}
+      {activeTab === 'contact' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+          <div style={{ backgroundColor: '#ffd166', border: '4px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a' }}>
+            <h3 style={{ margin: 0, fontSize: '1.4rem', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              BİZİMLE İLETİŞİME GEÇİN
+            </h3>
+            <p style={{ margin: '6px 0 0 0', fontWeight: 'bold', fontSize: '0.9rem', color: '#1a1a1a' }}>
+              Siparişleriniz, plak kondisyonları veya merak ettiğiniz her konuda bize aşağıdaki kanallardan dilediğiniz zaman ulaşabilirsiniz.
+            </p>
           </div>
-          <strong style={{ fontSize: '1rem', textTransform: 'uppercase' }}>PLAK DÜKKANI</strong>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '15px' }}>
+            <div style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '20px', boxShadow: '5px 5px 0px #1a1a1a', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ backgroundColor: '#118ab2', color: 'white', padding: '8px', border: '2px solid #1a1a1a' }}>
+                  <Mail size={20} />
+                </div>
+                <strong style={{ fontSize: '1rem', textTransform: 'uppercase' }}>E-POSTA DESTEK</strong>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: '#555', fontWeight: 'bold' }}>Tüm sorularınız için bize yazın:</p>
+              <a href="mailto:destek@vinvin.com" style={{ fontWeight: '900', color: '#1a1a1a', textDecoration: 'none', backgroundColor: '#eee', padding: '6px 10px', border: '1.5px solid #1a1a1a', textAlign: 'center' }}>
+                destek@vinvin.com ✉️
+              </a>
+            </div>
+
+            <div style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '20px', boxShadow: '5px 5px 0px #1a1a1a', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ backgroundColor: '#06d6a0', color: '#1a1a1a', padding: '8px', border: '2px solid #1a1a1a' }}>
+                  <PhoneCall size={20} />
+                </div>
+                <strong style={{ fontSize: '1rem', textTransform: 'uppercase' }}>TELEFON & WHATSAPP</strong>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: '#555', fontWeight: 'bold' }}>Müşteri Hizmetleri Hattı:</p>
+              <a href="tel:+905551234567" style={{ fontWeight: '900', color: '#1a1a1a', textDecoration: 'none', backgroundColor: '#eee', padding: '6px 10px', border: '1.5px solid #1a1a1a', textAlign: 'center' }}>
+                +90 (555) 123 45 67
+              </a>
+            </div>
+
+            <div style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '20px', boxShadow: '5px 5px 0px #1a1a1a', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ backgroundColor: '#ff9e00', color: '#1a1a1a', padding: '8px', border: '2px solid #1a1a1a' }}>
+                  <Clock size={20} />
+                </div>
+                <strong style={{ fontSize: '1rem', textTransform: 'uppercase' }}>ÇALIŞMA SAATLERİ</strong>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: '#555', fontWeight: 'bold' }}>Hafta İçi & Cumartesi:</p>
+              <div style={{ fontWeight: '900', color: '#1a1a1a', backgroundColor: '#eee', padding: '6px 10px', border: '1.5px solid #1a1a1a', textAlign: 'center', fontSize: '0.85rem' }}>
+                09:00 - 19:00 (Pazar Kapalı)
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '20px', boxShadow: '5px 5px 0px #1a1a1a', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ backgroundColor: '#ef476f', color: 'white', padding: '8px', border: '2px solid #1a1a1a' }}>
+                  <MapPin size={20} />
+                </div>
+                <strong style={{ fontSize: '1rem', textTransform: 'uppercase' }}>PLAK DÜKKANI</strong>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: '#555', fontWeight: 'bold' }}>Kahvemizi içip plak dinlemeye bekleriz:</p>
+              <div style={{ fontWeight: 'bold', color: '#1a1a1a', fontSize: '0.8rem', backgroundColor: '#eee', padding: '6px 10px', border: '1.5px solid #1a1a1a' }}>
+                📍 Moda Cad. No: 42/A Kadıköy, İstanbul
+              </div>
+            </div>
+          </div>
+
+          <div style={{ backgroundColor: '#ffffff', border: '4px solid #1a1a1a', padding: '20px', boxShadow: '6px 6px 0px #1a1a1a', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+            <div>
+              <h4 style={{ margin: 0, fontSize: '1.1rem', textTransform: 'uppercase' }}>💡 Bir önerin veya plak isteğin mi var?</h4>
+              <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#666', fontWeight: 'bold' }}>
+                Düşüncelerini doğrudan ekibimize iletmek için "Görüş & Öneriler" formumuzu da kullanabilirsin.
+              </p>
+            </div>
+            <button 
+              type="button" 
+              onClick={() => setActiveTab('feedback')} 
+              className="brutal-btn" 
+              style={{ backgroundColor: '#ff9e00', color: '#1a1a1a', border: '2px solid #1a1a1a', padding: '10px 16px', fontWeight: '900', cursor: 'pointer', boxShadow: '3px 3px 0px #1a1a1a' }}
+            >
+              ÖNERİ FORMU'NA GİT
+            </button>
+          </div>
         </div>
-        <p style={{ margin: 0, fontSize: '0.85rem', color: '#555', fontWeight: 'bold' }}>Kahvemizi içip plak dinlemeye bekleriz:</p>
-        <div style={{ fontWeight: 'bold', color: '#1a1a1a', fontSize: '0.8rem', backgroundColor: '#eee', padding: '6px 10px', border: '1.5px solid #1a1a1a' }}>
-          📍 Moda Cad. No: 42/A Kadıköy, İstanbul
-        </div>
-      </div>
-
-    </div>
-
-    {/* HIZLI YÖNLENDİRME / SIKÇA SORULAN SORULAR BİLGİ KUTUSU */}
-    <div style={{ 
-      backgroundColor: '#ffffff', 
-      border: '4px solid #1a1a1a', 
-      padding: '20px', 
-      boxShadow: '6px 6px 0px #1a1a1a',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      flexWrap: 'wrap',
-      gap: '15px'
-    }}>
-      <div>
-        <h4 style={{ margin: 0, fontSize: '1.1rem', textTransform: 'uppercase' }}>💡 Bir önerin veya plak isteğin mi var?</h4>
-        <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#666', fontWeight: 'bold' }}>
-          Düşüncelerini doğrudan ekibimize iletmek için "Görüş & Öneriler" formumuzu da kullanabilirsin.
-        </p>
-      </div>
-      <button 
-        type="button"
-        onClick={() => setActiveTab('feedback')}
-        className="brutal-btn"
-        style={{ 
-          backgroundColor: '#ff9e00', 
-          color: '#1a1a1a', 
-          border: '2px solid #1a1a1a', 
-          padding: '10px 16px', 
-          fontWeight: '900', 
-          cursor: 'pointer',
-          boxShadow: '3px 3px 0px #1a1a1a'
-        }}
-      >
-        ÖNERİ FORMU'NA GİT
-      </button>
-    </div>
-
-  </div>
-)}
+      )}
 
     </div>
   );
