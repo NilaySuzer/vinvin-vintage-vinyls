@@ -22,7 +22,12 @@ const productSchema = new mongoose.Schema({
   stokHaberVerListesi: [{
   type: mongoose.Schema.Types.ObjectId,
   ref: 'User'
-}]
+  }],
+  // models/Product.js şemasına eklenecek:
+indirimOrani: { 
+  type: Number, 
+  default: 0 // Yüzde olarak: 0 ise indirim yok, 20 ise %20 indirim
+}
 }, { timestamps: true });
 
 export default mongoose.model('Product', productSchema);

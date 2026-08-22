@@ -60,9 +60,48 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavor
           <h2 style={{ fontSize: '3rem', margin: 0, lineHeight: 1.1 }}>{plak.ad}</h2>
           <p style={{ fontSize: '1.5rem', color: '#666', margin: '5px 0 15px 0', fontWeight: 'bold' }}>{plak.sanatci}</p>
           
-          <div style={{ padding: '15px 25px', backgroundColor: '#e2f0cb', border: '3px solid #1a1a1a', display: 'inline-block', fontWeight: 'bold', fontSize: '1.8rem', boxShadow: '4px 4px 0px #1a1a1a' }}>
-            {plak.fiyat} TL
-          </div>
+         {/* 1. KARTIN SAĞ/SOL ÜST KÖŞESİNE İNDİRİM ROZETİ */}
+{plak.indirimOrani > 0 && (
+  <span
+    style={{
+      position: 'absolute',
+      top: '160px',
+      left: '55px',
+      backgroundColor: '#db0335',
+      color: 'white',
+      fontWeight: '900',
+      fontSize: '1.2rem',
+      padding: '15px 30px',
+      border: '2px solid #1a1a1a',
+      boxShadow: '3px 3px 0px #1a1a1a',
+      zIndex: 2,
+      transform: 'rotate(-20deg)'
+    }}
+  >
+    %{plak.indirimOrani} İNDİRİM
+  </span>
+)}
+
+{/* 2. FİYAT ALANI (Üstü Çizili Eski Fiyat + İndirimli Fiyat) */}
+<div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+  {plak.indirimOrani > 0 ? (
+    <>
+      {/* İndirimli Fiyat */}
+      <span style={{ fontSize: '2.0rem', fontWeight: 'bold', color: 'red' }}>
+        {(plak.fiyat * (1 - plak.indirimOrani / 100)).toFixed(2)} TL
+      </span>
+      {/* Eski Fiyat (Üstü Çizili) */}
+      <span style={{ fontSize: '1.5rem', color: '#888', textDecoration: 'line-through', textDecorationColor: 'red', fontWeight: 'bold' }}>
+        {plak.fiyat} TL
+      </span>
+    </>
+  ) : (
+    /* Normal Fiyat */
+    <span style={{ fontSize: '2.0rem', fontWeight: 'bold', color: 'orange' }}>
+      {plak.fiyat} TL
+    </span>
+  )}
+</div>
 
           <div style={{ marginTop: '15px', display: 'flex', gap: '10px', alignItems: 'center' }}>
             <span style={{ backgroundColor: (plak.stok ?? 5) > 0 ? '#0dae32' : '#c4101f', color: (plak.stok ?? 5) > 0 ? '#eff8f1' : '#eacbce', padding: '10px 15px', border: '2px solid #1a1a1a', fontWeight: 'bold', fontSize: '1.1rem' }}>
@@ -924,9 +963,27 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
                 <div style={{ fontWeight: 'black', fontSize: '0.95rem' }}>{plak.ad}</div>
                 <div style={{ fontSize: '0.8rem', color: '#666', fontWeight: 'bold' }}>{plak.sanatci}</div>
               </div>
-              <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#ff9e00', textShadow: '1px 1px 0px #1a1a1a' }}>
-                {plak.fiyat} TL
-              </div>
+           
+{/* 2. FİYAT ALANI (Üstü Çizili Eski Fiyat + İndirimli Fiyat) */}
+<div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+  {plak.indirimOrani > 0 ? (
+    <>
+      {/* İndirimli Fiyat */}
+      <span style={{ fontSize: '1.0rem', fontWeight: 'bold', color: 'red' }}>
+        {(plak.fiyat * (1 - plak.indirimOrani / 100)).toFixed(2)} TL
+      </span>
+      {/* Eski Fiyat (Üstü Çizili) */}
+      <span style={{ fontSize: '0.85rem', color: '#888', textDecoration: 'line-through', textDecorationColor: 'red', fontWeight: 'bold' }}>
+        {plak.fiyat} TL
+      </span>
+    </>
+  ) : (
+    /* Normal Fiyat */
+    <span style={{ fontSize: '1.0rem', fontWeight: 'bold', color: 'orange' }}>
+      {plak.fiyat} TL
+    </span>
+  )}
+</div>
             </Link>
           );
         })
@@ -1057,7 +1114,48 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
 
       {/* 3. DİNAMİK BUTON (STOK VARSA SEPETE EKLE / BİTTİYSE GELİNCE HABER VER) */}
       <div style={{  marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'  }}>
-      <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
+      {/* 1. KARTIN SAĞ/SOL ÜST KÖŞESİNE İNDİRİM ROZETİ */}
+{plak.indirimOrani > 0 && (
+  <span
+    style={{
+      position: 'absolute',
+      top: '25px',
+      left: '5px',
+      backgroundColor: '#db0335',
+      color: 'white',
+      fontWeight: '900',
+      fontSize: '0.85rem',
+      padding: '8px 16px',
+      border: '2px solid #1a1a1a',
+      boxShadow: '3px 3px 0px #1a1a1a',
+      zIndex: 2,
+      transform: 'rotate(-20deg)'
+    }}
+  >
+    %{plak.indirimOrani} İNDİRİM
+  </span>
+)}
+
+{/* 2. FİYAT ALANI (Üstü Çizili Eski Fiyat + İndirimli Fiyat) */}
+<div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+  {plak.indirimOrani > 0 ? (
+    <>
+      {/* İndirimli Fiyat */}
+      <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'red' }}>
+        {(plak.fiyat * (1 - plak.indirimOrani / 100)).toFixed(2)} TL
+      </span>
+      {/* Eski Fiyat (Üstü Çizili) */}
+      <span style={{ fontSize: '1.0rem', color: '#888', textDecoration: 'line-through', textDecorationColor: 'red', fontWeight: 'bold' }}>
+        {plak.fiyat} TL
+      </span>
+    </>
+  ) : (
+    /* Normal Fiyat */
+    <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'orange' }}>
+      {plak.fiyat} TL
+    </span>
+  )}
+</div>
   {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
     <button
       type="button"
@@ -1191,7 +1289,48 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
 
                 {/* 3. DİNAMİK BUTON (STOK VARSA SEPETE EKLE / BİTTİYSE GELİNCE HABER VER) */}
       <div style={{  marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'  }}>
-      <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
+       {/* 1. KARTIN SAĞ/SOL ÜST KÖŞESİNE İNDİRİM ROZETİ */}
+{plak.indirimOrani > 0 && (
+  <span
+    style={{
+      position: 'absolute',
+      top: '25px',
+      left: '5px',
+      backgroundColor: '#db0335',
+      color: 'white',
+      fontWeight: '900',
+      fontSize: '0.85rem',
+      padding: '8px 16px',
+      border: '2px solid #1a1a1a',
+      boxShadow: '3px 3px 0px #1a1a1a',
+      zIndex: 2,
+      transform: 'rotate(-20deg)'
+    }}
+  >
+    %{plak.indirimOrani} İNDİRİM
+  </span>
+)}
+
+{/* 2. FİYAT ALANI (Üstü Çizili Eski Fiyat + İndirimli Fiyat) */}
+<div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+  {plak.indirimOrani > 0 ? (
+    <>
+      {/* İndirimli Fiyat */}
+      <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'red' }}>
+        {(plak.fiyat * (1 - plak.indirimOrani / 100)).toFixed(2)} TL
+      </span>
+      {/* Eski Fiyat (Üstü Çizili) */}
+      <span style={{ fontSize: '1.0rem', color: '#888', textDecoration: 'line-through', textDecorationColor: 'red', fontWeight: 'bold' }}>
+        {plak.fiyat} TL
+      </span>
+    </>
+  ) : (
+    /* Normal Fiyat */
+    <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'orange' }}>
+      {plak.fiyat} TL
+    </span>
+  )}
+</div>
   {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
     <button
       type="button"
@@ -1319,7 +1458,48 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
               </Link>
             {/* 3. DİNAMİK BUTON (STOK VARSA SEPETE EKLE / BİTTİYSE GELİNCE HABER VER) */}
       <div style={{  marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'  }}>
-      <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
+      {/* 1. KARTIN SAĞ/SOL ÜST KÖŞESİNE İNDİRİM ROZETİ */}
+{plak.indirimOrani > 0 && (
+  <span
+    style={{
+      position: 'absolute',
+      top: '25px',
+      left: '5px',
+      backgroundColor: '#db0335',
+      color: 'white',
+      fontWeight: '900',
+      fontSize: '0.85rem',
+      padding: '8px 16px',
+      border: '2px solid #1a1a1a',
+      boxShadow: '3px 3px 0px #1a1a1a',
+      zIndex: 2,
+      transform: 'rotate(-20deg)'
+    }}
+  >
+    %{plak.indirimOrani} İNDİRİM
+  </span>
+)}
+
+{/* 2. FİYAT ALANI (Üstü Çizili Eski Fiyat + İndirimli Fiyat) */}
+<div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+  {plak.indirimOrani > 0 ? (
+    <>
+      {/* İndirimli Fiyat */}
+      <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'red' }}>
+        {(plak.fiyat * (1 - plak.indirimOrani / 100)).toFixed(2)} TL
+      </span>
+      {/* Eski Fiyat (Üstü Çizili) */}
+      <span style={{ fontSize: '1.0rem', color: '#888', textDecoration: 'line-through', textDecorationColor: 'red', fontWeight: 'bold' }}>
+        {plak.fiyat} TL
+      </span>
+    </>
+  ) : (
+    /* Normal Fiyat */
+    <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'orange' }}>
+      {plak.fiyat} TL
+    </span>
+  )}
+</div>
   {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
     <button
       type="button"
@@ -1446,7 +1626,48 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
               </Link>
               {/* 3. DİNAMİK BUTON (STOK VARSA SEPETE EKLE / BİTTİYSE GELİNCE HABER VER) */}
       <div style={{  marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'  }}>
-      <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
+       {/* 1. KARTIN SAĞ/SOL ÜST KÖŞESİNE İNDİRİM ROZETİ */}
+{plak.indirimOrani > 0 && (
+  <span
+    style={{
+      position: 'absolute',
+      top: '25px',
+      left: '5px',
+      backgroundColor: '#db0335',
+      color: 'white',
+      fontWeight: '900',
+      fontSize: '0.85rem',
+      padding: '8px 16px',
+      border: '2px solid #1a1a1a',
+      boxShadow: '3px 3px 0px #1a1a1a',
+      zIndex: 2,
+      transform: 'rotate(-20deg)'
+    }}
+  >
+    %{plak.indirimOrani} İNDİRİM
+  </span>
+)}
+
+{/* 2. FİYAT ALANI (Üstü Çizili Eski Fiyat + İndirimli Fiyat) */}
+<div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+  {plak.indirimOrani > 0 ? (
+    <>
+      {/* İndirimli Fiyat */}
+      <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'red' }}>
+        {(plak.fiyat * (1 - plak.indirimOrani / 100)).toFixed(2)} TL
+      </span>
+      {/* Eski Fiyat (Üstü Çizili) */}
+      <span style={{ fontSize: '1.0rem', color: '#888', textDecoration: 'line-through', textDecorationColor: 'red', fontWeight: 'bold' }}>
+        {plak.fiyat} TL
+      </span>
+    </>
+  ) : (
+    /* Normal Fiyat */
+    <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'orange' }}>
+      {plak.fiyat} TL
+    </span>
+  )}
+</div>
   {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
     <button
       type="button"
@@ -1573,7 +1794,48 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
               </Link>
             {/* 3. DİNAMİK BUTON (STOK VARSA SEPETE EKLE / BİTTİYSE GELİNCE HABER VER) */}
       <div style={{  marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'  }}>
-      <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
+       {/* 1. KARTIN SAĞ/SOL ÜST KÖŞESİNE İNDİRİM ROZETİ */}
+{plak.indirimOrani > 0 && (
+  <span
+    style={{
+      position: 'absolute',
+      top: '25px',
+      left: '5px',
+      backgroundColor: '#db0335',
+      color: 'white',
+      fontWeight: '900',
+      fontSize: '0.85rem',
+      padding: '8px 16px',
+      border: '2px solid #1a1a1a',
+      boxShadow: '3px 3px 0px #1a1a1a',
+      zIndex: 2,
+      transform: 'rotate(-20deg)'
+    }}
+  >
+    %{plak.indirimOrani} İNDİRİM
+  </span>
+)}
+
+{/* 2. FİYAT ALANI (Üstü Çizili Eski Fiyat + İndirimli Fiyat) */}
+<div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+  {plak.indirimOrani > 0 ? (
+    <>
+      {/* İndirimli Fiyat */}
+      <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'red' }}>
+        {(plak.fiyat * (1 - plak.indirimOrani / 100)).toFixed(2)} TL
+      </span>
+      {/* Eski Fiyat (Üstü Çizili) */}
+      <span style={{ fontSize: '1.0rem', color: '#888', textDecoration: 'line-through', textDecorationColor: 'red', fontWeight: 'bold' }}>
+        {plak.fiyat} TL
+      </span>
+    </>
+  ) : (
+    /* Normal Fiyat */
+    <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'orange' }}>
+      {plak.fiyat} TL
+    </span>
+  )}
+</div>
   {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
     <button
       type="button"
@@ -1704,7 +1966,48 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
                           </Link>
                          {/* 3. DİNAMİK BUTON (STOK VARSA SEPETE EKLE / BİTTİYSE GELİNCE HABER VER) */}
       <div style={{  marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'  }}>
-      <span style={{ fontWeight: 'black', fontSize: '1.1rem' }}>{plak.fiyat} TL</span>
+      {/* 1. KARTIN SAĞ/SOL ÜST KÖŞESİNE İNDİRİM ROZETİ */}
+{plak.indirimOrani > 0 && (
+  <span
+    style={{
+      position: 'absolute',
+      top: '25px',
+      left: '5px',
+      backgroundColor: '#db0335',
+      color: 'white',
+      fontWeight: '900',
+      fontSize: '0.85rem',
+      padding: '8px 16px',
+      border: '2px solid #1a1a1a',
+      boxShadow: '3px 3px 0px #1a1a1a',
+      zIndex: 2,
+      transform: 'rotate(-20deg)'
+    }}
+  >
+    %{plak.indirimOrani} İNDİRİM
+  </span>
+)}
+
+{/* 2. FİYAT ALANI (Üstü Çizili Eski Fiyat + İndirimli Fiyat) */}
+<div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+  {plak.indirimOrani > 0 ? (
+    <>
+      {/* İndirimli Fiyat */}
+      <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'red' }}>
+        {(plak.fiyat * (1 - plak.indirimOrani / 100)).toFixed(2)} TL
+      </span>
+      {/* Eski Fiyat (Üstü Çizili) */}
+      <span style={{ fontSize: '1.0rem', color: '#888', textDecoration: 'line-through', textDecorationColor: 'red', fontWeight: 'bold' }}>
+        {plak.fiyat} TL
+      </span>
+    </>
+  ) : (
+    /* Normal Fiyat */
+    <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'orange' }}>
+      {plak.fiyat} TL
+    </span>
+  )}
+</div>
   {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
     <button
       type="button"

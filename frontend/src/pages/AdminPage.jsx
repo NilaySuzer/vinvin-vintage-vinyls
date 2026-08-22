@@ -25,6 +25,21 @@ const AdminPage = () => {
   const [bildirimBaslik, setBildirimBaslik] = useState('');
   const [bildirimMesaj, setBildirimMesaj] = useState('');
   // --- VERİ ÇEKME FONKSİYONLARI ---
+  // AdminPage.jsx içine eklenecek düzenleme formu:
+const [duzenlenecekPlak, setDuzenlenecekPlak] = useState(null);
+
+const handlePlakGuncelle = async (e) => {
+  e.preventDefault();
+  try {
+    await API.put(`/products/${duzenlenecekPlak._id}`, duzenlenecekPlak);
+    alert('Plak bilgileri ve indirim başarıyla güncellendi! 🎉');
+    setDuzenlenecekPlak(null);
+    fetchAdminData(); // Listeyi yenile
+  } catch (err) {
+    alert('Güncelleme yapılamadı.');
+  }
+};
+
 
     const fetchFeedbacks = async () => {
       try {
@@ -351,6 +366,7 @@ const fetchAllPlaklar = async () => {
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    
                     {/* STOK DÜZENLEME ALANI */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ fontWeight: 'black', fontSize: '0.8rem' }}>STOK:</span>
@@ -368,7 +384,53 @@ const fetchAllPlaklar = async () => {
                         KAYDET
                       </button>
                     </div>
+                    <button
+  type="button"
+  onClick={() => setDuzenlenecekPlak(p)}
+  className="brutal-btn"
+  style={{
+    backgroundColor: '#87b5ff',
+    color: 'white',
+    border: '2px solid #1a1a1a',
+    padding: '6px 12px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    fontSize: '0.8rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px'
+  }}
+>
+ DÜZENLE
+                    </button>
+                    {duzenlenecekPlak && (
+  <div style={{ position: 'fixed', inset: 0,  zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+    <form onSubmit={handlePlakGuncelle} style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '25px', maxWidth: '500px', width: '100%', boxShadow: '10px 10px 0px #1a1a1a', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <h3 style={{ margin: 0, textTransform: 'uppercase' }}>✏️ PLAK DÜZENLE</h3>
+      
+      <label style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>PLAK ADI</label>
+      <input value={duzenlenecekPlak.ad} onChange={e => setDuzenlenecekPlak({...duzenlenecekPlak, ad: e.target.value})} style={{ padding: '8px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} />
 
+      <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ flex: 1 }}>
+          <label style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>FİYAT (TL)</label>
+          <input type="number" value={duzenlenecekPlak.fiyat} onChange={e => setDuzenlenecekPlak({...duzenlenecekPlak, fiyat: Number(e.target.value)})} style={{ width: '100%', padding: '8px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} />
+        </div>
+
+        <div style={{ flex: 1 }}>
+          <label style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>İNDİRİM ORANI (%)</label>
+          <input type="number" min="0" max="100" placeholder="Örn: 20" value={duzenlenecekPlak.indirimOrani || ''} onChange={e => setDuzenlenecekPlak({...duzenlenecekPlak, indirimOrani: Number(e.target.value)})} style={{ width: '100%', padding: '8px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box', backgroundColor: '#fff3cd' }} />
+        </div>
+      </div>
+
+
+      <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+        <button type="submit" className="brutal-btn" style={{ flex: 1, backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '10px', fontWeight: 'black', cursor: 'pointer' }}>GÜNCELLE</button>
+        <button type="button" onClick={() => setDuzenlenecekPlak(null)} style={{ flex: 1, backgroundColor: '#eee', border: '2px solid #1a1a1a', padding: '10px', fontWeight: 'black', cursor: 'pointer' }}>İPTAL</button>
+      </div>
+    </form>
+  </div>
+)}
                     <button onClick={() => handleDeleteProduct(pId)} className="brutal-btn" style={{ backgroundColor: '#ff4d4d', color: 'white', border: '2px solid #1a1a1a', padding: '6px 10px', cursor: 'pointer', fontWeight: 'bold' }}>
                       SİL 🗑️
                     </button>
