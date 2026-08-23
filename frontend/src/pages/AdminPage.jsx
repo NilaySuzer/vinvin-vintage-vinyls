@@ -28,19 +28,6 @@ const AdminPage = () => {
   // AdminPage.jsx içine eklenecek düzenleme formu:
 const [duzenlenecekPlak, setDuzenlenecekPlak] = useState(null);
 
-const handlePlakGuncelle = async (e) => {
-  e.preventDefault();
-  try {
-    await API.put(`/products/${duzenlenecekPlak._id}`, duzenlenecekPlak);
-    alert('Plak bilgileri ve indirim başarıyla güncellendi! 🎉');
-    setDuzenlenecekPlak(null);
-    fetchAdminData(); // Listeyi yenile
-  } catch (err) {
-    alert('Güncelleme yapılamadı.');
-  }
-};
-
-
     const fetchFeedbacks = async () => {
       try {
         const { data } = await API.get('/feedbacks');
@@ -281,7 +268,24 @@ const fetchAllPlaklar = async () => {
             <input required placeholder="Plak Adı" value={yeniPlak.ad} onChange={e => setYeniPlak({ ...yeniPlak, ad: e.target.value })} style={{ padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} />
             <input required placeholder="Sanatçı" value={yeniPlak.sanatci} onChange={e => setYeniPlak({ ...yeniPlak, sanatci: e.target.value })} style={{ padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} />
             <input required type="number" placeholder="Fiyat (TL)" value={yeniPlak.fiyat} onChange={e => setYeniPlak({ ...yeniPlak, fiyat: e.target.value })} style={{ padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} />
-            
+            <input 
+      required type="number"
+      placeholder="Baskı Yılı" 
+      value={yeniPlak.baskiYili} onChange={e => setYeniPlak({ ...yeniPlak, baskiYili: e.target.value })}
+      style={{ width: '100%', padding: '8px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} 
+    />
+    <select 
+      value={yeniPlak.kondisyon || 'Near Mint (NM)'} 
+      onChange={e => setYeniPlak({ ...yeniPlak, kondisyon: e.target.value })} 
+      style={{ width: '100%', padding: '8px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box', backgroundColor: 'white' }}
+    >
+      <option value="Jelatininde">Sıfır / Jelatininde</option>
+      <option value="Kusursuz">Kusursuz</option>
+      <option value="Çok İyi">Çok İyi</option>
+      <option value="İyi">İyi</option>
+      <option value="Çalınabilir">Yıpranmış / Çalınabilir</option>
+    </select>
+  
             <input 
     placeholder="Görsel URL Yapıştır (Örn: https://...)" 
     value={yeniPlak.resim} 
@@ -386,11 +390,11 @@ const fetchAllPlaklar = async () => {
                     </div>
                     <button
   type="button"
-  onClick={() => setDuzenlenecekPlak(p)}
+  onClick={() => setDuzenlenecekPlak({ ...p, _id: p._id || p.id })}
   className="brutal-btn"
   style={{
     backgroundColor: '#87b5ff',
-    color: 'white',
+    color: 'black',
     border: '2px solid #1a1a1a',
     padding: '6px 12px',
     fontWeight: 'bold',
@@ -401,36 +405,8 @@ const fetchAllPlaklar = async () => {
     gap: '4px'
   }}
 >
- DÜZENLE
-                    </button>
-                    {duzenlenecekPlak && (
-  <div style={{ position: 'fixed', inset: 0,  zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-    <form onSubmit={handlePlakGuncelle} style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '25px', maxWidth: '500px', width: '100%', boxShadow: '10px 10px 0px #1a1a1a', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      <h3 style={{ margin: 0, textTransform: 'uppercase' }}>✏️ PLAK DÜZENLE</h3>
-      
-      <label style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>PLAK ADI</label>
-      <input value={duzenlenecekPlak.ad} onChange={e => setDuzenlenecekPlak({...duzenlenecekPlak, ad: e.target.value})} style={{ padding: '8px', border: '2px solid #1a1a1a', fontWeight: 'bold' }} />
-
-      <div style={{ display: 'flex', gap: '10px' }}>
-        <div style={{ flex: 1 }}>
-          <label style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>FİYAT (TL)</label>
-          <input type="number" value={duzenlenecekPlak.fiyat} onChange={e => setDuzenlenecekPlak({...duzenlenecekPlak, fiyat: Number(e.target.value)})} style={{ width: '100%', padding: '8px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} />
-        </div>
-
-        <div style={{ flex: 1 }}>
-          <label style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>İNDİRİM ORANI (%)</label>
-          <input type="number" min="0" max="100" placeholder="Örn: 20" value={duzenlenecekPlak.indirimOrani || ''} onChange={e => setDuzenlenecekPlak({...duzenlenecekPlak, indirimOrani: Number(e.target.value)})} style={{ width: '100%', padding: '8px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box', backgroundColor: '#fff3cd' }} />
-        </div>
-      </div>
-
-
-      <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-        <button type="submit" className="brutal-btn" style={{ flex: 1, backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '10px', fontWeight: 'black', cursor: 'pointer' }}>GÜNCELLE</button>
-        <button type="button" onClick={() => setDuzenlenecekPlak(null)} style={{ flex: 1, backgroundColor: '#eee', border: '2px solid #1a1a1a', padding: '10px', fontWeight: 'black', cursor: 'pointer' }}>İPTAL</button>
-      </div>
-    </form>
-  </div>
-)}
+  DÜZENLE
+</button>
                     <button onClick={() => handleDeleteProduct(pId)} className="brutal-btn" style={{ backgroundColor: '#ff4d4d', color: 'white', border: '2px solid #1a1a1a', padding: '6px 10px', cursor: 'pointer', fontWeight: 'bold' }}>
                       SİL 🗑️
                     </button>
@@ -806,8 +782,136 @@ const fetchAllPlaklar = async () => {
         </div>
       )}
 
+      {duzenlenecekPlak && (
+        <EditProductModal 
+          plak={duzenlenecekPlak} 
+          onClose={() => setDuzenlenecekPlak(null)} 
+          onSuccess={() => {
+            setDuzenlenecekPlak(null);
+            fetchAdminData();
+          }} 
+        />
+      )}
+
     </div>
   );
 };
+// AdminPage.jsx dosyasının EN DIŞINA (export default AdminPage'in üstüne veya altına) yapıştır:
+const EditProductModal = ({ plak, onClose, onSuccess }) => {
+   const [loading, setLoading] = useState(false);
+  const gecerliKondisyonlar = ['Jelatininde', 'Kusursuz', 'Çok İyi', 'İyi', 'Çalınabilir'];
+  const [formData, setFormData] = useState({
+  ...plak,
+  kondisyon: gecerliKondisyonlar.includes(plak.kondisyon) ? plak.kondisyon : 'Jelatininde'
+});
+ 
 
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const plakId = formData._id || formData.id;
+    if (!plakId) {
+      alert('Plak ID bulunamadı!');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await API.put(`/products/${plakId}`, formData);
+      alert('Plak başarıyla güncellendi! 🎉');
+      onSuccess();
+    } catch (err) {
+      console.error('Güncelleme hatası:', err);
+      alert(err.response?.data?.message || 'Güncelleme yapılamadı.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(2px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+      <form onSubmit={handleSubmit} style={{ backgroundColor: 'white', border: '4px solid #1a1a1a', padding: '25px', maxWidth: '500px', width: '100%', boxShadow: '10px 10px 0px #1a1a1a', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <h3 style={{ margin: 0, textTransform: 'uppercase' }}>DÜZENLE</h3>
+
+        <div>
+          <label style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>PLAK ADI</label>
+          <input 
+            value={formData.ad || ''} 
+            onChange={e => setFormData({ ...formData, ad: e.target.value })} 
+            style={{ width: '100%', padding: '8px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} 
+          />
+        </div>
+
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>FİYAT (TL)</label>
+            <input 
+              type="number" 
+              value={formData.fiyat ?? ''} 
+              onChange={e => setFormData({ ...formData, fiyat: Number(e.target.value) })} 
+              style={{ width: '100%', padding: '8px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} 
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>İNDİRİM (%)</label>
+            <input 
+              type="number" 
+              min="0" 
+              max="100" 
+              placeholder="Örn: 20" 
+              value={formData.indirimOrani ?? ''} 
+              onChange={e => setFormData({ ...formData, indirimOrani: Number(e.target.value) })} 
+              style={{ width: '100%', padding: '8px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box', backgroundColor: '#fff3cd' }} 
+            />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>BASKI YILI</label>
+            <input 
+              type="text" 
+              value={formData.baskiYili || ''} 
+              onChange={e => setFormData({ ...formData, baskiYili: e.target.value })} 
+              style={{ width: '100%', padding: '8px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} 
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>KONDİSYON</label>
+            <select 
+              value={formData.kondisyon || 'Near Mint (NM)'} 
+              onChange={e => setFormData({ ...formData, kondisyon: e.target.value })} 
+              style={{ width: '100%', padding: '8px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }}
+            >
+              <option value="Jelatininde">Jelatininde</option>
+              <option value="Kusursuz">Kusursuz</option>
+              <option value="Çok İyi">Çok İyi</option>
+              <option value="İyi">İyi</option>
+              <option value="Çalınabilir">Çalınabilir</option>
+            </select>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+          <button 
+            type="submit" 
+            disabled={loading} 
+            className="brutal-btn" 
+            style={{ flex: 1, backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '10px', fontWeight: 'black', cursor: 'pointer' }}
+          >
+            {loading ? 'KAYDEDİLİYOR...' : 'GÜNCELLE'}
+          </button>
+          <button 
+            type="button" 
+            onClick={onClose} 
+            style={{ flex: 1, backgroundColor: '#eee', border: '2px solid #1a1a1a', padding: '10px', fontWeight: 'black', cursor: 'pointer' }}
+          >
+            İPTAL
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
 export default AdminPage;

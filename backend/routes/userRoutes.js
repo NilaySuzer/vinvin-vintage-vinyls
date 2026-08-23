@@ -38,7 +38,9 @@ router.get('/profile', async (req, res) => {
       email: user.email || user.eposta,
       role: user.role || (user.isAdmin ? 'admin' : 'user'),
       isAdmin: user.isAdmin || user.role === 'admin',
-      favorites: user.favorites || []
+      favorites: user.favorites || [],
+      adresler: user.adresler || []
+
     });
   } catch (err) {
     console.error('Profil getirme hatası:', err);

@@ -70,7 +70,7 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavor
       backgroundColor: '#db0335',
       color: 'white',
       fontWeight: '900',
-      fontSize: '1.2rem',
+      fontSize: '1.5rem',
       padding: '15px 30px',
       border: '2px solid #1a1a1a',
       boxShadow: '3px 3px 0px #1a1a1a',
@@ -116,9 +116,21 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavor
             <h3 style={{ margin: '0 0 10px 0', textTransform: 'uppercase', borderBottom: '2px dashed #1a1a1a', paddingBottom: '5px' }}>PLAK ÖZELLİKLERİ</h3>
             <ul style={{ margin: 0, paddingLeft: '20px', lineHeight: '1.8', fontSize: '0.95rem', fontWeight: 'bold' }}>
               <li>Kategori: <span style={{ backgroundColor: '#ff9e00', padding: '2px 6px' }}>{plak.kategori}</span></li>
-              <li>Kondisyon: <span style={{ color: '#2b9348' }}>Sıfır Ürün (NM / 9/10)</span></li>
-              <li>Devir: 33 RPM (12" LP)</li>
-              <li>Baskı Yılı: Orijinal Baskı</li>
+              <li>
+      Kondisyon: <span style={{ 
+        color: plak.kondisyon?.includes('Jelatininde') ? '#2b9348' : plak.kondisyon?.includes('Kusursuz') ? '#d97706' : '#d00000',
+                  backgroundColor: 'rgb(253, 217, 97)',
+                    fontWeight: '900'
+      }}>
+        {plak.kondisyon}
+      </span>
+    </li>
+    <li>
+      Devir: <span style={{ color: '#1a1a1a' }}>33 RPM (12" LP)</span>
+    </li>
+    <li>
+      Baskı Yılı: <span style={{ color: '#7d006d',  backgroundColor: 'rgb(197, 235, 245)', fontWeight: 'bold', fontSize: '1.1rem' }}>{plak.baskiYili || 'Orijinal İlk Baskı'}</span>
+    </li>
               <li>Kargo: Sipariş sonrası 1 ila 3 iş günü 📦</li>
             </ul>
           </div>
@@ -2254,18 +2266,53 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
         </div>
         <h4 style={{ margin: '0 0 3px 0', fontSize: '1.05rem', textTransform: 'uppercase', lineHeight: '1.2' }}>{guncelPlak.ad || plak.ad}</h4>
         <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.85rem' }}>{guncelPlak.sanatci || plak.sanatci}</p>
-        <div style={{ fontWeight: 'black', margin: '8px 0', fontSize: '1.1rem' }}>{guncelPlak.fiyat || plak.fiyat} TL</div>
       </Link>
-
+{/* 2. FİYAT ALANI (Üstü Çizili Eski Fiyat + İndirimli Fiyat) */}
+<div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+  {plak.indirimOrani > 0 ? (
+    <>
+      {/* İndirimli Fiyat */}
+      <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'red' }}>
+        {(plak.fiyat * (1 - plak.indirimOrani / 100)).toFixed(2)} TL
+      </span>
+      {/* Eski Fiyat (Üstü Çizili) */}
+      <span style={{ fontSize: '1.0rem', color: '#888', textDecoration: 'line-through', textDecorationColor: 'red', fontWeight: 'bold' }}>
+        {plak.fiyat} TL
+      </span>
+    </>
+  ) : (
+    /* Normal Fiyat */
+    <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'orange' }}>
+      {plak.fiyat} TL
+    </span>
+  )}
+</div>
       {/* Dinamik Buton */}
       <div style={{ marginTop: '8px' }}>
         {stokBittiMi ? (
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              alert(`"${guncelPlak.ad || plak.ad}" stoğa girdiğinde size haber vereceğiz! 🔔`);
-            }}
+             onClick={async (e) => {
+    e.stopPropagation();
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const userId = currentUser._id || currentUser.id;
+
+    if (!userId) {
+      alert('Stok bildirimlerinden haberdar olmak için lütfen giriş yapın! 🔑');
+      return;
+    }
+
+    try {
+      await API.post('/notifications/subscribe-stock', {
+        userId,
+        plakId: plak._id || plak.id
+      });
+      alert(`"${plak.ad}" stoğa girdiğinde bildirim kutunuza haber vereceğiz! 🔔`);
+    } catch (err) {
+      alert('İşlem gerçekleştirilemedi.');
+    }
+  }}
+
             className="brutal-btn"
             style={{
               width: '100%',
@@ -2323,6 +2370,8 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
         </div>
       )}
 
+      
+      
       <Link to="/" style={{ display: 'inline-block', marginTop: '20px', fontWeight: 'bold', color: '#1a1a1a' }}>
         ← Alışverişe Dön
       </Link>
@@ -2494,7 +2543,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
                   
                   <label style={{ fontWeight: 'bold' }}>ŞİFRE</label>
                   <input required name="sifre" type="password" placeholder="******" style={{ padding: '12px', border: '3px solid #1a1a1a', outline: 'none' }} />
-                  {/* Şifre Inputunun Altına: */}
+                  
 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '5px' }}>
   <button
     type="button"
@@ -2848,18 +2897,39 @@ useEffect(() => {
 }, []);
   
 
-  const sepeteEkle = (plak) => {
-    const plakId = plak._id || plak.id;
-    const urunVarMi = cart.find(item => (item._id || item.id) === plakId);
-    if (urunVarMi) {
-      setCart(cart.map(item => (item._id || item.id) === plakId ? { ...item, adet: (item.adet || 1) + 1 } : item));
-    } else {
-      setCart([...cart, { ...plak, adet: 1 }]);
-    }
-    setBildirim(`${plak.ad} sepete eklendi! 📦`);
-    setTimeout(() => setBildirim(null), 3000);
-  };
+ const sepeteEkle = (plak) => {
+  const plakId = plak._id || plak.id;
+  const urunVarMi = cart.find(item => (item._id || item.id) === plakId);
 
+  // İndirimli birim fiyat hesabı:
+  const indirim = Number(plak.indirimOrani || 0);
+  const netFiyat = indirim > 0 
+    ? Number((plak.fiyat * (1 - indirim / 100)).toFixed(2))
+    : Number(plak.fiyat);
+
+  if (urunVarMi) {
+    setCart(cart.map(item => 
+      (item._id || item.id) === plakId 
+        ? { ...item, adet: (item.adet || 1) + 1 } 
+        : item
+    ));
+  } else {
+    setCart([
+      ...cart, 
+      { 
+        ...plak, 
+        fiyat: netFiyat,          // Sepet hesaplamalarında geçerli olacak net indirimli fiyat
+        orijinalFiyat: plak.fiyat, // Gerekirse arayüzde üstü çizili göstermek için orijinal fiyat
+        indirimOrani: indirim,
+        adet: 1 
+      }
+    ]);
+  }
+
+  setBildirim(`${plak.ad} sepete eklendi! 📦`);
+  setTimeout(() => setBildirim(null), 3000);
+}; 
+  
   const adetGuncelle = (id, miktar) => {
     setCart(cart.map(item => {
       if ((item._id || item.id) === id) {

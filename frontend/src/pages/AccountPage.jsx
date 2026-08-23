@@ -103,6 +103,7 @@ const handleMarkAsRead = async (notifId) => {
   };
     
   // Kullanıcı profilini ve kayıtlı adreslerini çek (userId parametresi eklendi)
+  // Kullanıcı profilini ve kayıtlı adreslerini çek
   const fetchProfile = async () => {
     try {
       const rawUser = localStorage.getItem('user');
@@ -111,16 +112,39 @@ const handleMarkAsRead = async (notifId) => {
 
       if (!targetId) return;
 
-      const { data } = await API.get(`/users/profile?userId=${targetId}`);
-      if (data) {
-        setAdresler(data.adresler || []);
-        setName(data.name || data.adSoyad || '');
-        setEmail(data.email || '');
+      // 1. Profil bilgilerini çek
+      const profileRes = await API.get(`/users/profile?userId=${targetId}`);
+      if (profileRes.data) {
+        setName(profileRes.data.name || profileRes.data.adSoyad || '');
+        setEmail(profileRes.data.email || '');
+        if (Array.isArray(profileRes.data.adresler) && profileRes.data.adresler.length > 0) {
+          setAdresler(profileRes.data.adresler);
+        }
+      }
+
+      // 2. Adresleri doğrudan adres rotasından garanti çek (Sayfa yenilendiğinde kaybolmayı engeller)
+      try {
+        const addressRes = await API.get(`/users/address?userId=${targetId}`);
+        if (Array.isArray(addressRes.data)) {
+          setAdresler(addressRes.data);
+        }
+      } catch (e) {
+        // Eğer ayrı GET rotası yoksa profileRes içindeki adresler geçerlidir
       }
     } catch (err) {
       console.error("Profil yüklenemedi", err);
     }
   };
+  // 2. SAYFA İLK AÇILDIĞINDA VEYA YENİLENDİĞİNDE OTOMATİK ÇALIŞTIR
+useEffect(() => {
+  fetchProfile();
+}, []);
+
+// 3. KULLANICI STATE'İ VEYA SEKME DEĞİŞTİĞİNDE DE GARANTİYE AL
+useEffect(() => {
+  fetchProfile();
+}, [activeTab, user]);
+
 
   // Kullanıcının siparişlerini çek
   const fetchOrders = async () => {

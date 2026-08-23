@@ -145,14 +145,24 @@ router.put('/:id', async (req, res) => {
       plak.stokHaberVerListesi = [];
     }
 
-    Object.assign(plak, req.body);
+    // _id ve id alanlarını temizle (MongoDB çökmesini engelleyen kritik adım)
+    const guncelVeri = { ...req.body };
+    delete guncelVeri._id;
+    delete guncelVeri.id;
+
+    // Kalan alanları güvenle aktar
+    Object.assign(plak, guncelVeri);
+    
     if (gelenStok !== undefined) plak.stok = yeniStok;
+    if (guncelVeri.fiyat !== undefined) plak.fiyat = Number(guncelVeri.fiyat);
+    if (guncelVeri.indirimOrani !== undefined) plak.indirimOrani = Number(guncelVeri.indirimOrani);
 
     await plak.save();
+    console.log(`✅ [GÜNCELLENDİ] "${plak.ad}" başarıyla kaydedildi.`);
     res.json({ message: 'Ürün güncellendi.', product: plak });
   } catch (err) {
     console.error('Ürün güncelleme hatası:', err);
-    res.status(500).json({ message: 'Güncellenemedi.' });
+    res.status(500).json({ message: 'Güncellenemedi: ' + err.message });
   }
 });
 
