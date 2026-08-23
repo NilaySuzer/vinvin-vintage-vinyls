@@ -1159,10 +1159,27 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
   {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
     <button
       type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        alert(`"${plak.ad}" stoğa girdiğinde size haber vereceğiz! 🔔`);
-      }}
+     onClick={async (e) => {
+    e.stopPropagation();
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const userId = currentUser._id || currentUser.id;
+
+    if (!userId) {
+      alert('Stok bildirimlerinden haberdar olmak için lütfen giriş yapın! 🔑');
+      return;
+    }
+
+    try {
+      await API.post('/notifications/subscribe-stock', {
+        userId,
+        plakId: plak._id || plak.id
+      });
+      alert(`"${plak.ad}" stoğa girdiğinde bildirim kutunuza haber vereceğiz! 🔔`);
+    } catch (err) {
+      alert('İşlem gerçekleştirilemedi.');
+    }
+  }}
+
       className="brutal-btn"
       style={{
       backgroundColor: '#306a04', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem'
@@ -1334,10 +1351,27 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
   {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
     <button
       type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        alert(`"${plak.ad}" stoğa girdiğinde size haber vereceğiz! 🔔`);
-      }}
+      onClick={async (e) => {
+    e.stopPropagation();
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const userId = currentUser._id || currentUser.id;
+
+    if (!userId) {
+      alert('Stok bildirimlerinden haberdar olmak için lütfen giriş yapın! 🔑');
+      return;
+    }
+
+    try {
+      await API.post('/notifications/subscribe-stock', {
+        userId,
+        plakId: plak._id || plak.id
+      });
+      alert(`"${plak.ad}" stoğa girdiğinde bildirim kutunuza haber vereceğiz! 🔔`);
+    } catch (err) {
+      alert('İşlem gerçekleştirilemedi.');
+    }
+  }}
+
       className="brutal-btn"
       style={{
       backgroundColor: '#306a04', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem'
@@ -1503,10 +1537,27 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
   {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
     <button
       type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        alert(`"${plak.ad}" stoğa girdiğinde size haber vereceğiz! 🔔`);
-      }}
+      onClick={async (e) => {
+    e.stopPropagation();
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const userId = currentUser._id || currentUser.id;
+
+    if (!userId) {
+      alert('Stok bildirimlerinden haberdar olmak için lütfen giriş yapın! 🔑');
+      return;
+    }
+
+    try {
+      await API.post('/notifications/subscribe-stock', {
+        userId,
+        plakId: plak._id || plak.id
+      });
+      alert(`"${plak.ad}" stoğa girdiğinde bildirim kutunuza haber vereceğiz! 🔔`);
+    } catch (err) {
+      alert('İşlem gerçekleştirilemedi.');
+    }
+  }}
+
       className="brutal-btn"
       style={{
       backgroundColor: '#306a04', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem'
@@ -1671,10 +1722,27 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
   {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
     <button
       type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        alert(`"${plak.ad}" stoğa girdiğinde size haber vereceğiz! 🔔`);
-      }}
+      onClick={async (e) => {
+    e.stopPropagation();
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const userId = currentUser._id || currentUser.id;
+
+    if (!userId) {
+      alert('Stok bildirimlerinden haberdar olmak için lütfen giriş yapın! 🔑');
+      return;
+    }
+
+    try {
+      await API.post('/notifications/subscribe-stock', {
+        userId,
+        plakId: plak._id || plak.id
+      });
+      alert(`"${plak.ad}" stoğa girdiğinde bildirim kutunuza haber vereceğiz! 🔔`);
+    } catch (err) {
+      alert('İşlem gerçekleştirilemedi.');
+    }
+  }}
+
       className="brutal-btn"
       style={{
       backgroundColor: '#306a04', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem'
@@ -1839,10 +1907,27 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
   {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
     <button
       type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        alert(`"${plak.ad}" stoğa girdiğinde size haber vereceğiz! 🔔`);
-      }}
+     onClick={async (e) => {
+    e.stopPropagation();
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const userId = currentUser._id || currentUser.id;
+
+    if (!userId) {
+      alert('Stok bildirimlerinden haberdar olmak için lütfen giriş yapın! 🔑');
+      return;
+    }
+
+    try {
+      await API.post('/notifications/subscribe-stock', {
+        userId,
+        plakId: plak._id || plak.id
+      });
+      alert(`"${plak.ad}" stoğa girdiğinde bildirim kutunuza haber vereceğiz! 🔔`);
+    } catch (err) {
+      alert('İşlem gerçekleştirilemedi.');
+    }
+  }}
+
       className="brutal-btn"
       style={{
       backgroundColor: '#306a04', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem'
@@ -2011,10 +2096,27 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
   {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
     <button
       type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        alert(`"${plak.ad}" stoğa girdiğinde size haber vereceğiz! 🔔`);
-      }}
+      onClick={async (e) => {
+    e.stopPropagation();
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const userId = currentUser._id || currentUser.id;
+
+    if (!userId) {
+      alert('Stok bildirimlerinden haberdar olmak için lütfen giriş yapın! 🔑');
+      return;
+    }
+
+    try {
+      await API.post('/notifications/subscribe-stock', {
+        userId,
+        plakId: plak._id || plak.id
+      });
+      alert(`"${plak.ad}" stoğa girdiğinde bildirim kutunuza haber vereceğiz! 🔔`);
+    } catch (err) {
+      alert('İşlem gerçekleştirilemedi.');
+    }
+  }}
+
       className="brutal-btn"
       style={{
       backgroundColor: '#06d6a0', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem'
