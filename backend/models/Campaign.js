@@ -4,10 +4,11 @@ const campaignSchema = new mongoose.Schema({
   baslik: { type: String, required: true },
   detay: { type: String, required: true },
   renk: { type: String, default: '#ff9e00' },
-  kod: { type: String, required: true, uppercase: true },
-  kategori: { type: String, default: 'Tümü' },
-  isAktif: { type: Boolean, default: true }, // 👈 Kuponun geçerli/geçersiz olma durumu!
-  sonTarih: { type: String, default: '' }
+  kod: { type: String, required: true, uppercase: true, trim: true, unique: true },
+  indirimYuzdesi: { type: Number, required: true, min: 1, max: 100 },
+  hedefKategori: { type: String, default: 'Tümü' }, // 'Tümü', 'Rock', 'Pop', 'Jazz' vb.
+  bitisTarihi: { type: Date, required: true },
+  aktif: { type: Boolean, default: true }
 }, {
   timestamps: true
 });

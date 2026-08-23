@@ -395,7 +395,7 @@ const handleAdresSec = (adr) => {
 const AppContent = ({ 
   cart, setActiveCategory, activeCategory, isSidebarOpen, setIsSidebarOpen, isNavOpen, setIsNavOpen,
   kampanyalar, currentSlide, setSelectedKampanya, selectedPlak, setSelectedPlak, filtrelenmisPlaklar,
-  sepeteEkle, sepetiBosalt, adetGuncelle, urunCikar, toplamTutar, selectedKampanya, plaklar, bildirim, kuponKodu, kuponMesaji, kuponKullan, uygulananIndirim, indirimTutari, odenecekTutar, DEFAULT_KUPONLAR,
+  sepeteEkle, sepetiBosalt, adetGuncelle, urunCikar, toplamTutar, selectedKampanya, plaklar, bildirim, kuponKodu, kuponMesaji, kuponKullan, uygulananIndirim, indirimTutari, odenecekTutar, DEFAULT_KUPONLAR, uygulananKupon,
   aramaMetni, setAramaMetni, sirallama, setSirallama, favorites, toggleFavorite, isLoggedIn, setIsLoggedIn, handleLogout,
 }) => {
 
@@ -2425,49 +2425,107 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
                       );
                     })}
 
-                    <div style={{ margin: '20px 0', padding: '15px', border: '3px solid #1a1a1a', backgroundColor: '#f9f9f9' }}>
-                      <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px' }}>İNDİRİM KUPONU</label>
-                      <div style={{ display: 'flex', gap: '10px' }}>
-                        <input 
-                          id="kuponInputAlani"
-                          type="text" 
-                          placeholder="Örn: VINTAGE10" 
-                          style={{ flex: 1, padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', textTransform: 'uppercase', outline: 'none' }}
-                        />
-                        <button 
-                          type="button"
-                          onClick={() => {
-                            const girilenMetin = document.getElementById('kuponInputAlani')?.value;
-                            kuponKullan(girilenMetin);
-                          }}
-                          style={{ padding: '10px 20px', backgroundColor: '#1a1a1a', color: 'white', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}
-                        >
-                          UYGULA
-                        </button>
-                      </div>
-                      {kuponMesaji && (
-                        <p style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '0.9rem', color: kuponMesaji.includes('❌') ? '#cc0000' : '#008000' }}>
-                          {kuponMesaji}
-                        </p>
-                      )}
-                    </div>
+                    {/* İNDİRİM KUPONU ALANI */}
+<div style={{ margin: '20px 0', padding: '15px', border: '3px solid #1a1a1a', backgroundColor: '#f9f9f9', boxShadow: '4px 4px 0px #1a1a1a' }}>
+  <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', textTransform: 'uppercase' }}>
+    🎟️ İNDİRİM KUPONU
+  </label>
+  
+  <div style={{ display: 'flex', gap: '10px' }}>
+    <input 
+      id="kuponInputKutusu"
+      type="text" 
+      placeholder="Örn: ROCK20" 
+      defaultValue=""
+      disabled={!!uygulananKupon}
+      style={{ 
+        flex: 1, 
+        padding: '10px', 
+        border: '2px solid #1a1a1a', 
+        fontWeight: 'bold', 
+        textTransform: 'uppercase', 
+        outline: 'none',
+        backgroundColor: uygulananKupon ? '#e9ecef' : 'white'
+      }}
+    />
+    
+    {uygulananKupon ? (
+      <button 
+        type="button"
+        onClick={() => {
+          setUygulananKupon(null);
+          setKuponMesaji('');
+          const inputElem = document.getElementById('kuponInputKutusu');
+          if (inputElem) inputElem.value = '';
+        }}
+        style={{ 
+          padding: '10px 18px', 
+          backgroundColor: '#ff4d4d', 
+          color: 'white', 
+          fontWeight: 'bold', 
+          border: '2px solid #1a1a1a', 
+          cursor: 'pointer' 
+        }}
+      >
+        ✕ KALDIR
+      </button>
+    ) : (
+      <button 
+        type="button"
+        onClick={() => {
+          const girilenDeger = document.getElementById('kuponInputKutusu')?.value || '';
+          kuponKullan(girilenDeger);
+        }}
+        style={{ 
+          padding: '10px 20px', 
+          backgroundColor: '#1a1a1a', 
+          color: 'white', 
+          fontWeight: 'bold', 
+          border: 'none', 
+          cursor: 'pointer' 
+        }}
+      >
+        UYGULA
+      </button>
+    )}
+  </div>
 
-                    <div style={{ marginTop: '20px', borderTop: '3px solid #1a1a1a', paddingTop: '15px' }}>
-                      <p style={{ display: 'flex', justifyContent: 'space-between', margin: '5px 0', fontWeight: 'bold' }}>
-                        <span>Ara Toplam:</span>
-                        <span>{guvenliToplam.toFixed(2)} TL</span>
-                      </p>
-                      {uygulananIndirim > 0 && (
-                        <p style={{ display: 'flex', justifyContent: 'space-between', margin: '5px 0', color: 'green', fontWeight: 'bold' }}>
-                          <span>İndirim:</span>
-                          <span>-{guvenliIndirim.toFixed(2)} TL</span>
-                        </p>
-                      )}
-                      <h3 style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.3rem', borderTop: '2px solid #1a1a1a', paddingTop: '10px', marginTop: '10px' }}>
-                        <span>ÖDENECEK TUTAR:</span>
-                        <span>{guvenliOdenecek.toFixed(2)} TL</span>
-                      </h3>
-                    </div>
+  {/* MESAJ ALANI */}
+  {kuponMesaji && (
+    <p style={{ 
+      marginTop: '10px', 
+      fontWeight: 'bold', 
+      fontSize: '0.85rem', 
+      color: kuponMesaji.includes('❌') ? '#cc0000' : '#008000',
+      backgroundColor: kuponMesaji.includes('❌') ? '#ffeef0' : '#e8f5e9',
+      padding: '8px 12px',
+      border: '1px solid #1a1a1a',
+      margin: '10px 0 0 0'
+    }}>
+      {kuponMesaji}
+    </p>
+  )}
+</div>
+
+{/* HESAP ÖZETİ BÖLÜMÜ */}
+<div style={{ marginTop: '20px', borderTop: '3px solid #1a1a1a', paddingTop: '15px' }}>
+  <p style={{ display: 'flex', justifyContent: 'space-between', margin: '6px 0', fontWeight: 'bold' }}>
+    <span>Ara Toplam:</span>
+    <span>{guvenliToplam.toFixed(2)} TL</span>
+  </p>
+
+  {uygulananIndirim > 0 && (
+    <p style={{ display: 'flex', justifyContent: 'space-between', margin: '6px 0', color: '#2b9348', fontWeight: 'bold' }}>
+      <span>Kupon İndirimi {uygulananKupon?.kategori !== 'Tümü' ? `(${uygulananKupon?.kategori})` : ''}:</span>
+      <span>-{guvenliIndirim.toFixed(2)} TL</span>
+    </p>
+  )}
+
+  <h3 style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.3rem', borderTop: '2px solid #1a1a1a', paddingTop: '10px', marginTop: '10px', fontWeight: 'black' }}>
+    <span>ÖDENECEK TUTAR:</span>
+    <span style={{ color: '#d97706' }}>{guvenliOdenecek.toFixed(2)} TL</span>
+  </h3>
+</div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px', alignItems: 'center' }}>
                       <Link to="/" style={{ color: '#1a1a1a', fontWeight: 'bold', textDecoration: 'none' }}>← ALIŞVERİŞE DÖN</Link>
@@ -2742,8 +2800,28 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
 
 // --- ANA APP BİLEŞENİ ---
 function App() {
+  const [cart, setCart] = useState(() => {
+  try {
+    const kayitliSepet = localStorage.getItem('vinvin_cart');
+    return kayitliSepet ? JSON.parse(kayitliSepet) : [];
+  } catch (err) {
+    return [];
+  }
+});
+
+// 2. cart her değiştiğinde localStorage'a kaydet
+useEffect(() => {
+  localStorage.setItem('vinvin_cart', JSON.stringify(cart));
+}, [cart]);
+  const [kuponKodu, setKuponKodu] = useState('');
+  const [uygulananKupon, setUygulananKupon] = useState(null);
+  const [kuponMesaji, setKuponMesaji] = useState('');
+  // Eski kodların aradığı değişkeni ve sepet toplamlarını tek çatıya alıyoruz:
+  const toplamTutar = cart.reduce((toplam, item) => toplam + (Number(item.fiyat || 0) * Number(item.adet || 1)), 0);
+  const indirimTutari = uygulananKupon ? Number(uygulananKupon.indirimTutari || 0) : 0;
+  const araToplam = cart.reduce((toplam, item) => toplam + (Number(item.fiyat || 0) * Number(item.adet || 1)), 0);
+  const odenecekTutar = Math.max(0, araToplam - indirimTutari);
   const [plaklar, setPlaklar] = useState([]);
-  const [cart, setCart] = useState([]);
   const [activeCategory, setActiveCategory] = useState("Hepsi");
   const [selectedPlak, setSelectedPlak] = useState(null);
   const [selectedKampanya, setSelectedKampanya] = useState(null);
@@ -2803,8 +2881,7 @@ useEffect(() => {
   setFavorites(guestFavs);
 };
   
-  const [uygulananIndirim, setUygulananIndirim] = useState(0);
-  const [kuponMesaji, setKuponMesaji] = useState('');
+ 
 
  const toggleFavorite = async (plak) => {
   const plakId = plak._id || plak.id;
@@ -2840,34 +2917,61 @@ useEffect(() => {
     }
   }
 };
-  // 2. Kullanıcı giriş yapmışsa veritabanına da kaydet
-    
+ 
+ 
+const kuponKullan = async (parametreKod) => {
+  // Inputtan gelen değeri garantiye alıyoruz:
+  const inputDegeri = document.getElementById('kuponInputKutusu')?.value || '';
+  const kod = (parametreKod || inputDegeri || '').trim().toUpperCase();
 
+  console.log('Sepetten giden kod:', kod);
 
-  const toplamTutar = (cart || []).reduce((acc, item) => {
-    const gelenFiyat = item.fiyat || item.price || 0;
-    const fiyat = parseFloat(gelenFiyat) || 0;
-    const adet = parseInt(item.adet || 1) || 1;
-    return acc + (fiyat * adet);
-  }, 0);
+  if (!kod) {
+    setKuponMesaji('❌ Lütfen bir kupon kodu girin.');
+    return;
+  }
 
-  const indirimTutari = toplamTutar * (uygulananIndirim || 0);
-  const odenecekTutar = uygulananIndirim > 0 ? Math.max(0, toplamTutar - indirimTutari) : toplamTutar;
+  if (!cart || cart.length === 0) {
+    setKuponMesaji('❌ Sepetiniz boşken kupon kullanamazsınız.');
+    return;
+  }
 
-  const kuponKullan = async (kod) => {
-    if (!kod) {
-      setKuponMesaji('❌ Lütfen bir kupon kodu girin');
-      return;
+  try {
+    const { data } = await API.post('/campaigns/validate-coupon', {
+      kod: kod,
+      cartItems: cart
+    });
+
+    if (data.success) {
+      setUygulananKupon(data);
+      setKuponMesaji(`✅ ${data.message}`);
     }
-    try {
-      const { data } = await API.post('/coupons/validate', { kod });
-      setUygulananIndirim(data.oran);
-      setKuponMesaji(data.mesaj);
-    } catch (error) {
-      setUygulananIndirim(0);
-      setKuponMesaji(error.response?.data?.message || '❌ Geçersiz Kupon Kodu');
-    }
-  };
+  } catch (err) {
+    setUygulananKupon(null);
+    const hata = err.response?.data?.message || 'Geçersiz veya süresi dolmuş kupon!';
+    setKuponMesaji(`❌ ${hata}`);
+  }
+};
+
+
+// 🌟 Kuponu Kaldırma Fonksiyonu
+const kuponuKaldir = () => {
+  setUygulananKupon(null);
+  setKuponKodu('');
+  setKuponMesaji('');
+};
+
+// 🌟 Sepet Tutar Hesaplamaları
+const guvenliToplam = cart.reduce((toplam, item) => {
+  return toplam + (Number(item.fiyat || 0) * Number(item.adet || 1));
+}, 0);
+
+// Kupondan gelen indirim tutarı
+const guvenliIndirim = uygulananKupon ? Number(uygulananKupon.indirimTutari || 0) : 0;
+const uygulananIndirim = guvenliIndirim;
+
+// Net Ödenecek Tutar
+const guvenliOdenecek = Math.max(0, guvenliToplam - guvenliIndirim);
 
   /* BANNER SLIDE DÖNGÜSÜ (4 saniyede bir kampanya değişir) */
 useEffect(() => {
@@ -2893,9 +2997,16 @@ const fetchKampanyalar = async () => {
 
 // Sayfa ilk açıldığında çalıştır
 useEffect(() => {
-  fetchKampanyalar();
+  const fetchActiveCampaigns = async () => {
+    try {
+      const { data } = await API.get('/campaigns');
+      setKampanyalar(data);
+    } catch (err) {
+      console.error('Kampanyalar yüklenemedi:', err);
+    }
+  };
+  fetchActiveCampaigns();
 }, []);
-  
 
  const sepeteEkle = (plak) => {
   const plakId = plak._id || plak.id;
