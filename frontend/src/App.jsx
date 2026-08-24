@@ -407,6 +407,22 @@ const AppContent = ({
     window.scrollTo(0, 0);
   }, [pathname]);
   
+  // Tema Durumu (localStorage destekli)
+const [theme, setTheme] = useState(() => {
+  return localStorage.getItem('vinvin_theme') || 'light';
+});
+
+// Tema değiştikçe HTML root etiketine ve localStorage'a uygula
+useEffect(() => {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('vinvin_theme', theme);
+}, [theme]);
+
+// Tema Değiştirici Fonksiyon
+const toggleTheme = () => {
+  setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
+};
+
   const [tumPlaklariGoster, setTumPlaklariGoster] = useState(false);
    const { id } = useParams();
   const plak = plaklar.find(p => (p._id || p.id) === id || (p.id && p.id === parseInt(id)));
@@ -848,6 +864,27 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
           <ShoppingBag size={18} color="black" /> SEPET ({(cart || []).reduce((acc, curr) => acc + (curr.adet || 1), 0)})
         </Link>
 
+         <button
+  type="button"
+  onClick={toggleTheme}
+  className="brutal-btn"
+  title={theme === 'light' ? 'Gece Moduna Geç' : 'Gündüz Moduna Geç'}
+  style={{
+    backgroundColor: theme === 'light' ? '#1a1a1a' : '#ffd166',
+    color: theme === 'light' ? '#ffd166' : '#1a1a1a',
+    border: '2px solid #1a1a1a',
+    padding: '6px 10px',
+    fontWeight: '900',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '1rem',
+    boxShadow: '2px 2px 0px #1a1a1a'
+  }}
+>
+  {theme === 'light' ? '🌙' : '☀️'}
+</button>     
         <button 
           onClick={() => { setIsNavOpen(false); handleLogout(); }} 
           style={{ 

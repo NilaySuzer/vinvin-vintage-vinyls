@@ -5,6 +5,63 @@ body {
   color: #1a1a1a;
 }
 
+/* --- TEMA RENK DEĞİŞKENLERİ --- */
+:root {
+  --bg-main: #f4f1de;
+  --text-main: #1a1a1a;
+  --card-bg: #ffffff;
+  --border-color: #1a1a1a;
+}
+
+[data-theme="dark"] {
+  --bg-main: #121212;
+  --text-main: #f4f1de;
+  --card-bg: #1e1e1e;
+  --border-color: #ffffff;
+}
+
+/* Sayfa Gövdesi */
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* Karanlık Modda Kartlar, Modallar ve Form Alanları */
+[data-theme="dark"] .brutal-card,
+[data-theme="dark"] div[style*="backgroundColor: white"],
+[data-theme="dark"] div[style*="backgroundColor: 'white'"],
+[data-theme="dark"] div[style*="background-color: white"],
+[data-theme="dark"] .product-detail-layout,
+[data-theme="dark"] .product-specs-box {
+  background-color: #1e1e1e !important;
+  color: #f4f1de !important;
+}
+
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] p,
+[data-theme="dark"] span,
+[data-theme="dark"] label {
+  color: #f4f1de;
+}
+
+/* Açık sarı / turuncu kısımların okunurluğunu korumak için */
+[data-theme="dark"] .product-artist {
+  color: #bbb !important;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background-color: #2a2a2a !important;
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
 /* Masaüstü / Mobil Görünürlük Kontrolleri */
 @media (min-width: 769px) {
   .mobile-only {
