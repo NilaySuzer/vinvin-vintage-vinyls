@@ -2482,21 +2482,85 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
 
             <Route path="/checkout" element={<CheckoutPage total={odenecekTutar} sepetiBosalt={sepetiBosalt} cart={cart} indirimTutari={indirimTutari} odenecekTutar={odenecekTutar} />} />
             
-            <Route path="/campaigns" element={
-              <div style={{ padding: '20px', border: '4px solid #1a1a1a', backgroundColor: 'white', boxShadow: '10px 10px 0px #1a1a1a' }}>
-                <h2 style={{ borderBottom: '4px solid #1a1a1a', paddingBottom: '10px', textTransform: 'uppercase' }}>Kampanya Arşivi ⚡</h2>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px' }}>
-                  {kampanyalar.map(kamp => (
-                    <div key={kamp.id} style={{ border: '3px solid #1a1a1a', padding: '20px', backgroundColor: kamp.renk, boxShadow: '5px 5px 0px #1a1a1a' }}>
-                      <h3 style={{ margin: '0 0 10px 0' }}>{kamp.baslik}</h3>
-                      <p style={{ fontWeight: 'bold' }}>{kamp.detay}</p>
-                      <div style={{ marginTop: '10px', fontWeight: 'bold', fontSize: '0.8rem', backgroundColor: 'rgba(255,255,255,0.7)', display: 'inline-block', padding: '4px 8px', border: '1px solid #1a1a1a' }}>GEÇERLİLİK: {kamp.tarih}</div>
-                    </div>
-                  ))}
+           <Route path="/campaigns" element={
+  <div style={{ padding: '20px', border: '4px solid #1a1a1a', backgroundColor: 'white', boxShadow: '10px 10px 0px #1a1a1a' }}>
+    <h2 style={{ borderBottom: '4px solid #1a1a1a', paddingBottom: '10px', textTransform: 'uppercase' }}>
+      KAMPANYALAR VE KUPONLAR ⚡
+    </h2>
+
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginTop: '20px' }}>
+      {kampanyalar && kampanyalar.filter(k => (k.aktif !== undefined ? k.aktif : k.isAktif) === true).length === 0 ? (
+        <p style={{ fontWeight: 'bold', color: '#666' }}>Şu anda aktif bir kampanya bulunmamaktadır.</p>
+      ) : (
+        kampanyalar
+          .filter(k => (k.aktif !== undefined ? k.aktif : k.isAktif) === true)
+          .map(kamp => (
+            <div 
+              key={kamp._id || kamp.id} 
+              style={{ 
+                border: '3px solid #1a1a1a', 
+                padding: '20px', 
+                backgroundColor: kamp.renk || '#fff', 
+                boxShadow: '6px 6px 0px #1a1a1a',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: '12px'
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', marginBottom: '8px' }}>
+                  <h3 style={{ margin: 0, fontWeight: '900', textTransform: 'uppercase' }}>{kamp.baslik}</h3>
+                  {kamp.indirimYuzdesi && (
+                    <span style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '3px 8px', fontSize: '0.8rem', fontWeight: '900' }}>
+                      %{kamp.indirimYuzdesi} İNDİRİM
+                    </span>
+                  )}
                 </div>
-                <Link to="/" style={{ display: 'block', marginTop: '30px', fontWeight: 'bold', color: '#1a1a1a' }}>← ANA SAYFAYA DÖN</Link>
+
+                <p style={{ fontWeight: 'bold', margin: '0 0 12px 0', fontSize: '0.95rem' }}>{kamp.detay}</p>
+
+                {kamp.kod && (
+                  <div style={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+                    border: '2px dashed #1a1a1a', 
+                    padding: '8px 12px', 
+                    textAlign: 'center', 
+                    fontWeight: '900',
+                    letterSpacing: '1px'
+                  }}>
+                    KUPON KODU: <span style={{ color: '#d97706', userSelect: 'all' }}>{kamp.kod}</span>
+                  </div>
+                )}
               </div>
-            } />
+
+              {(kamp.bitisTarihi || kamp.sonTarih || kamp.tarih) && (
+                <div style={{ 
+                  marginTop: '10px', 
+                  fontWeight: 'bold', 
+                  fontSize: '0.8rem', 
+                  backgroundColor: 'rgba(255,255,255,0.7)', 
+                  display: 'inline-block', 
+                  padding: '4px 8px', 
+                  border: '1px solid #1a1a1a' 
+                }}>
+                  ⏳ SON GEÇERLİLİK: {
+                    kamp.bitisTarihi || kamp.sonTarih 
+                      ? new Date(kamp.bitisTarihi || kamp.sonTarih).toLocaleDateString('tr-TR')
+                      : kamp.tarih
+                  }
+                </div>
+              )}
+            </div>
+          ))
+      )}
+    </div>
+
+    <Link to="/" style={{ display: 'inline-block', marginTop: '30px', fontWeight: '900', color: '#1a1a1a', textDecoration: 'none', borderBottom: '2px solid #1a1a1a' }}>
+      ← ANA SAYFAYA DÖN
+    </Link>
+  </div>
+} />
 
             {/* LOGIN ROUTE */}
             <Route path="/login" element={
@@ -2696,40 +2760,6 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
           <span style={{ fontSize: '1.4rem', fontWeight: 'black', letterSpacing: '2px', color: '#1a1a1a' }}>{selectedKampanya.kod}</span>
         </div>
       )}
-
-      {/* 🚀 AKILLI YÖNLEDİRME BUTONLARI */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {selectedKampanya.kategori && (
-          <button 
-            onClick={() => {
-              setActiveCategory(selectedKampanya.kategori); // Kategori filtresini aktifleştirir
-              setSelectedKampanya(null); // Modalı kapatır
-            }}
-            className="brutal-btn"
-            style={{
-              width: '100%', backgroundColor: '#1a1a1a', color: 'white',
-              border: '3px solid #1a1a1a', padding: '14px', fontWeight: 'black',
-              cursor: 'pointer', fontSize: '1rem', textTransform: 'uppercase',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-            }}
-          >
-            <span> {selectedKampanya.kategori.toUpperCase()} PLAKLARINI İNCELE</span>
-            <span>→</span>
-          </button>
-        )}
-
-        <button 
-          onClick={() => setSelectedKampanya(null)}
-          style={{
-            width: '100%', backgroundColor: 'transparent', color: '#1a1a1a',
-            border: '2px solid #1a1a1a', padding: '8px', fontWeight: 'bold',
-            cursor: 'pointer', fontSize: '0.85rem'
-          }}
-        >
-          Kapat
-        </button>
-      </div>
-
     </div>
   </div>
 )}
