@@ -28,8 +28,9 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavor
 
   return (
     <div style={{ padding: '20px' }}>
-      <div style={{ display: 'flex', gap: '50px', flexWrap: 'wrap' }}>
-        <div style={{
+      <div   className="product-detail-layout" style={{ display: 'flex', gap: '50px', flexWrap: 'wrap' }}>
+        <div  className="product-image-section"
+          style={{
           flex: '1', width: '100%', 
     maxWidth: '480px',  border: '5px solid #1a1a1a', boxShadow: '15px 15px 0px #ff9e00', backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '5rem', aspectRatio: '1/1', position: 'relative'
         }}>
@@ -587,183 +588,313 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
   return (
     <div style={{ width: '92%', margin: '0 auto', padding: '20px' }}>
       {/* NAVBAR */}
-      <nav style={{ 
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
-        padding: '20px', border: '4px solid #1a1a1a', backgroundColor: '#ffd166', 
-        boxShadow: '8px 8px 0px #1a1a1a', marginBottom: '30px', position: 'relative' 
-      }}>
-        <Link to="/" style={{ textDecoration: 'none', color: '#1a1a1a' }}>
-          <h1 style={{ margin: 0, fontSize: window.innerWidth < 768 ? '1.2rem' : '2rem', letterSpacing: '-1px' }}>VINtage VINyls</h1> 
-        </Link>
+<nav style={{ 
+  display: 'flex', 
+  justifyContent: 'space-between', 
+  alignItems: 'center', 
+  padding: '16px 20px', 
+  border: '4px solid #1a1a1a', 
+  backgroundColor: '#ffd166', 
+  boxShadow: '8px 8px 0px #1a1a1a', 
+  marginBottom: '30px', 
+  position: 'relative',
+  zIndex: 100
+}}>
+  {/* LOGO & SAĞ KISALTMALAR (MOBİLDE HIZLI ERİŞİM) */}
+  <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+    <Link to="/" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a' }}>
+      <h1 style={{ margin: 0, fontSize: '1.6rem', letterSpacing: '-1px', fontWeight: '900' }}>
+        VINtage VINyls
+      </h1> 
+    </Link>
+  </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <Link to="/" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>VİTRİN</Link>
-         
-          <Link to="/campaigns" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>KAMPANYALAR</Link>
-          <Link to="/about" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>HAKKIMIZDA</Link>
-          <Link to="/favorites" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>❤️ ({favorites.length})</Link>
- 
-          {isLoggedIn ? (
-      <>
-        <Link to="/account" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', backgroundColor: 'white', border: '2px solid #1a1a1a', padding: '5px 10px', boxShadow: '2px 2px 0px #1a1a1a' }}>
-        <User2Icon size={22} color="gray" /> HESABIM
-        </Link>
-        
-       
-       {/* Giriş yapılmış ve admin ise göster */}
-{isLoggedIn && (() => {
-  try {
-    const user = JSON.parse(localStorage.getItem('user'));
-    return user && (user.isAdmin === true || user.role === 'admin');
-  } catch (e) {
-    return false;
-  }
-})() && (
-  <Link 
-    to="/admin" 
-    style={{ 
-      textDecoration: 'none', 
-      color: 'white', 
-      backgroundColor: '#1a1a1a', 
-      border: '2px solid #1a1a1a', 
-      padding: '5px 10px', 
-      fontWeight: 'bold',
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: '6px'
-    }}
-  >
-    <KeyIcon size={22} color="yellow" /> ADMIN
-  </Link>
-)}
-{user && (
-  <div style={{ position: 'relative' }}>
-  {/* ZİL BUTONU */}
-  <button
-    type="button"
-    onClick={() => setShowNotifMenu(!showNotifMenu)}
-    className="brutal-btn"
-    style={{
-      backgroundColor: 'white',
-      border: '2px solid #1a1a1a',
-      padding: '8px',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      position: 'relative'
-    }}
-  >
-    <Bell size={20} color="#1a1a1a" />
-    {unreadCount > 0 && (
-      <span
-        style={{
-          position: 'absolute',
-          top: '-6px',
-          right: '-6px',
-          backgroundColor: '#ff4d4d',
-          color: 'white',
-          borderRadius: '50%',
-          width: '18px',
-          height: '18px',
-          fontSize: '0.75rem',
-          fontWeight: '900',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          border: '1.5px solid #1a1a1a'
-        }}
-      >
-        {unreadCount}
-      </span>
-    )}
-  </button>
-
-  {/* AÇILIR BİLDİRİM KUTUSU (DROPDOWN) */}
-  {showNotifMenu && (
-    <div
-      style={{
-        position: 'absolute',
-        top: '45px',
-        right: 0,
-        width: '320px',
-        maxHeight: '400px',
-        overflowY: 'auto',
-        backgroundColor: 'white',
-        border: '3px solid #1a1a1a',
-        boxShadow: '6px 6px 0px #1a1a1a',
-        zIndex: 1000,
-        padding: '12px'
+  {/* MOBİLDE HEP GÖRÜNEN HIZLI AKSİYONLAR (SEPET & HAMBURGER) */}
+  <div className="mobile-only" style={{ display: 'none', alignItems: 'center', gap: '10px' }}>
+    <Link 
+      to="/cart" 
+      onClick={() => setIsNavOpen(false)}
+      style={{ 
+        textDecoration: 'none', 
+        color: '#1a1a1a', 
+        border: '2px solid #1a1a1a', 
+        padding: '6px 10px', 
+        backgroundColor: 'white', 
+        display: 'flex', 
+        alignItems: 'center', 
+        fontWeight: 'bold',
+        boxShadow: '2px 2px 0px #1a1a1a'
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #1a1a1a', paddingBottom: '8px', marginBottom: '10px' }}>
-        <strong style={{ fontSize: '0.9rem', textTransform: 'uppercase' }}>🔔 Bildirimler ({unreadCount})</strong>
-        <button
-          type="button"
-          onClick={() => setShowNotifMenu(false)}
-          style={{ background: 'none', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}
-        >
-          ✕
-        </button>
-      </div>
+      <ShoppingBag size={18} color="black" /> ({(cart || []).reduce((acc, curr) => acc + (curr.adet || 1), 0)})
+    </Link>
 
-      {notifications.length === 0 ? (
-        <p style={{ fontSize: '0.85rem', color: '#666', textAlign: 'center', margin: '20px 0' }}>Henüz bildiriminiz yok.</p>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {notifications.map(n => (
-            <div
-              key={n._id}
-              onClick={() => !n.okundu && handleMarkAsRead(n._id)}
+    <button 
+      type="button"
+      onClick={() => setIsNavOpen(!isNavOpen)}
+      className="brutal-btn"
+      style={{ 
+        backgroundColor: isNavOpen ? '#ff4d4d' : '#1a1a1a', 
+        color: 'white', 
+        border: '2px solid #1a1a1a', 
+        padding: '6px 12px', 
+        fontSize: '1.3rem', 
+        fontWeight: '900', 
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        lineHeight: 1
+      }}
+    >
+      {isNavOpen ? '✕' : '☰'}
+    </button>
+  </div>
+
+  {/* MENÜ LİNKLERİ (MASAÜSTÜNDE YAN YANA, MOBİLDE AÇILIR PANEL) */}
+  <div 
+    className={`nav-links-container ${isNavOpen ? 'nav-open' : ''}`}
+    style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: '15px' 
+    }}
+  >
+    <Link to="/" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>
+      VİTRİN
+    </Link>
+    
+    <Link to="/campaigns" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>
+      KAMPANYALAR
+    </Link>
+    
+    <Link to="/about" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>
+      HAKKIMIZDA
+    </Link>
+    
+    <Link to="/favorites" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>
+      ❤️ ({favorites.length})
+    </Link>
+
+    {isLoggedIn ? (
+      <>
+        <Link 
+          to="/account" 
+          onClick={() => setIsNavOpen(false)}
+          style={{ 
+            textDecoration: 'none', 
+            color: '#1a1a1a', 
+            fontWeight: 'bold', 
+            backgroundColor: 'white', 
+            border: '2px solid #1a1a1a', 
+            padding: '5px 10px', 
+            boxShadow: '2px 2px 0px #1a1a1a',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px'
+          }}
+        >
+          <User2Icon size={20} color="gray" /> HESABIM
+        </Link>
+        
+        {/* Admin Kontrolü */}
+        {(() => {
+          try {
+            const u = JSON.parse(localStorage.getItem('user'));
+            return u && (u.isAdmin === true || u.role === 'admin');
+          } catch (e) {
+            return false;
+          }
+        })() && (
+          <Link 
+            to="/admin" 
+            onClick={() => setIsNavOpen(false)}
+            style={{ 
+              textDecoration: 'none', 
+              color: 'white', 
+              backgroundColor: '#1a1a1a', 
+              border: '2px solid #1a1a1a', 
+              padding: '5px 10px', 
+              fontWeight: 'bold', 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '6px' 
+            }}
+          >
+            <KeyIcon size={20} color="yellow" /> ADMIN
+          </Link>
+        )}
+
+        {/* BİLDİRİM ZİLİ */}
+        {user && (
+          <div style={{ position: 'relative' }}>
+            <button
+              type="button"
+              onClick={() => setShowNotifMenu(!showNotifMenu)}
+              className="brutal-btn"
               style={{
-                backgroundColor: n.okundu ? '#f9f9f9' : '#fff3cd',
-                border: '1.5px solid #1a1a1a',
-                padding: '10px',
+                backgroundColor: 'white',
+                border: '2px solid #1a1a1a',
+                padding: '7px',
                 cursor: 'pointer',
-                transition: '0.2s'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative'
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <strong style={{ fontSize: '0.85rem', color: '#1a1a1a' }}>{n.baslik}</strong>
-                {!n.okundu && (
-                  <span style={{ fontSize: '0.65rem', backgroundColor: '#ff4d4d', color: 'white', padding: '2px 4px', fontWeight: 'bold' }}>YENİ</span>
+              <Bell size={20} color="#1a1a1a" />
+              {unreadCount > 0 && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '-6px',
+                    right: '-6px',
+                    backgroundColor: '#ff4d4d',
+                    color: 'white',
+                    borderRadius: '50%',
+                    width: '18px',
+                    height: '18px',
+                    fontSize: '0.75rem',
+                    fontWeight: '900',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1.5px solid #1a1a1a'
+                  }}
+                >
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            {/* AÇILIR BİLDİRİM DROPDOWN */}
+            {showNotifMenu && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '45px',
+                  right: 0,
+                  width: '300px',
+                  maxHeight: '380px',
+                  overflowY: 'auto',
+                  backgroundColor: 'white',
+                  border: '3px solid #1a1a1a',
+                  boxShadow: '6px 6px 0px #1a1a1a',
+                  zIndex: 1000,
+                  padding: '12px'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #1a1a1a', paddingBottom: '8px', marginBottom: '10px' }}>
+                  <strong style={{ fontSize: '0.9rem', textTransform: 'uppercase' }}>🔔 Bildirimler ({unreadCount})</strong>
+                  <button
+                    type="button"
+                    onClick={() => setShowNotifMenu(false)}
+                    style={{ background: 'none', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {notifications.length === 0 ? (
+                  <p style={{ fontSize: '0.85rem', color: '#666', textAlign: 'center', margin: '20px 0' }}>Henüz bildiriminiz yok.</p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {notifications.map(n => (
+                      <div
+                        key={n._id}
+                        onClick={() => !n.okundu && handleMarkAsRead(n._id)}
+                        style={{
+                          backgroundColor: n.okundu ? '#f9f9f9' : '#fff3cd',
+                          border: '1.5px solid #1a1a1a',
+                          padding: '10px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <strong style={{ fontSize: '0.85rem', color: '#1a1a1a' }}>{n.baslik}</strong>
+                          {!n.okundu && (
+                            <span style={{ fontSize: '0.65rem', backgroundColor: '#ff4d4d', color: 'white', padding: '2px 4px', fontWeight: 'bold' }}>YENİ</span>
+                          )}
+                        </div>
+                        <p style={{ margin: '4px 0 0 0', fontWeight: 'bold', fontSize: '0.9rem', color: '#444' }}>{n.mesaj}</p>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
-              <p style={{ margin: '4px 0 0 0', fontWeight: 'bold', fontSize: '1.0rem', color: '#444' }}>{n.mesaj}</p>
-              <span style={{ fontSize: '0.80rem', color: '#161515', display: 'block', marginTop: '4px' }}>
-                {new Date(n.createdAt).toLocaleDateString('tr-TR')} - {new Date(n.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )}
-</div>
-              )}
-               <Link to="/cart" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 12px', backgroundColor: 'white', boxShadow: '3px 3px 0px #1a1a1a' }}>
-             <ShoppingBag size={20} color="black" /> SEPET ({(cart || []).reduce((acc, curr) => acc + (curr.adet || 1), 0)})
-          </Link>
-        <button onClick={handleLogout} style={{ border: '2px solid #1a1a1a', padding: '6px 12px', backgroundColor: '#1a1a1a', color: 'white', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            )}
+          </div>
+        )}
+
+        <Link 
+          to="/cart" 
+          onClick={() => setIsNavOpen(false)}
+          className="desktop-only"
+          style={{ 
+            textDecoration: 'none', 
+            color: '#1a1a1a', 
+            fontWeight: 'bold', 
+            border: '2px solid #1a1a1a', 
+            padding: '5px 12px', 
+            backgroundColor: 'white', 
+            boxShadow: '3px 3px 0px #1a1a1a',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          <ShoppingBag size={18} color="black" /> SEPET ({(cart || []).reduce((acc, curr) => acc + (curr.adet || 1), 0)})
+        </Link>
+
+        <button 
+          onClick={() => { setIsNavOpen(false); handleLogout(); }} 
+          style={{ 
+            border: '2px solid #1a1a1a', 
+            padding: '6px 12px', 
+            backgroundColor: '#1a1a1a', 
+            color: 'white', 
+            fontWeight: 'bold', 
+            cursor: 'pointer', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '5px' 
+          }}
+        >
           <LogOut size={16} /> ÇIKIŞ
         </button>
       </>
     ) : (
       <>
-        <Link to="/login" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 10px', backgroundColor: 'white' }}>
+        <Link to="/login" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 10px', backgroundColor: 'white' }}>
           Giriş
         </Link>
-        <Link to="/register" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 10px', backgroundColor: '#1a1a1a' }}>
+        <Link to="/register" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 10px', backgroundColor: '#1a1a1a' }}>
           Kayıt
-              </Link>
-              <Link to="/cart" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 12px', backgroundColor: 'white', boxShadow: '3px 3px 0px #1a1a1a' }}>
-             <ShoppingBag size={20} color="black" /> SEPET ({(cart || []).reduce((acc, curr) => acc + (curr.adet || 1), 0)})
-          </Link>
+        </Link>
+        <Link 
+          to="/cart" 
+          onClick={() => setIsNavOpen(false)}
+          className="desktop-only"
+          style={{ 
+            textDecoration: 'none', 
+            color: '#1a1a1a', 
+            fontWeight: 'bold', 
+            border: '2px solid #1a1a1a', 
+            padding: '5px 12px', 
+            backgroundColor: 'white', 
+            boxShadow: '3px 3px 0px #1a1a1a',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          <ShoppingBag size={18} color="black" /> SEPET ({(cart || []).reduce((acc, curr) => acc + (curr.adet || 1), 0)})
+        </Link>
       </>
     )}
-          
-        </div>
-      </nav>
+  </div>
+</nav>
 
         <div style={{ 
   display: 'flex', 

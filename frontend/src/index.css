@@ -4,6 +4,78 @@ body {
   font-family: "Courier New", Courier, monospace;
   color: #1a1a1a;
 }
+
+/* Masaüstü / Mobil Görünürlük Kontrolleri */
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+
+  .mobile-only {
+    display: flex !important;
+  }
+  .product-detail-container,
+  div[style*="display: flex"][style*="max-width: 1000px"],
+  div[style*="display: flex"][style*="justifyContent: space-between"] {
+    flex-direction: column !important;
+    flex-wrap: wrap !important;
+  }
+
+  /* 2. Resim kutusunu mobilde tam genişliğe yay ve kare yap */
+  .product-detail-image-box,
+  .product-image-section,
+  div[style*="position: relative"] > img {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+    object-fit: cover !important;
+  }
+
+  /* 3. Turuncu brutalist gölge katmanını görsel boyutuna eşitle */
+  div[style*="backgroundColor: #ff9e00"][style*="position: absolute"] {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  /* Mobil Menü Konteyneri (Hamburger Açılınca Aşağı Doğru Açılır) */
+  .nav-links-container {
+    display: none !important;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: -4px;
+    right: -4px;
+    background-color: #ffd166;
+    border: 4px solid #1a1a1a;
+    box-shadow: 8px 8px 0px #1a1a1a;
+    flex-direction: column;
+    align-items: stretch !important;
+    padding: 20px;
+    gap: 15px !important;
+    z-index: 999;
+  }
+
+  /* Hamburger Menü Butonuna Tıklandığında Açılan Durum */
+  .nav-links-container.nav-open {
+    display: flex !important;
+  }
+
+  /* Menü Elemanlarının Mobilde Tam Genişlikte Olması */
+  .nav-links-container a,
+  .nav-links-container button {
+    justify-content: center;
+    text-align: center;
+    padding: 10px !important;
+    font-size: 1.05rem;
+  }
+}
+
 /* ⚡ PLAK KARTLARI HOVER EFEKTİ */
 .brutal-card {
   transition:
