@@ -666,6 +666,14 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
       HAKKIMIZDA
     </Link>
     
+     <Link 
+  to="/contact" 
+  onClick={() => setIsNavOpen(false)} 
+  style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}
+>
+  İLETİŞİM
+</Link>     
+          
     <Link to="/favorites" onClick={() => setIsNavOpen(false)} style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold' }}>
       ❤️ ({favorites.length})
     </Link>
@@ -2230,6 +2238,7 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
             <Route path="/product/:id" element={<ProductDetail  plaklar={plaklar} sepeteEkle={sepeteEkle} isLoggedIn={isLoggedIn} favorites={favorites} toggleFavorite={toggleFavorite} />} />
             <Route path="/admin" element={<AdminPage />} />
             
+            
  <Route 
   path="/account" 
   element={<AccountPage user={user} setUser={setUser} />} 
@@ -2247,7 +2256,45 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
       setSelectedKampanya={setSelectedKampanya} 
     />
   } 
-/>
+            />
+            
+            <Route path="/contact" element={
+  <div style={{ 
+                width: '100%', 
+                maxWidth: '1200px',
+    margin: '0 auto', 
+    padding: '30px', 
+    backgroundColor: 'white', 
+    border: '4px solid #1a1a1a', 
+    boxShadow: '8px 8px 0px #1a1a1a' 
+  }}>
+    <h1 style={{ margin: '0 0 10px 0', textTransform: 'uppercase', fontSize: '2.2rem', fontWeight: '900' }}>
+      BİZE ULAŞIN
+    </h1>
+    <p style={{ fontWeight: 'bold', color: '#555', marginBottom: '25px' }}>
+      Plak koleksiyonumuz, siparişleriniz veya özel istekleriniz için bize yazabilirsiniz.
+    </p>
+
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+      <div style={{ padding: '15px', border: '3px solid #1a1a1a', backgroundColor: '#ffd166', boxShadow: '4px 4px 0px #1a1a1a' }}>
+        <h3 style={{ margin: '0 0 5px 0' }}>📍 ADRES</h3>
+        <p style={{ margin: 0, fontWeight: 'bold' }}>VinVin Plakçılık, Kadıköy / İstanbul</p>
+      </div>
+      <div style={{ padding: '15px', border: '3px solid #1a1a1a', backgroundColor: '#a7c957', boxShadow: '4px 4px 0px #1a1a1a' }}>
+        <h3 style={{ margin: '0 0 5px 0' }}>✉️ E-POSTA</h3>
+        <p style={{ margin: 0, fontWeight: 'bold' }}>destek@vinvinrecords.com</p>
+      </div>
+      <div style={{ padding: '15px', border: '3px solid #1a1a1a', backgroundColor: '#ff9e00', boxShadow: '4px 4px 0px #1a1a1a' }}>
+        <h3 style={{ margin: '0 0 5px 0' }}>📞 TELEFON</h3>
+        <p style={{ margin: 0, fontWeight: 'bold' }}>+90 (212) 555 0199</p>
+      </div>
+    </div>
+
+    <Link to="/" style={{ display: 'inline-block', fontWeight: '900', color: '#1a1a1a', borderBottom: '2px solid #1a1a1a', textDecoration: 'none' }}>
+      ← VİTRİNE DÖN
+    </Link>
+  </div>
+} />
             
              {/* FAVORİLER */}
 <Route
