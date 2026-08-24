@@ -785,14 +785,18 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
                   const renkPaleti = [ '#c7f9cc', '#ffadad','#a0c4ff',  '#bdb2ff'];
 
         const aktifKampanyalar = (kampanyalar || [])
-          .filter(k => k.isAktif !== false)
-          .slice()
-          .reverse();
+  .filter(k => {
+    // Hem 'aktif' hem 'isAktif' alanını kontrol et:
+    const durum = k.aktif !== undefined ? k.aktif : k.isAktif;
+    return durum === true; // 👈 Sadece kesinlikle true olanlar geçsin!
+  })
+  .slice()
+  .reverse();
 
-        if (aktifKampanyalar.length === 0) return null;
+if (aktifKampanyalar.length === 0) return null;
 
-        const mevcutIndex = currentSlide % aktifKampanyalar.length;
-        const mevcutSlayt = aktifKampanyalar[currentSlide % aktifKampanyalar.length];
+const mevcutIndex = currentSlide % aktifKampanyalar.length;
+const mevcutSlayt = aktifKampanyalar[mevcutIndex];
 
         const bannerRengi = renkPaleti[mevcutIndex % renkPaleti.length];
         return (
@@ -936,7 +940,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
       )}
     </div>
                   )}
-                  
+
                    {tumPlaklariGoster && (
   <>
     <div style={{ flex: 2, minWidth: '220px', position: 'relative' }}>
