@@ -6,9 +6,21 @@ const router = express.Router();
 // 1. Vitrin & Banner İçin Kampanyalar
 router.get('/', async (req, res) => {
   try {
-    // Sadece aktif olanları getir (otomatik bozma sorgusu kaldırıldı)
+    const simdi = new Date();
+
+    // Süresi dolmuş olanları pasif yap
+    await Campaign.updateMany(
+      { 
+        aktif: true,
+        bitisTarihi: { $exists: true, $ne: null, $lt: simdi } 
+      },
+      { $set: { aktif: false, isAktif: false } }
+    );
+
+    // Yalnızca geçerli ve aktif kampanyaları getir
     const campaigns = await Campaign.find({
-      $or: [{ aktif: true }, { isAktif: true }]
+      aktif: true,
+      bitisTarihi: { $gte: simdi }
     }).sort({ createdAt: -1 });
 
     res.json(campaigns);
@@ -21,6 +33,16 @@ router.get('/', async (req, res) => {
 // 2. Admin İçin Tüm Kampanyalar
 router.get('/admin', async (req, res) => {
   try {
+    const simdi = new Date();
+
+    // Süresi dolmuş olanları pasife çek
+    await Campaign.updateMany(
+      { 
+        aktif: true,
+        bitisTarihi: { $exists: true, $ne: null, $lt: simdi } 
+      },
+      { $set: { aktif: false, isAktif: false } }
+    );
     const campaigns = await Campaign.find({}).sort({ createdAt: -1 });
     res.json(campaigns);
   } catch (error) {
@@ -44,13 +66,27 @@ router.post('/', async (req, res) => {
       indirimYuzdesi 
     } = req.body;
 
+    const tarihGirdisi = bitisTarihi || sonTarih;
+    if (!tarihGirdisi) {
+      return res.status(400).json({ message: 'Lütfen bir son geçerlilik tarihi belirleyin.' });
+    }
+
+    // Seçilen günün sonuna (23:59:59) kadar geçerli sayılması için:
+    const sonGecerlilik = new Date(tarihGirdisi);
+    sonGecerlilik.setHours(23, 59, 59, 999);
+
+    const suAn = new Date();
+    if (sonGecerlilik < suAn) {
+      return res.status(400).json({ message: 'Geçmiş bir tarihe kampanya oluşturulamaz! ❌' });
+    }
+
     const yeniKampanya = new Campaign({
       baslik: baslik || 'Özel İndirim',
       detay: detay || 'Tüm plaklarda geçerli!',
       renk: renk || '#ff9e00',
       kod: (kod || 'INDIRIM').toUpperCase().trim(),
       hedefKategori: hedefKategori || kategori || 'Tümü',
-      bitisTarihi: bitisTarihi || sonTarih || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      bitisTarihi: sonGecerlilik,
       indirimYuzdesi: Number(indirimYuzdesi) || 10,
       aktif: true,
       isAktif: true
@@ -106,6 +142,15 @@ router.post('/validate-coupon', async (req, res) => {
       return res.status(404).json({ message: 'Böyle bir kupon kodu bulunamadı! ❌' });
     }
 
+    const simdi = new Date();
+    const bitis = campaign.bitisTarihi || campaign.sonTarih;
+
+    // Süresi dolmuş mu kontrolü
+    if (bitis && new Date(bitis) < simdi) {
+      await Campaign.findByIdAndUpdate(campaign._id, { $set: { aktif: false, isAktif: false } });
+      return res.status(400).json({ message: 'Bu kuponun son kullanma tarihi dolmuş! ⏳' });
+    }
+    
     // 2. Aktiflik Kontrolü (Admin pasif yaptıysa anında reddeder)
     const aktifMi = (campaign.aktif !== undefined) ? campaign.aktif : campaign.isAktif;
     if (!aktifMi) {

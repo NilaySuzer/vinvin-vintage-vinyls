@@ -743,6 +743,7 @@ const handleToggleActive = async (id) => {
           <input 
             required
             type="date" 
+            min={new Date().toISOString().split('T')[0]}     
             value={yeniKampanya.sonTarih} 
             onChange={e => setYeniKampanya({ ...yeniKampanya, sonTarih: e.target.value })} 
             style={{ width: '100%', padding: '9px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }} 

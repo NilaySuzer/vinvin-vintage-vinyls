@@ -636,94 +636,6 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
     <KeyIcon size={22} color="yellow" /> ADMIN
   </Link>
 )}
-
-        <button onClick={handleLogout} style={{ border: '2px solid #1a1a1a', padding: '6px 12px', backgroundColor: '#1a1a1a', color: 'white', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <LogOut size={16} /> ÇIKIŞ
-        </button>
-      </>
-    ) : (
-      <>
-        <Link to="/login" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 10px', backgroundColor: 'white' }}>
-          Giriş
-        </Link>
-        <Link to="/register" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 10px', backgroundColor: '#1a1a1a' }}>
-          Kayıt
-        </Link>
-      </>
-    )}
-{/* 📂 KATEGORİLER DROPDOWN (YENİLENMİŞ RETRO BRUTALIST TASARIM) */}
-<div style={{ position: 'relative', display: 'inline-block', }}>
-  <button 
-    onClick={() => setIsNavOpen(!isNavOpen)} 
-    style={{ 
-      backgroundColor: isNavOpen ? '#ff9e00' : 'white', 
-      color: '#1a1a1a', 
-      border: '3px solid #1a1a1a', 
-      padding: '6px 14px', 
-      fontWeight: 'bold', 
-      cursor: 'pointer', 
-      fontSize: '0.9rem', 
-      display: 'flex', 
-      alignItems: 'center', 
-      gap: '8px',
-      boxShadow: '3px 3px 0px #1a1a1a',
-      transition: 'all 0.1s ease',
-      textTransform: 'uppercase',
-      fontFamily: 'inherit'
-    }}
-  >
-    <span>Kategoriler</span>
-    <span style={{ 
-      fontSize: '0.75rem', 
-      transform: isNavOpen ? 'rotate(180deg)' : 'rotate(0deg)', 
-      transition: 'transform 0.2s' 
-    }}>
-      ▼
-    </span>
-  </button>
-
-  {/* Açılır Kutu */}
-  {isNavOpen && (
-    <div style={{ 
-      position: 'absolute', 
-      top: 'calc(100% + 8px)', 
-      left: 0, 
-      backgroundColor: 'white', 
-      border: '3px solid #1a1a1a', 
-      boxShadow: '6px 6px 0px #1a1a1a', 
-      zIndex: 999, 
-      display: 'flex', 
-      flexDirection: 'column', 
-      minWidth: '180px',
-      padding: '6px'
-    }}>
-      {['Tümü', 'Rock', 'Jazz', 'Pop', 'Klasik', 'Metal'].map((cat) => (
-        <button
-          key={cat}
-          onClick={() => {
-            setActiveCategory(cat);
-            setIsNavOpen(false);
-          }}
-          style={{
-            textAlign: 'left', 
-            padding: '10px 12px', 
-            border: activeCategory === cat ? '2px solid #1a1a1a' : '2px solid transparent', 
-            backgroundColor: activeCategory === cat ? '#ff9e00' : 'transparent',
-            fontWeight: 'bold', 
-            cursor: 'pointer', 
-            fontSize: '0.85rem',
-            textTransform: 'uppercase',
-            marginBottom: '4px',
-            boxShadow: activeCategory === cat ? '2px 2px 0px #1a1a1a' : 'none'
-          }}
-        >
-          {cat === 'Tümü' ? '📀 TÜM PLAKLAR' : ` ${cat}`}
-        </button>
-      ))}
-    </div>
-  )}
-</div>
-          {/* NAVBAR İÇİNDE BİLDİRİM ZİLİ */}
 {user && (
   <div style={{ position: 'relative' }}>
   {/* ZİL BUTONU */}
@@ -828,10 +740,28 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
     </div>
   )}
 </div>
-)}
-          <Link to="/cart" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 12px', backgroundColor: 'white', boxShadow: '3px 3px 0px #1a1a1a' }}>
+              )}
+               <Link to="/cart" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 12px', backgroundColor: 'white', boxShadow: '3px 3px 0px #1a1a1a' }}>
              <ShoppingBag size={20} color="black" /> SEPET ({(cart || []).reduce((acc, curr) => acc + (curr.adet || 1), 0)})
           </Link>
+        <button onClick={handleLogout} style={{ border: '2px solid #1a1a1a', padding: '6px 12px', backgroundColor: '#1a1a1a', color: 'white', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <LogOut size={16} /> ÇIKIŞ
+        </button>
+      </>
+    ) : (
+      <>
+        <Link to="/login" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 10px', backgroundColor: 'white' }}>
+          Giriş
+        </Link>
+        <Link to="/register" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 10px', backgroundColor: '#1a1a1a' }}>
+          Kayıt
+              </Link>
+              <Link to="/cart" style={{ textDecoration: 'none', color: '#1a1a1a', fontWeight: 'bold', border: '2px solid #1a1a1a', padding: '5px 12px', backgroundColor: 'white', boxShadow: '3px 3px 0px #1a1a1a' }}>
+             <ShoppingBag size={20} color="black" /> SEPET ({(cart || []).reduce((acc, curr) => acc + (curr.adet || 1), 0)})
+          </Link>
+      </>
+    )}
+          
         </div>
       </nav>
 
@@ -1005,8 +935,11 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
         </div>
       )}
     </div>
-  )}
-
+                  )}
+                  
+                   {tumPlaklariGoster && (
+  <>
+    <div style={{ flex: 2, minWidth: '220px', position: 'relative' }}>
             <div style={{ flex: 1, minWidth: '150px', display: 'flex', alignItems: 'center', border: '3px solid #1a1a1a', backgroundColor: 'white', padding: '0 10px', boxShadow: '4px 4px 0px #1a1a1a' }}>
               <ArrowUpDown size={18} color="#1a1a1a" />
               <select 
@@ -1020,8 +953,11 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
                 <option value="a-z">İsim: A - Z</option>
               </select>
             </div>
-          </div>
-
+                  </div>
+                   </> 
+)}
+                </div>  
+                
                 {tumPlaklariGoster && (
                   <div style={{ margin: '10px 0' }}>
                     <button
