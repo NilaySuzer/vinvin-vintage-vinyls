@@ -407,6 +407,7 @@ const AppContent = ({
     window.scrollTo(0, 0);
   }, [pathname]);
   
+
   // Tema Durumu (localStorage destekli)
 const [theme, setTheme] = useState(() => {
   return localStorage.getItem('vinvin_theme') || 'light';
@@ -1131,26 +1132,80 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
 )}
                 </div>  
                 
-                {tumPlaklariGoster && (
-                  <div style={{ margin: '10px 0' }}>
-                    <button
-                      onClick={() => {
-                        setTumPlaklariGoster(false);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }}
-                      style={{
-                        backgroundColor: '#ff6b6b',
-                        border: '3px solid #1a1a1a',
-                        padding: '8px 16px',
-                        fontWeight: '900',
-                        cursor: 'pointer',
-                        boxShadow: '3px 3px 0px #1a1a1a'
-                      }}
-                    >
-                      ← VİTRİNE DÖN
-                    </button>
-                  </div>
-                )}
+              {tumPlaklariGoster && (
+  <div style={{ 
+    margin: '20px 0 30px 0', 
+    display: 'flex', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    flexWrap: 'wrap', 
+    gap: '15px' 
+  }}>
+    {/* VİTRİNE DÖN BUTONU */}
+    <button
+      type="button"
+      onClick={() => {
+        setTumPlaklariGoster(false);
+        setActiveCategory('Tümü');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }}
+      className="brutal-btn"
+      style={{
+        backgroundColor: '#ff6b6b',
+        color: '#1a1a1a',
+        border: '3px solid #1a1a1a',
+        padding: '10px 20px',
+        fontWeight: '900',
+        cursor: 'pointer',
+        boxShadow: '4px 4px 0px #1a1a1a',
+        textTransform: 'uppercase',
+        fontSize: '0.9rem',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '6px'
+      }}
+    >
+      ← VİTRİNE DÖN
+    </button>
+
+    {/* YAN YANA SIRALANAN KATEGORİ BUTONLARI */}
+    <div style={{ 
+      display: 'flex', 
+      flexWrap: 'wrap', 
+      gap: '30px', 
+      alignItems: 'flex-start', 
+      justifyContent: 'flex-start' 
+    }}>
+      {['Tümü', 'Rock', 'Jazz', 'Pop', 'Metal'].map((cat) => {
+        const isAktif = (activeCategory || 'Tümü').toLowerCase() === cat.toLowerCase();
+
+        return (
+          <button
+            key={cat}
+            type="button"
+            onClick={() => setActiveCategory(cat)}
+            className="brutal-btn"
+            style={{
+              padding: '10px 20px',
+              border: '3px solid #1a1a1a',
+              backgroundColor: isAktif ? '#ff9e00' : '#ffffff',
+              color: '#1a1a1a',
+              fontWeight: '1500',
+              cursor: 'pointer',
+              textTransform: 'uppercase',
+              fontSize: '0.9rem',
+              boxShadow: isAktif ? '2px 2px 0px #1a1a1a' : '4px 4px 0px #1a1a1a',
+              transform: isAktif ? 'translate(2px, 2px)' : 'none',
+              transition: 'all 0.1s ease'
+            }}
+          >
+            {cat === 'Tümü' ? '⚡ TÜMÜ' : cat}
+          </button>
+        );
+      })}
+    </div>
+  </div>
+)}
 
          {!tumPlaklariGoster && (
   <>
@@ -3285,7 +3340,7 @@ useEffect(() => {
   }, []);
 
   // FRONTEND FİLTRELEME
-  let filtrelenmisPlaklar = activeCategory === "Hepsi" ? plaklar : plaklar.filter(p => p.kategori === activeCategory);
+  let filtrelenmisPlaklar = activeCategory === "Tümü" ? plaklar : plaklar.filter(p => p.kategori === activeCategory);
   
   if (aramaMetni) {
     filtrelenmisPlaklar = filtrelenmisPlaklar.filter(p => 
