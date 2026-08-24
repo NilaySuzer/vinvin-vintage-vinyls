@@ -397,7 +397,7 @@ const AppContent = ({
   cart, setActiveCategory, activeCategory, isSidebarOpen, setIsSidebarOpen, isNavOpen, setIsNavOpen,
   kampanyalar, currentSlide, setSelectedKampanya, selectedPlak, setSelectedPlak, filtrelenmisPlaklar,
   sepeteEkle, sepetiBosalt, adetGuncelle, urunCikar, toplamTutar, selectedKampanya, plaklar, bildirim, kuponKodu, kuponMesaji, kuponKullan, uygulananIndirim, indirimTutari, odenecekTutar, DEFAULT_KUPONLAR, uygulananKupon,
-  aramaMetni, setAramaMetni, sirallama, setSirallama, favorites, toggleFavorite, isLoggedIn, setIsLoggedIn, handleLogout,
+  aramaMetni, setAramaMetni, sirallama, setSirallama, favorites, toggleFavorite, isLoggedIn, setIsLoggedIn, handleLogout, user, setUser 
 }) => {
 
   const { pathname } = useLocation(); // 👈 Mevcut sayfa yolunu alır
@@ -577,13 +577,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
   const guvenliOdenecek = Number(odenecekTutar) || guvenliToplam;
   
 
-  const [user, setUser] = useState(() => {
-    try {
-      const savedUser = localStorage.getItem('user');
-      return savedUser ? JSON.parse(savedUser) : null;
-    } catch (e) {
-      return null;
-    }});
+  
 
   return (
     <div style={{ width: '92%', margin: '0 auto', padding: '20px' }}>
@@ -726,7 +720,6 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
         )}
 
         {/* BİLDİRİM ZİLİ */}
-        {user && (
           <div style={{ position: 'relative' }}>
             <button
               type="button"
@@ -825,7 +818,7 @@ const vitrinPlaklari = (filtrelenmisPlaklar || []).filter(plak => (plak.stok ?? 
               </div>
             )}
           </div>
-        )}
+        
 
         <Link 
           to="/cart" 
@@ -2901,19 +2894,50 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
 
 // --- ANA APP BİLEŞENİ ---
 function App() {
-  const [cart, setCart] = useState(() => {
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (e) {
+      return null;
+    }});
+  const getCartStorageKey = (currentUser) => {
+  if (currentUser && (currentUser._id || currentUser.id)) {
+    return `vinvin_user_cart_${currentUser._id || currentUser.id}`;
+  }
+  return 'vinvin_guest_cart';
+};
+
+// 2. Sepet State'i (Oturum durumuna göre başlatır)
+const [cart, setCart] = useState(() => {
   try {
-    const kayitliSepet = localStorage.getItem('vinvin_cart');
+    const kayitliUser = JSON.parse(localStorage.getItem('user'));
+    const anahtar = getCartStorageKey(kayitliUser);
+    const kayitliSepet = localStorage.getItem(anahtar);
     return kayitliSepet ? JSON.parse(kayitliSepet) : [];
   } catch (err) {
     return [];
   }
 });
 
-// 2. cart her değiştiğinde localStorage'a kaydet
+// 3. Sepet her değiştiğinde aktif oturumun anahtarına kaydet
 useEffect(() => {
-  localStorage.setItem('vinvin_cart', JSON.stringify(cart));
-}, [cart]);
+  const anahtar = getCartStorageKey(user);
+  localStorage.setItem(anahtar, JSON.stringify(cart));
+}, [cart, user]);
+
+// 4. Kullanıcı Giriş/Çıkış Yaptığında Sepeti İlgili Hesaba Geçir
+useEffect(() => {
+  try {
+    const anahtar = getCartStorageKey(user);
+    const hedefSepet = localStorage.getItem(anahtar);
+    setCart(hedefSepet ? JSON.parse(hedefSepet) : []);
+    if (typeof setUygulananKupon === 'function') setUygulananKupon(null);
+    if (typeof setKuponMesaji === 'function') setKuponMesaji('');
+  } catch (e) {
+    console.error('Sepet senkronizasyon hatası:', e);
+  }
+}, [user]);
   const [kuponKodu, setKuponKodu] = useState('');
   const [uygulananKupon, setUygulananKupon] = useState(null);
   const [kuponMesaji, setKuponMesaji] = useState('');
@@ -2922,6 +2946,7 @@ useEffect(() => {
   const indirimTutari = uygulananKupon ? Number(uygulananKupon.indirimTutari || 0) : 0;
   const araToplam = cart.reduce((toplam, item) => toplam + (Number(item.fiyat || 0) * Number(item.adet || 1)), 0);
   const odenecekTutar = Math.max(0, araToplam - indirimTutari);
+  
   const [plaklar, setPlaklar] = useState([]);
   const [activeCategory, setActiveCategory] = useState("Hepsi");
   const [selectedPlak, setSelectedPlak] = useState(null);
@@ -2978,11 +3003,17 @@ useEffect(() => {
   localStorage.removeItem('user');
   setIsLoggedIn(false);
   setUser(null);
+    // Misafir favorilerini ve misafir sepetini yükle
   const guestFavs = JSON.parse(localStorage.getItem('guest_favorites') || '[]');
   setFavorites(guestFavs);
+
+  const guestCart = JSON.parse(localStorage.getItem('vinvin_guest_cart') || '[]');
+  setCart(guestCart);
+
+  if (typeof setUygulananKupon === 'function') setUygulananKupon(null);
+  if (typeof setKuponMesaji === 'function') setKuponMesaji('');
+    
 };
-  
- 
 
  const toggleFavorite = async (plak) => {
   const plakId = plak._id || plak.id;
