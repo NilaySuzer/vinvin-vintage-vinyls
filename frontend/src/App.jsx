@@ -177,22 +177,81 @@ const ProductDetail = ({ plaklar, sepeteEkle, isLoggedIn, favorites, toggleFavor
       </div>
       
       {/* BENZER ÜRÜNLER */}
-      <div style={{ marginTop: '60px', borderTop: '4px solid #1a1a1a', paddingTop: '30px' }}>
-         <h3 style={{ textTransform: 'uppercase' }}>AYNI KATEGORİDEN DİĞER PLAKLAR</h3>
-          <div style={{ display: 'flex', gap: '20px', overflowX: 'auto', padding: '10px 0' }}>
-            {plaklar.filter(p => p.kategori === plak.kategori && (p._id || p.id) !== plakId).map(p => {
-              const pId = p._id || p.id;
-              return (
-                <Link key={pId} to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', minWidth: '200px', border: '3px solid #1a1a1a', padding: '15px', backgroundColor: 'white', boxShadow: '5px 5px 0px #1a1a1a' }}>
-                  <div style={{ textAlign: 'center', fontSize: '2rem', marginBottom: '10px' }}><Disc size={60} color="#1a1a1a" strokeWidth={2.5} /></div>
-                  <div style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>{p.ad}</div>
-                  <div style={{ fontSize: '0.85rem', color: '#666' }}>{p.sanatci}</div>
-                  <div style={{ fontSize: '1rem', fontWeight: 'bold', marginTop: '8px', color: '#1a1a1a' }}>{p.fiyat} TL</div>
-                </Link>
-              );
-            })}
-          </div>
-      </div>
+<div style={{ marginTop: '60px', borderTop: '4px solid #1a1a1a', paddingTop: '30px' }}>
+  <h3 style={{ textTransform: 'uppercase', fontWeight: '900', letterSpacing: '-0.5px' }}>
+    AYNI KATEGORİDEN DİĞER PLAKLAR
+  </h3>
+  <div style={{ display: 'flex', gap: '20px', overflowX: 'auto', padding: '10px 0' }}>
+    {plaklar
+      .filter(p => p.kategori === plak?.kategori && (p._id || p.id) !== plakId)
+      .map(p => {
+        const pId = p._id || p.id;
+        // Her plağın KENDİ resmini alıyoruz (p.resim, p.image, p.gorsel vs.)
+        const plakGorseli = p.resim || p.image || p.fotografUrl || p.img;
+
+        return (
+          <Link
+            key={pId}
+            to={`/product/${pId}`}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            style={{
+              textDecoration: 'none',
+              color: 'inherit',
+              minWidth: '200px',
+              maxWidth: '200px',
+              border: '3px solid #1a1a1a',
+              padding: '15px',
+              backgroundColor: 'white',
+              boxShadow: '5px 5px 0px #1a1a1a',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              transition: 'transform 0.1s ease'
+            }}
+          >
+            {/* HER PLAĞIN KENDİ RESMİ (YOKSA DİSK İKONU) */}
+            <div style={{ 
+              width: '100%', 
+              height: '160px', 
+              backgroundColor: '#f0f0f0', 
+              border: '2px solid #1a1a1a',
+              marginBottom: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden'
+            }}>
+              {plakGorseli ? (
+                <img 
+                  src={plakGorseli} 
+                  alt={p.ad || p.title} 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  onError={(e) => {
+                    // Resim linki bozuksa hata vermesin, gizleyip arka planı göstersin
+                    e.target.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <Disc size={60} color="#1a1a1a" strokeWidth={2.5} />
+              )}
+            </div>
+
+            <div>
+              <div style={{ fontWeight: '900', fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {p.ad || p.title}
+              </div>
+              <div style={{ fontSize: '0.85rem', color: '#666', fontWeight: 'bold', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {p.sanatci || p.artist}
+              </div>
+              <div style={{ fontSize: '1.1rem', fontWeight: '900', marginTop: '10px', color: '#ff9e00' }}>
+                {p.fiyat || p.price} TL
+              </div>
+            </div>
+          </Link>
+        );
+      })}
+  </div>
+</div>
 
       {/* YORUMLAR */}
 <ProductReviews 
