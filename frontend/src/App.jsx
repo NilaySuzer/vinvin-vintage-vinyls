@@ -3530,7 +3530,7 @@ useEffect(() => {
   const odenecekTutar = Math.max(0, araToplam - indirimTutari);
   
   const [plaklar, setPlaklar] = useState([]);
-  const [activeCategory, setActiveCategory] = useState("Hepsi");
+  const [activeCategory, setActiveCategory] = useState("Tümü");
   const [selectedPlak, setSelectedPlak] = useState(null);
   const [selectedKampanya, setSelectedKampanya] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
