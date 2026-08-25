@@ -397,7 +397,7 @@ const AppContent = ({
   cart, setActiveCategory, activeCategory, isSidebarOpen, setIsSidebarOpen, isNavOpen, setIsNavOpen,
   kampanyalar, currentSlide, setSelectedKampanya, selectedPlak, setSelectedPlak, filtrelenmisPlaklar,
   sepeteEkle, sepetiBosalt, adetGuncelle, urunCikar, toplamTutar, selectedKampanya, plaklar, bildirim, kuponKodu, kuponMesaji, kuponKullan, uygulananIndirim, indirimTutari, odenecekTutar, DEFAULT_KUPONLAR, uygulananKupon,
-  aramaMetni, setAramaMetni, sirallama, setSirallama, favorites, toggleFavorite, isLoggedIn, setIsLoggedIn, handleLogout, user, setUser 
+  aramaMetni, setAramaMetni, sirallama, setSirallama, favorites, toggleFavorite, isLoggedIn, setIsLoggedIn, handleLogout, user, setUser, 
 }) => {
 
   const { pathname } = useLocation(); // 👈 Mevcut sayfa yolunu alır
@@ -407,6 +407,94 @@ const AppContent = ({
     window.scrollTo(0, 0);
   }, [pathname]);
   
+  const [tradeForm, setTradeForm] = useState({
+  plakAdi: '',
+  sanatci: '',
+  kondisyon: 'Jelatininde',
+  teklifTuru: 'satis',
+  talepEdilenFiyat: '',
+  aciklama: '',
+  fotografUrl: ''
+});
+
+const [tradeLoading, setTradeLoading] = useState(false);
+const [tradeMesaj, setTradeMesaj] = useState('');
+
+const handleTradeSubmit = async (e) => {
+  e.preventDefault();
+
+  // 1. Oturumu doğrudan localStorage üzerinden oku (State gecikmesini ve false-positive durumunu önler)
+  let activeUser = null;
+  try {
+    const rawUser = localStorage.getItem('user');
+    if (rawUser) {
+      activeUser = JSON.parse(rawUser);
+    }
+  } catch (err) {
+    console.error('Kullanıcı verisi okunamadı:', err);
+  }
+
+  const token = localStorage.getItem('token');
+
+  // Kullanıcı gerçekten yoksa uyar
+  if (!activeUser || !token) {
+    alert('Teklif gönderebilmek için lütfen önce giriş yapın.');
+    window.location.href = '/login';
+    return;
+  }
+
+  setTradeLoading(true);
+  setTradeMesaj('');
+
+  try {
+    // 2. Kullanıcı bilgilerini güvenle paketle
+    const payload = {
+      plakAdi: tradeForm?.plakAdi || '',
+      sanatci: tradeForm?.sanatci || '',
+      kondisyon: tradeForm?.kondisyon || 'Near Mint (NM) - Mükemmele Yakın',
+      teklifTuru: tradeForm?.teklifTuru || 'satis',
+      talepEdilenFiyat: tradeForm?.talepEdilenFiyat ? Number(tradeForm.talepEdilenFiyat) : 0,
+      aciklama: tradeForm?.aciklama || '',
+      fotografUrl: tradeForm?.fotografUrl || '',
+      userId: activeUser._id || activeUser.id,
+      userName: activeUser.adSoyad || activeUser.ad || activeUser.name || activeUser.kullaniciAdi || 'Kullanıcı',
+      userEmail: activeUser.email || ''
+    };
+
+    const res = await fetch('http://localhost:5000/api/trade/create', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` // Backend token kontrolü yapıyorsa güvenceye alır
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      setTradeMesaj('✅ Teklifiniz başarıyla iletildi! İncelendikten sonra bildirim kutunuza yanıt düşecek.');
+      // Formu sıfırla
+      setTradeForm({
+        plakAdi: '',
+        sanatci: '',
+        kondisyon: 'Jelatininde',
+        teklifTuru: 'satis',
+        talepEdilenFiyat: '',
+        aciklama: '',
+        fotografUrl: ''
+      });
+    } else {
+      setTradeMesaj(`❌ Hata: ${data.message || 'Teklif iletilemedi.'}`);
+    }
+  } catch (err) {
+    console.error('Trade Submit Error:', err);
+    setTradeMesaj('❌ Sunucuya bağlanırken bir hata oluştu. Backend servisinizin çalıştığından emin olun.');
+  } finally {
+    setTradeLoading(false);
+  }
+};
+
 
   // Tema Durumu (localStorage destekli)
 const [theme, setTheme] = useState(() => {
@@ -977,9 +1065,9 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
               backgroundColor: bannerRengi, 
               color: '#1a1a1a', 
               border: '4px solid #1a1a1a', 
-              padding: '25px', 
+              padding: '15px', 
               boxShadow: '8px 8px 0px #1a1a1a', 
-              marginBottom: '30px', 
+              marginBottom: '15px', 
               cursor: 'pointer', 
               textAlign: 'center',
               transition: 'background-color 0.5s ease, transform 0.1s ease'
@@ -998,41 +1086,71 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
         );
       })()}
                 
-{/* BRUTALIST SONSUZ KAYAN MARQUEE ŞERİDİ */}
-<div 
-  className="brutal-marquee-container"
-  style={{
-    backgroundColor: '#92cef7', // İster neon yeşil (#06d6a0), ister fosforlu sarı (#ffd166)
-    borderTop: '1px solid #1a1a1a',
-    borderBottom: '1px solid #1a1a1a',
-    overflow: 'hidden',
-    padding: '12px 0',
-    margin: '5px -55px',
-    boxShadow: '0 4px 0px #1a1a1a',
-    userSelect: 'none',
-    width: '100vw',
-    border: '4px solid #1a1a1a', // 👈 Sadece üst-alt değil, 4 bir tarafına kalın çerçeve
-    boxShadow: '6px 6px 0px #1a1a1a', // 👈 Diğer kartlarla aynı brutalist gölge
-    boxSizing: 'border-box',
-    maskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
-    WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
-   
 
-    
-  }}
->
-  <div className="brutal-marquee-track">
-    {/* Metni yan yana iki kez yazıyoruz ki döngü kusursuz ve kesintisiz aksın */}
-    <span style={{ fontSize: '1.1rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase', color: '#1a1a1a', whiteSpace: 'nowrap', paddingRight: '20px' }}>
-      🔥 HIZLI KARGO &nbsp;•&nbsp; ⚡ %100 ORİJİNAL BASKILAR &nbsp;•&nbsp; 📻 HER SİPARİŞTE VİNİL TEMİZLEME BEZİ HEDİYE &nbsp;•&nbsp; 💿 ANALOG SESİN SAF GÜCÜ &nbsp;•&nbsp; 📦 AHŞAP KORUMALI KIRILMAZ PAKETLEME &nbsp;•&nbsp;
-    </span>
-    <span style={{ fontSize: '1.1rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase', color: '#1a1a1a', whiteSpace: 'nowrap', paddingRight: '20px' }}>
-      🔥HIZLI KARGO &nbsp;•&nbsp; ⚡ %100 ORİJİNAL BASKILAR &nbsp;•&nbsp; 📻 HER SİPARİŞTE VİNİL TEMİZLEME BEZİ HEDİYE &nbsp;•&nbsp; 💿 ANALOG SESİN SAF GÜCÜ &nbsp;•&nbsp; 📦 AHŞAP KORUMALI KIRILMAZ PAKETLEME &nbsp;•&nbsp;
-    </span>
+ {/* PLAK SAT / TAKAS ET BRUTALIST PROMO KARTI */}
+<div style={{
+  backgroundColor: '#ffd166',
+  border: '4px solid #1a1a1a',
+  boxShadow: '8px 8px 0px #1a1a1a',
+  padding: '15px 20px',
+  marginBottom: '10px',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  gap: '15px'
+}}>
+  <div>
+    <div style={{ 
+      display: 'inline-block', 
+      backgroundColor: '#e4f529', 
+      color: 'black', 
+      padding: '6px 12px', 
+      fontWeight: '900', 
+      fontSize: '1.0rem', 
+      textTransform: 'uppercase',
+      marginBottom: '6px',
+      border: '2px solid black'
+    }}>
+      TAKAS ZAMANI
+    </div>
+    <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-0.5px' }}>
+      Eski Plaklarını Bize Sat veya Yenileriyle Takasla!
+    </h3>
+    <p style={{ margin: '4px 0 0 0', fontWeight: 'bold', color: '#333', fontSize: '0.9rem' }}>
+      Koleksiyonundaki plakların fotoğraflarını gönder, ekibimiz anında fiyat teklifi versin.
+    </p>
   </div>
-</div>
 
-
+  <button
+    type="button"
+    onClick={() => {
+      const formElement = document.getElementById('trade-in-section');
+      if (formElement) {
+        formElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }}
+    className="brutal-btn"
+    style={{
+      backgroundColor: '#a332bd',
+      color: 'white',
+      border: '3px solid #1a1a1a',
+      padding: '12px 24px',
+      fontWeight: '800',
+      fontFamily: 'inherit',
+      fontSize: '1.2rem',
+      cursor: 'pointer',
+      boxShadow: '4px 4px 0px #1a1a1a',
+      textTransform: 'uppercase',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '8px'
+    }}
+  >
+    TEKLİF FORMU DOLDUR ↓
+  </button>
+</div>               
+                
 {/* 🔍 3. ARAMA VE SIRALAMA BAR */}
           {/* ARAMA BAR (CANLI SONUÇ DROPDOWN'LI) */}
 <div style={{ flex: 2, minWidth: '220px', position: 'relative' }}>
@@ -1393,7 +1511,39 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
   sepeteEkle={sepeteEkle} 
 />
 
+{/* BRUTALIST SONSUZ KAYAN MARQUEE ŞERİDİ */}
+<div 
+  className="brutal-marquee-container"
+  style={{
+    backgroundColor: '#92cef7', // İster neon yeşil (#06d6a0), ister fosforlu sarı (#ffd166)
+    borderTop: '1px solid #1a1a1a',
+    borderBottom: '1px solid #1a1a1a',
+    overflow: 'hidden',
+    padding: '12px 0',
+    margin: '5px -55px',
+    boxShadow: '0 4px 0px #1a1a1a',
+    userSelect: 'none',
+    width: '100vw',
+    border: '4px solid #1a1a1a', // 👈 Sadece üst-alt değil, 4 bir tarafına kalın çerçeve
+    boxShadow: '6px 6px 0px #1a1a1a', // 👈 Diğer kartlarla aynı brutalist gölge
+    boxSizing: 'border-box',
+    maskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+    WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+   
 
+    
+  }}
+>
+  <div className="brutal-marquee-track">
+    {/* Metni yan yana iki kez yazıyoruz ki döngü kusursuz ve kesintisiz aksın */}
+    <span style={{ fontSize: '1.1rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase', color: '#1a1a1a', whiteSpace: 'nowrap', paddingRight: '20px' }}>
+      🔥 HIZLI KARGO &nbsp;•&nbsp; ⚡ %100 ORİJİNAL BASKILAR &nbsp;•&nbsp; 📻 HER SİPARİŞTE VİNİL TEMİZLEME BEZİ HEDİYE &nbsp;•&nbsp; 💿 ANALOG SESİN SAF GÜCÜ &nbsp;•&nbsp; 📦 AHŞAP KORUMALI KIRILMAZ PAKETLEME &nbsp;•&nbsp;
+    </span>
+    <span style={{ fontSize: '1.1rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase', color: '#1a1a1a', whiteSpace: 'nowrap', paddingRight: '20px' }}>
+      🔥HIZLI KARGO &nbsp;•&nbsp; ⚡ %100 ORİJİNAL BASKILAR &nbsp;•&nbsp; 📻 HER SİPARİŞTE VİNİL TEMİZLEME BEZİ HEDİYE &nbsp;•&nbsp; 💿 ANALOG SESİN SAF GÜCÜ &nbsp;•&nbsp; 📦 AHŞAP KORUMALI KIRILMAZ PAKETLEME &nbsp;•&nbsp;
+    </span>
+  </div>
+</div>
                 
 {/* SLIDER: EDİTÖRÜN ÖZEL SEÇTİKLERİ */}
 {(() => {
@@ -1581,6 +1731,40 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
   );
 })()}
 
+{/* BRUTALIST SONSUZ KAYAN MARQUEE ŞERİDİ */}
+<div 
+  className="brutal-marquee-container"
+  style={{
+    backgroundColor: '#92cef7', // İster neon yeşil (#06d6a0), ister fosforlu sarı (#ffd166)
+    borderTop: '1px solid #1a1a1a',
+    borderBottom: '1px solid #1a1a1a',
+    overflow: 'hidden',
+    padding: '12px 0',
+    margin: '5px -55px',
+    boxShadow: '0 4px 0px #1a1a1a',
+    userSelect: 'none',
+    width: '100vw',
+    border: '4px solid #1a1a1a', // 👈 Sadece üst-alt değil, 4 bir tarafına kalın çerçeve
+    boxShadow: '6px 6px 0px #1a1a1a', // 👈 Diğer kartlarla aynı brutalist gölge
+    boxSizing: 'border-box',
+    maskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+    WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+   
+
+    
+  }}
+>
+  <div className="brutal-marquee-track">
+    {/* Metni yan yana iki kez yazıyoruz ki döngü kusursuz ve kesintisiz aksın */}
+    <span style={{ fontSize: '1.1rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase', color: '#1a1a1a', whiteSpace: 'nowrap', paddingRight: '20px' }}>
+      🔥 HIZLI KARGO &nbsp;•&nbsp; ⚡ %100 ORİJİNAL BASKILAR &nbsp;•&nbsp; 📻 HER SİPARİŞTE VİNİL TEMİZLEME BEZİ HEDİYE &nbsp;•&nbsp; 💿 ANALOG SESİN SAF GÜCÜ &nbsp;•&nbsp; 📦 AHŞAP KORUMALI KIRILMAZ PAKETLEME &nbsp;•&nbsp;
+    </span>
+    <span style={{ fontSize: '1.1rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase', color: '#1a1a1a', whiteSpace: 'nowrap', paddingRight: '20px' }}>
+      🔥HIZLI KARGO &nbsp;•&nbsp; ⚡ %100 ORİJİNAL BASKILAR &nbsp;•&nbsp; 📻 HER SİPARİŞTE VİNİL TEMİZLEME BEZİ HEDİYE &nbsp;•&nbsp; 💿 ANALOG SESİN SAF GÜCÜ &nbsp;•&nbsp; 📦 AHŞAP KORUMALI KIRILMAZ PAKETLEME &nbsp;•&nbsp;
+    </span>
+  </div>
+</div>                    
+
 {/* 4. YÖNTEM SLIDER: FIRSAT & BÜTÇE DOSTU PLAKLAR */}
 {(() => {
   const firsatPlaklari = (plaklar || [])
@@ -1764,7 +1948,41 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
       </div>
     </div>
   );
-})()}
+                    })()}
+                    
+                    {/* BRUTALIST SONSUZ KAYAN MARQUEE ŞERİDİ */}
+<div 
+  className="brutal-marquee-container"
+  style={{
+    backgroundColor: '#92cef7', // İster neon yeşil (#06d6a0), ister fosforlu sarı (#ffd166)
+    borderTop: '1px solid #1a1a1a',
+    borderBottom: '1px solid #1a1a1a',
+    overflow: 'hidden',
+    padding: '12px 0',
+    margin: '5px -55px',
+    boxShadow: '0 4px 0px #1a1a1a',
+    userSelect: 'none',
+    width: '100vw',
+    border: '4px solid #1a1a1a', // 👈 Sadece üst-alt değil, 4 bir tarafına kalın çerçeve
+    boxShadow: '6px 6px 0px #1a1a1a', // 👈 Diğer kartlarla aynı brutalist gölge
+    boxSizing: 'border-box',
+    maskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+    WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+   
+
+    
+  }}
+>
+  <div className="brutal-marquee-track">
+    {/* Metni yan yana iki kez yazıyoruz ki döngü kusursuz ve kesintisiz aksın */}
+    <span style={{ fontSize: '1.1rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase', color: '#1a1a1a', whiteSpace: 'nowrap', paddingRight: '20px' }}>
+      🔥 HIZLI KARGO &nbsp;•&nbsp; ⚡ %100 ORİJİNAL BASKILAR &nbsp;•&nbsp; 📻 HER SİPARİŞTE VİNİL TEMİZLEME BEZİ HEDİYE &nbsp;•&nbsp; 💿 ANALOG SESİN SAF GÜCÜ &nbsp;•&nbsp; 📦 AHŞAP KORUMALI KIRILMAZ PAKETLEME &nbsp;•&nbsp;
+    </span>
+    <span style={{ fontSize: '1.1rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase', color: '#1a1a1a', whiteSpace: 'nowrap', paddingRight: '20px' }}>
+      🔥HIZLI KARGO &nbsp;•&nbsp; ⚡ %100 ORİJİNAL BASKILAR &nbsp;•&nbsp; 📻 HER SİPARİŞTE VİNİL TEMİZLEME BEZİ HEDİYE &nbsp;•&nbsp; 💿 ANALOG SESİN SAF GÜCÜ &nbsp;•&nbsp; 📦 AHŞAP KORUMALI KIRILMAZ PAKETLEME &nbsp;•&nbsp;
+    </span>
+  </div>
+</div>
                 
 {/* SLIDER: METAL EFSANELERİ */}
 {(() => {
@@ -1952,6 +2170,41 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
 })()}
 
 
+ {/* BRUTALIST SONSUZ KAYAN MARQUEE ŞERİDİ */}
+<div 
+  className="brutal-marquee-container"
+  style={{
+    backgroundColor: '#92cef7', // İster neon yeşil (#06d6a0), ister fosforlu sarı (#ffd166)
+    borderTop: '1px solid #1a1a1a',
+    borderBottom: '1px solid #1a1a1a',
+    overflow: 'hidden',
+    padding: '12px 0',
+    margin: '5px -55px',
+    boxShadow: '0 4px 0px #1a1a1a',
+    userSelect: 'none',
+    width: '100vw',
+    border: '4px solid #1a1a1a', // 👈 Sadece üst-alt değil, 4 bir tarafına kalın çerçeve
+    boxShadow: '6px 6px 0px #1a1a1a', // 👈 Diğer kartlarla aynı brutalist gölge
+    boxSizing: 'border-box',
+    maskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+    WebkitMaskImage: 'linear-gradient(to right, transparent, black 4%, black 96%, transparent)',
+   
+
+    
+  }}
+>
+  <div className="brutal-marquee-track">
+    {/* Metni yan yana iki kez yazıyoruz ki döngü kusursuz ve kesintisiz aksın */}
+    <span style={{ fontSize: '1.1rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase', color: '#1a1a1a', whiteSpace: 'nowrap', paddingRight: '20px' }}>
+      🔥 HIZLI KARGO &nbsp;•&nbsp; ⚡ %100 ORİJİNAL BASKILAR &nbsp;•&nbsp; 📻 HER SİPARİŞTE VİNİL TEMİZLEME BEZİ HEDİYE &nbsp;•&nbsp; 💿 ANALOG SESİN SAF GÜCÜ &nbsp;•&nbsp; 📦 AHŞAP KORUMALI KIRILMAZ PAKETLEME &nbsp;•&nbsp;
+    </span>
+    <span style={{ fontSize: '1.1rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase', color: '#1a1a1a', whiteSpace: 'nowrap', paddingRight: '20px' }}>
+      🔥HIZLI KARGO &nbsp;•&nbsp; ⚡ %100 ORİJİNAL BASKILAR &nbsp;•&nbsp; 📻 HER SİPARİŞTE VİNİL TEMİZLEME BEZİ HEDİYE &nbsp;•&nbsp; 💿 ANALOG SESİN SAF GÜCÜ &nbsp;•&nbsp; 📦 AHŞAP KORUMALI KIRILMAZ PAKETLEME &nbsp;•&nbsp;
+    </span>
+  </div>
+</div>                   
+                    
+
 {/* SLIDER: TÜRKÇE POP KRALİÇELERİ */}
 {(() => {
   // Manuel olarak öne çıkarmak istediğin plakların tam adları:
@@ -2137,7 +2390,7 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
                     })()}
 
 {!tumPlaklariGoster && (
-  <div style={{ display: 'flex', justifyContent: 'center', margin: '40px 0' }}>
+  <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0' }}>
     <button
       onClick={() => {
         setTumPlaklariGoster(true);
@@ -2168,7 +2421,187 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
 
                     </>
 )} 
+   {/* FOOTER ÖNCESİ: PLAK SATIŞ / TAKAS FORMU BÖLÜMÜ */}
+      {!tumPlaklariGoster && (
+        <section
+          id="trade-in-section"
+          style={{
+            marginTop: '10px',
+            marginBottom: '40px',
+            backgroundColor: '#ffffff',
+            border: '4px solid #1a1a1a',
+            boxShadow: '10px 10px 0px #1a1a1a',
+            padding: '35px 25px'
+          }}
+        >
+          <div style={{ maxWidth: '850px', margin: '0 auto' }}>
+            {/* BAŞLIK VE AÇIKLAMA */}
+            <div style={{ borderBottom: '3px solid #1a1a1a', paddingBottom: '15px', marginBottom: '30px', marginTop:'5px' }}>
+              <span style={{
+                backgroundColor: '#ff9e00',
+                color: '#1a1a1a',
+                padding: '6px 20px',
+                fontWeight: '900',
+                border: '2px solid #1a1a1a',
+                fontSize: '1.1rem',
+                textTransform: 'uppercase',
+                boxShadow: '2px 2px 0px #1a1a1a'
+              }}>
+                PLAK ALIM MERKEZİ
+              </span>
+              <h2 style={{ margin: '20px 0 10px 0', fontSize: '2.2rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-1px' }}>
+                PLAKLARINI DEĞERLENDİR
+              </h2>
+              <p style={{ margin: 0, fontWeight: 'bold', color: '#555', fontSize: '0.95rem' }}>
+                Rafında dinlemediğin plaklar mı var? Formu doldurarak bize ilet, dükkanımız nakit alsın veya vitrindeki favorilerinle takaslayalım.
+              </p>
+            </div>
 
+            {/* BİLDİRİM / MESAJ ALANI */}
+            {tradeMesaj && (
+              <div style={{
+                padding: '12px 16px',
+                border: '3px solid #1a1a1a',
+                backgroundColor: tradeMesaj.includes('✅') ? '#a7c957' : '#ff6b6b',
+                color: '#1a1a1a',
+                fontWeight: '900',
+                marginBottom: '20px',
+                boxShadow: '4px 4px 0px #1a1a1a'
+              }}>
+                {tradeMesaj}
+              </div>
+            )}
+
+            {/* FORM */}
+            <form onSubmit={handleTradeSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '15px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: '900', marginBottom: '6px', fontSize: '0.85rem', textTransform: 'uppercase' }}>
+                    Plak Adı / Albüm *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Örn: The Dark Side of the Moon"
+                    value={tradeForm.plakAdi}
+                    onChange={e => setTradeForm({ ...tradeForm, plakAdi: e.target.value })}
+                    style={{ width: '100%', padding: '12px', border: '3px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box', outline: 'none' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontWeight: '900', marginBottom: '6px', fontSize: '0.85rem', textTransform: 'uppercase' }}>
+                    Sanatçı / Grup *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Örn: Pink Floyd"
+                    value={tradeForm.sanatci}
+                    onChange={e => setTradeForm({ ...tradeForm, sanatci: e.target.value })}
+                    style={{ width: '100%', padding: '12px', border: '3px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box', outline: 'none' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '15px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: '900', marginBottom: '6px', fontSize: '0.85rem', textTransform: 'uppercase' }}>
+                    İşlem Türü
+                  </label>
+                  <select
+                    value={tradeForm.teklifTuru}
+                    onChange={e => setTradeForm({ ...tradeForm, teklifTuru: e.target.value })}
+                    style={{ width: '100%', padding: '12px', border: '3px solid #1a1a1a', fontWeight: 'bold', backgroundColor: 'white', boxSizing: 'border-box', outline: 'none' }}
+                  >
+                    <option value="satis"> Nakit Satış Talebi</option>
+                    <option value="takas"> Plak Takas Talebi</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontWeight: '900', marginBottom: '6px', fontSize: '0.85rem', textTransform: 'uppercase' }}>
+                    Kondisyon Durumu *
+                  </label>
+                  <select
+                    value={tradeForm.kondisyon}
+                    onChange={e => setTradeForm({ ...tradeForm, kondisyon: e.target.value })}
+                    style={{ width: '100%', padding: '12px', border: '3px solid #1a1a1a', fontWeight: 'bold', backgroundColor: 'white', boxSizing: 'border-box', outline: 'none' }}
+                  >
+                    <option value="Jelatininde">Jelatininde</option>
+                    <option value="Kusursuz">Kusursuz</option>
+                    <option value="Çok İyi">Çok İyi</option>
+                    <option value="İyi">İyi</option>
+                    <option value="Çalınabilir">Çalınabilir</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '15px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: '900', marginBottom: '6px', fontSize: '0.85rem', textTransform: 'uppercase' }}>
+                    İstediğiniz Tutar (TL)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="Örn: 750 (Opsiyonel)"
+                    value={tradeForm.talepEdilenFiyat}
+                    onChange={e => setTradeForm({ ...tradeForm, talepEdilenFiyat: e.target.value })}
+                    style={{ width: '100%', padding: '12px', border: '3px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box', outline: 'none' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontWeight: '900', marginBottom: '6px', fontSize: '0.85rem', textTransform: 'uppercase' }}>
+                    Görsel / Fotoğraf Linki
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://..."
+                    value={tradeForm.fotografUrl}
+                    onChange={e => setTradeForm({ ...tradeForm, fotografUrl: e.target.value })}
+                    style={{ width: '100%', padding: '12px', border: '3px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box', outline: 'none' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontWeight: '900', marginBottom: '6px', fontSize: '0.85rem', textTransform: 'uppercase' }}>
+                  Ek Açıklama & Plak Detayları
+                </label>
+                <textarea
+                  rows="3"
+                  placeholder="Baskı yılı, iç zarf durumu veya plaktaki çizikler hakkında kısa bilgi..."
+                  value={tradeForm.aciklama}
+                  onChange={e => setTradeForm({ ...tradeForm, aciklama: e.target.value })}
+                  style={{ width: '100%', padding: '12px', border: '3px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box', outline: 'none' }}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={tradeLoading}
+                className="brutal-btn"
+                style={{
+                  backgroundColor: '#ff9e00',
+                  color: '#1a1a1a',
+                  border: '3px solid #1a1a1a',
+                  padding: '16px',
+                  fontWeight: '900',
+                  fontFamily: 'inherit',
+                  fontSize: '1.2rem',
+                  cursor: 'pointer',
+                  boxShadow: '6px 6px 0px #1a1a1a',
+                  textTransform: 'uppercase',
+                  marginTop: '10px'
+                }}
+              >
+                {tradeLoading ? 'İLETİLİYOR...' : 'TEKLİFİ DÜKKANA GÖNDER'}
+              </button>
+            </form>
+          </div>
+        </section>
+      )}
           {/* SADECE tumPlaklariGoster TRUE OLDUĞUNDA GÖZÜKÜR */}
                 {tumPlaklariGoster && (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '25px', marginTop: '20px' }}>
@@ -2958,6 +3391,9 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
           </Routes>
         </div>
       </div>
+
+      
+   
 
       {/* FOOTER */}
       <footer style={{ marginTop: '60px', padding: '40px 20px', borderTop: '5px solid #1a1a1a', backgroundColor: '#1a1a1a', color: 'white', textAlign: 'center' }}>

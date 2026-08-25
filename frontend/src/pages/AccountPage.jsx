@@ -24,6 +24,110 @@ const AccountPage = ({ user, setUser }) => {
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
 
+  const [myTradeOffers, setMyTradeOffers] = useState([]);
+const [tradeOffersLoading, setTradeOffersLoading] = useState(false);
+const [tradeFormLoading, setTradeFormLoading] = useState(false);
+const [tradeMesaj, setTradeMesaj] = useState('');
+
+const [userTradeForm, setUserTradeForm] = useState({
+  plakAdi: '',
+  sanatci: '',
+  kondisyon: 'Jelatininde',
+  teklifTuru: 'satis',
+  talepEdilenFiyat: '',
+  aciklama: '',
+  fotografUrl: ''
+});
+
+// Kullanıcının tekliflerini backend'den çeken fonksiyon
+const fetchMyTradeOffers = async () => {
+  try {
+    setTradeOffersLoading(true);
+    const token = localStorage.getItem('token');
+    const activeUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const currentUserId = activeUser._id || activeUser.id || user?._id || user?.id;
+   
+
+    if (!currentUserId) return;
+
+    const res = await fetch(`http://localhost:5000/api/trade/my-offers/${currentUserId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    const data = await res.json();
+    if (data.success) {
+      setMyTradeOffers(data.data);
+    }
+  } catch (err) {
+    console.error('Teklifler yüklenemedi:', err);
+  } finally {
+    setTradeOffersLoading(false);
+  }
+};
+
+// Sekme seçildiğinde veya sayfa yüklendiğinde teklifleri çek
+useEffect(() => {
+  if (activeTab === 'tradeOffers') {
+    fetchMyTradeOffers();
+  }
+}, [activeTab, user]);
+
+// Yeni teklif oluşturup dükkana gönderme
+const handleProfileTradeSubmit = async (e) => {
+  e.preventDefault();
+  const token = localStorage.getItem('token');
+  const activeUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const currentUserId = activeUser._id || activeUser.id || user?._id || user?.id;
+
+  if (!currentUserId || !token) {
+    alert('İşlem yapabilmek için lütfen giriş yapın.');
+    return;
+  }
+
+  setTradeFormLoading(true);
+  setTradeMesaj('');
+
+  try {
+    const res = await fetch('http://localhost:5000/api/trade/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        ...userTradeForm,
+        talepEdilenFiyat: userTradeForm.talepEdilenFiyat ? Number(userTradeForm.talepEdilenFiyat) : 0,
+        userId: currentUserId,
+        userName: activeUser.adSoyad || activeUser.ad || activeUser.name || user?.adSoyad || 'Kullanıcı',
+        userEmail: activeUser.email || user?.email || ''
+      })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      setTradeMesaj('✅ Teklifiniz dükkana iletildi! Admin yanıtladığında bildirim alacaksınız.');
+      setUserTradeForm({
+        plakAdi: '',
+        sanatci: '',
+        kondisyon: 'Jelatininde',
+        teklifTuru: 'satis',
+        talepEdilenFiyat: '',
+        aciklama: '',
+        fotografUrl: ''
+      });
+      fetchMyTradeOffers(); // Listeyi anında tazele
+    } else {
+      setTradeMesaj(`❌ Hata: ${data.message}`);
+    }
+  } catch (err) {
+    setTradeMesaj('❌ Sunucuya bağlanırken bir hata oluştu.');
+  } finally {
+    setTradeFormLoading(false);
+  }
+};
+
+
   const [allPlaklar, setAllPlaklar] = useState([]);
   const [feedbackMesaj, setFeedbackMesaj] = useState('');
   const [feedbackLoading, setFeedbackLoading] = useState(false);
@@ -105,36 +209,39 @@ const handleMarkAsRead = async (notifId) => {
   // Kullanıcı profilini ve kayıtlı adreslerini çek (userId parametresi eklendi)
   // Kullanıcı profilini ve kayıtlı adreslerini çek
   const fetchProfile = async () => {
-    try {
-      const rawUser = localStorage.getItem('user');
-      const currentUser = rawUser ? JSON.parse(rawUser) : null;
-      const targetId = currentUser?._id || currentUser?.id || user?._id || user?.id;
+  try {
+    const rawUser = localStorage.getItem('user');
+    const currentUser = rawUser ? JSON.parse(rawUser) : null;
+    const targetId = currentUser?._id || currentUser?.id || user?._id || user?.id;
 
-      if (!targetId) return;
+    if (!targetId) return;
 
-      // 1. Profil bilgilerini çek
-      const profileRes = await API.get(`/users/profile?userId=${targetId}`);
-      if (profileRes.data) {
-        setName(profileRes.data.name || profileRes.data.adSoyad || '');
-        setEmail(profileRes.data.email || '');
-        if (Array.isArray(profileRes.data.adresler) && profileRes.data.adresler.length > 0) {
-          setAdresler(profileRes.data.adresler);
-        }
+    // 1. Profil ve Adres Bilgilerini Çek
+    const profileRes = await API.get(`/users/profile?userId=${targetId}`);
+    if (profileRes.data) {
+      setName(profileRes.data.name || profileRes.data.adSoyad || '');
+      setEmail(profileRes.data.email || '');
+
+      const gelenAdresler = profileRes.data.adresler || profileRes.data.addresses || [];
+      if (Array.isArray(gelenAdresler)) {
+        setAdresler(gelenAdresler);
       }
-
-      // 2. Adresleri doğrudan adres rotasından garanti çek (Sayfa yenilendiğinde kaybolmayı engeller)
-      try {
-        const addressRes = await API.get(`/users/address?userId=${targetId}`);
-        if (Array.isArray(addressRes.data)) {
-          setAdresler(addressRes.data);
-        }
-      } catch (e) {
-        // Eğer ayrı GET rotası yoksa profileRes içindeki adresler geçerlidir
-      }
-    } catch (err) {
-      console.error("Profil yüklenemedi", err);
     }
-  };
+
+    // 2. Plak Tekliflerini API ile Çek (Buraya Eklendi)
+    try {
+      const tradeRes = await API.get(`/trade/my-offers/${targetId}`);
+      if (tradeRes.data && tradeRes.data.success) {
+        setMyTradeOffers(tradeRes.data.data);
+      }
+    } catch (tradeErr) {
+      console.error("Teklifler çekilemedi:", tradeErr);
+    }
+
+  } catch (err) {
+    console.error("Profil yüklenemedi", err);
+  }
+};
   // 2. SAYFA İLK AÇILDIĞINDA VEYA YENİLENDİĞİNDE OTOMATİK ÇALIŞTIR
 useEffect(() => {
   fetchProfile();
@@ -274,7 +381,15 @@ useEffect(() => {
   className="brutal-btn" 
   style={{ backgroundColor: activeTab === 'notifications' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
   <Bell size={18} color="#e63946" /> BİLDİRİMLERİM ({notifications.filter(n => !n.okundu).length})
-</button>
+        </button>
+        {/* 👈 YENİ EKLENEN TAKAS / SATIŞ SEKME BUTONU */}
+  <button
+    type="button"
+    onClick={() => setActiveTab('tradeOffers')}
+    className="brutal-btn"
+    style={{ backgroundColor: activeTab === 'tradeOffers' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
+    <Disc size={18} color="orange" /> Plak / Albüm Sat / Takas ({myTradeOffers?.length || 0})
+  </button>
         <button onClick={() => setActiveTab('feedback')} className="brutal-btn" style={{ backgroundColor: activeTab === 'feedback' ? '#ff9e00' : 'white', border: '3px solid #1a1a1a', padding: '10px 18px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'inherit' }}>
           <MessageSquareQuote size={18} color="green" /> GÖRÜŞ & ÖNERİLER
         </button>
@@ -282,6 +397,248 @@ useEffect(() => {
           <PhoneCall size={18} color="purple" /> BİZE ULAŞIN
         </button>
       </div>
+
+      {activeTab === 'tradeOffers' && (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+    
+    {/* 1. ÜST: YENİ TEKLİF FORMU */}
+    <div style={{ 
+      backgroundColor: '#ffffff', 
+      border: '4px solid #1a1a1a', 
+      padding: '25px', 
+      boxShadow: '6px 6px 0px #1a1a1a' 
+    }}>
+      <div style={{ borderBottom: '3px solid #1a1a1a', paddingBottom: '12px', marginBottom: '20px' }}>
+        <h3 style={{ margin: '0 0 5px 0', fontSize: '1.4rem', fontWeight: '900', textTransform: 'uppercase' }}>
+          ➕ Dükkana Plak Sat / Takas Talebi Gönder
+        </h3>
+        <p style={{ margin: 0, fontWeight: 'bold', color: '#555', fontSize: '0.85rem' }}>
+          Eski plağını nakit olarak bize satabilir veya başka plaklarla takaslamak için fiyat teklifi alabilirsin.
+        </p>
+      </div>
+
+      {tradeMesaj && (
+        <div style={{
+          padding: '10px 14px',
+          border: '3px solid #1a1a1a',
+          backgroundColor: tradeMesaj.includes('✅') ? '#a7c957' : '#ff6b6b',
+          color: '#1a1a1a',
+          fontWeight: '900',
+          marginBottom: '18px',
+          boxShadow: '3px 3px 0px #1a1a1a'
+        }}>
+          {tradeMesaj}
+        </div>
+      )}
+
+      <form onSubmit={handleProfileTradeSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '12px' }}>
+          <div>
+            <label style={{ display: 'block', fontWeight: '900', marginBottom: '4px', fontSize: '0.8rem', textTransform: 'uppercase' }}>
+              Plak / Albüm Adı *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="Örn: The Dark Side of the Moon"
+              value={userTradeForm.plakAdi}
+              onChange={e => setUserTradeForm({ ...userTradeForm, plakAdi: e.target.value })}
+              style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontWeight: '900', marginBottom: '4px', fontSize: '0.8rem', textTransform: 'uppercase' }}>
+              Sanatçı / Grup *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="Örn: Pink Floyd"
+              value={userTradeForm.sanatci}
+              onChange={e => setUserTradeForm({ ...userTradeForm, sanatci: e.target.value })}
+              style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }}
+            />
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '12px' }}>
+          <div>
+            <label style={{ display: 'block', fontWeight: '900', marginBottom: '4px', fontSize: '0.8rem', textTransform: 'uppercase' }}>
+              İşlem Türü
+            </label>
+            <select
+              value={userTradeForm.teklifTuru}
+              onChange={e => setUserTradeForm({ ...userTradeForm, teklifTuru: e.target.value })}
+              style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', backgroundColor: 'white', boxSizing: 'border-box' }}
+            >
+              <option value="satis"> Nakit Satış</option>
+              <option value="takas"> Plak Takası</option>
+            </select>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontWeight: '900', marginBottom: '4px', fontSize: '0.8rem', textTransform: 'uppercase' }}>
+              Kondisyon Durumu
+            </label>
+            <select
+              value={userTradeForm.kondisyon}
+              onChange={e => setUserTradeForm({ ...userTradeForm, kondisyon: e.target.value })}
+              style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', backgroundColor: 'white', boxSizing: 'border-box' }}
+            >
+              <option value="Jelatininde">Jelatininde</option>
+              <option value="Kusursuz">Kusursuz</option>
+              <option value="Çok İyi">Çok İyi</option>
+              <option value="İyi">İyi</option>
+              <option value="Çalınabilir">Çalınabilir</option>
+            </select>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '12px' }}>
+          <div>
+            <label style={{ display: 'block', fontWeight: '900', marginBottom: '4px', fontSize: '0.8rem', textTransform: 'uppercase' }}>
+              İstediğiniz Fiyat (TL)
+            </label>
+            <input
+              type="number"
+              placeholder="Örn: 750 (Boş bırakabilirsiniz)"
+              value={userTradeForm.talepEdilenFiyat}
+              onChange={e => setUserTradeForm({ ...userTradeForm, talepEdilenFiyat: e.target.value })}
+              style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontWeight: '900', marginBottom: '4px', fontSize: '0.8rem', textTransform: 'uppercase' }}>
+              Fotoğraf Bağlantısı (URL)
+            </label>
+            <input
+              type="url"
+              placeholder="https://..."
+              value={userTradeForm.fotografUrl}
+              onChange={e => setUserTradeForm({ ...userTradeForm, fotografUrl: e.target.value })}
+              style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label style={{ display: 'block', fontWeight: '900', marginBottom: '4px', fontSize: '0.8rem', textTransform: 'uppercase' }}>
+            Ek Açıklama (Baskı Yılı / Kusurlar)
+          </label>
+          <textarea
+            rows="2"
+            placeholder="Kapakta yıpranma var mı? Orijinal iç zarf mevcut mu?"
+            value={userTradeForm.aciklama}
+            onChange={e => setUserTradeForm({ ...userTradeForm, aciklama: e.target.value })}
+            style={{ width: '100%', padding: '10px', border: '2px solid #1a1a1a', fontWeight: 'bold', boxSizing: 'border-box' }}
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={tradeFormLoading}
+          className="brutal-btn"
+          style={{
+            backgroundColor: '#ff9e00',
+            color: '#1a1a1a',
+            border: '2px solid #1a1a1a',
+            padding: '12px',
+            fontWeight: '900',
+            fontSize: '1rem',
+            cursor: 'pointer',
+            boxShadow: '4px 4px 0px #1a1a1a',
+            textTransform: 'uppercase',
+            marginTop: '5px'
+          }}
+        >
+          {tradeFormLoading ? 'GÖNDERİLİYOR...' : '🚀 TEKLİFİ DÜKKANA İLET'}
+        </button>
+      </form>
+    </div>
+
+    {/* 2. ALT: GEÇMİŞ VE MEVCUT TEKLİFLERİN LİSTESİ */}
+    <div style={{ 
+      backgroundColor: '#ffffff', 
+      border: '4px solid #1a1a1a', 
+      padding: '25px', 
+      boxShadow: '6px 6px 0px #1a1a1a' 
+    }}>
+      <h3 style={{ margin: '0 0 15px 0', fontSize: '1.3rem', fontWeight: '900', textTransform: 'uppercase', borderBottom: '2px dashed #1a1a1a', paddingBottom: '10px' }}>
+        📋 İlettiğim Teklifler ({myTradeOffers.length})
+      </h3>
+
+      {tradeOffersLoading ? (
+        <p style={{ fontWeight: 'bold' }}>Teklifler yükleniyor...</p>
+      ) : myTradeOffers.length === 0 ? (
+        <p style={{ fontWeight: 'bold', color: '#666' }}>Henüz dükkana ilettiğiniz bir teklif bulunmuyor.</p>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          {myTradeOffers.map((item) => (
+            <div 
+              key={item._id}
+              style={{
+                border: '3px solid #1a1a1a',
+                padding: '16px',
+                backgroundColor: '#fbfaf8',
+                boxShadow: '4px 4px 0px #1a1a1a'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+                <div>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '6px' }}>
+                    <span style={{
+                      backgroundColor: item.durum === 'onaylandi' ? '#a7c957' : item.durum === 'reddedildi' ? '#ff6b6b' : '#ffd166',
+                      padding: '3px 8px',
+                      border: '1.5px solid #1a1a1a',
+                      fontWeight: '900',
+                      fontSize: '0.75rem',
+                      textTransform: 'uppercase'
+                    }}>
+                      {item.durum === 'onaylandi' ? '✓ ONAYLANDI' : item.durum === 'reddedildi' ? '✕ REDDEDİLDİ' : '⏳ İNCELENİYOR'}
+                    </span>
+                    <span style={{ fontWeight: '900', fontSize: '0.8rem', color: '#555' }}>
+                      {item.teklifTuru === 'satis' ? '💵 SATIŞ' : '🔄 TAKAS'}
+                    </span>
+                  </div>
+
+                  <h4 style={{ margin: '4px 0', fontSize: '1.2rem', fontWeight: '900' }}>
+                    {item.plakAdi} — {item.sanatci}
+                  </h4>
+                  <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 'bold', color: '#555' }}>
+                    Kondisyon: <span style={{ color: '#1a1a1a' }}>{item.kondisyon}</span> {item.talepEdilenFiyat ? `| Talep Ettiğiniz: ${item.talepEdilenFiyat} TL` : ''}
+                  </p>
+                </div>
+
+                {/* ADMİN YANIT KUTUSU */}
+                {item.durum !== 'beklemede' && (
+                  <div style={{
+                    backgroundColor: item.durum === 'onaylandi' ? '#e9f5db' : '#ffe5e5',
+                    padding: '10px 14px',
+                    border: '2px solid #1a1a1a',
+                    minWidth: '220px',
+                    boxShadow: '2px 2px 0px #1a1a1a'
+                  }}>
+                    <div style={{ fontWeight: '900', fontSize: '0.9rem', color: '#1a1a1a' }}>
+                      {item.adminTeklifFiyati ? `Dükkan Teklifi: ${item.adminTeklifFiyati} TL` : 'Sonuç Açıklandı'}
+                    </div>
+                    {item.adminNotu && (
+                      <div style={{ fontSize: '0.8rem', fontWeight: 'bold', marginTop: '4px', color: '#333' }}>
+                        Admin Notu: {item.adminNotu}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+
+  </div>
+)}
 
       {/* 1. SİPARİŞLERİM SEKMESİ */}
       {activeTab === 'orders' && (

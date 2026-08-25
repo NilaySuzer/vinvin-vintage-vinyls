@@ -8,6 +8,54 @@ const AdminPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+const [tradeOffers, setTradeOffers] = useState([]);
+const [adminYanitlar, setAdminYanitlar] = useState({}); // { [offerId]: { fiyat: '', not: '' } }
+
+// Teklifleri backend'den çeken fonksiyon
+const fetchTradeOffers = async () => {
+  try {
+    const res = await fetch('http://localhost:5000/api/trade/all');
+    const data = await res.json();
+    if (data.success) {
+      setTradeOffers(data.data);
+    }
+  } catch (err) {
+    console.error('Teklifler yüklenirken hata:', err);
+  }
+};
+
+// Sayfa açıldığında veya sekme değiştiğinde teklifleri çek
+useEffect(() => {
+  if (activeTab === 'tradeOffers') {
+    fetchTradeOffers();
+  }
+}, [activeTab]);
+
+// Teklife Onay / Ret Verme Fonksiyonu
+const handleTradeAction = async (offerId, durum) => {
+  const yanit = adminYanitlar[offerId] || {};
+  try {
+    const res = await fetch(`http://localhost:5000/api/trade/respond/${offerId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        durum: durum, // 'onaylandi' veya 'reddedildi'
+        adminTeklifFiyati: yanit.fiyat ? Number(yanit.fiyat) : undefined,
+        adminNotu: yanit.not || ''
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(data.message);
+      fetchTradeOffers(); // Listeyi güncelle
+    } else {
+      alert(`Hata: ${data.message}`);
+    }
+  } catch (err) {
+    alert('İşlem sırasında sunucu hatası oluştu.');
+  }
+};
+
   // Kampanya State'leri
   const [kampanyalar, setKampanyalar] = useState([]);
   const [yeniKampanya, setYeniKampanya] = useState({ baslik: '', detay: '', renk: '#ff9e00', kod: '', kategori: 'Tümü', sonTarih: '' , indirimYuzdesi: 10});
@@ -283,7 +331,145 @@ const handleToggleActive = async (id) => {
 >
   GÖRÜŞ & ÖNERİLER ({feedbacks.length})
         </button>
+        <button
+  type="button"
+  onClick={() => setActiveTab('tradeOffers')}
+  className="brutal-btn"
+   style={{ flex: 1, minWidth: '180px', padding: '15px', border: '3px solid #1a1a1a', backgroundColor: activeTab === 'tradeOffers' ? '#ff9e00' : 'white', fontWeight: 'bold', fontsize: '1.1rem', cursor: 'pointer', boxShadow: activeTab === 'tradeOffers' ? '5px 5px 0px #1a1a1a' : 'none' }}
+>
+  GELEN TEKLİFLER ({tradeOffers.filter(t => t.durum === 'beklemede').length})
+</button>
       </div>
+
+      {activeTab === 'tradeOffers' && (
+  <div style={{ marginTop: '20px' }}>
+    <h2 style={{ fontSize: '1.6rem', fontWeight: '900', textTransform: 'uppercase', marginBottom: '20px' }}>
+      📦 Gelen Plak Satış ve Takas Talepleri
+    </h2>
+
+    {tradeOffers.length === 0 ? (
+      <p style={{ fontWeight: 'bold', color: '#666' }}>Henüz incelenecek teklif bulunmuyor.</p>
+    ) : (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {tradeOffers.map((item) => (
+          <div 
+            key={item._id} 
+            style={{ 
+              backgroundColor: 'white', 
+              border: '3px solid #1a1a1a', 
+              padding: '20px', 
+              boxShadow: '6px 6px 0px #1a1a1a' 
+            }}
+          >
+            {/* ÜST BİLGİ SATIRI */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
+              <div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ 
+                    backgroundColor: item.durum === 'onaylandi' ? '#a7c957' : item.durum === 'reddedildi' ? '#ff6b6b' : '#ffd166',
+                    padding: '5px 10px',
+                    border: '1.5px solid #1a1a1a',
+                    fontWeight: '900',
+                    fontSize: '1.1rem',
+                    textTransform: 'uppercase'
+                  }}>
+                    {item.durum}
+                  </span>
+                  <span style={{ fontWeight: '900', fontSize: '0.8rem', color: '#555' }}>
+                    {item.teklifTuru === 'satis' ? '💵 SATIŞ' : '🔄 TAKAS'} TALEBİ
+                  </span>
+                </div>
+
+                <h3 style={{ margin: '0 0 5px 0', fontSize: '1.3rem', fontWeight: '900' }}>
+                  {item.plakAdi} — {item.sanatci}
+                </h3>
+                <p style={{ margin: 0, fontWeight: 'bold', color: '#1f0c02', fontSize: '1.0rem' }}>
+                  Kullanıcı: {item.userName} ({item.userEmail}) | Kondisyon: <span style={{  backgroundColor: '#f7a83b', color: 'black', padding: '2px 6px', borderRadius: '4px' }}>{item.kondisyon}</span>
+                </p>
+              </div>
+
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '1.3rem', fontWeight: '900', color: '#ff9e00' }}>
+                  Kullanıcı Talebi: {item.talepEdilenFiyat ? `${item.talepEdilenFiyat} TL` : 'Belirtilmedi'}
+                </div>
+                {item.createdAt && (
+                  <span style={{ fontSize: '0.90rem', color: '#888', fontWeight: 'bold' }}>
+                    {new Date(item.createdAt).toLocaleDateString('tr-TR')}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* AÇIKLAMA VE FOTOĞRAF */}
+            {item.aciklama && (
+              <div style={{ backgroundColor: '#f8f9fa', padding: '10px', border: '2px dashed #1a1a1a', margin: '15px 0', fontWeight: 'bold', fontSize: '1.0rem' }}>
+                📝 Kullanıcı Açıklaması: {item.aciklama}
+              </div>
+            )}
+
+            {item.fotografUrl && (
+              <div style={{ margin: '10px 0' }}>
+                <a href={item.fotografUrl} target="_blank" rel="noreferrer" style={{ fontWeight: '900', color: '#ff9e00', textDecoration: 'underline', fontSize: '0.85rem' }}>
+                  🖼️ Plak Fotoğrafını Görüntüle ↗
+                </a>
+              </div>
+            )}
+
+            {/* BEKLEMEDEYSE ADMİN CEVAP ALANI */}
+            {item.durum === 'beklemede' && (
+              <div style={{ borderTop: '2px solid #1a1a1a', paddingTop: '15px', marginTop: '15px', display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
+                <input 
+                  type="number" 
+                  placeholder="Teklif Ettiğiniz TL"
+                  value={adminYanitlar[item._id]?.fiyat || ''}
+                  onChange={e => setAdminYanitlar({ 
+                    ...adminYanitlar, 
+                    [item._id]: { ...adminYanitlar[item._id], fiyat: e.target.value } 
+                  })}
+                  style={{ padding: '8px 12px', border: '2px solid #1a1a1a', fontWeight: 'bold', width: '160px' }}
+                />
+
+                <input 
+                  type="text" 
+                  placeholder="Kullanıcıya not (örn: 'Plağı kargo ile gönderebilirsiniz')"
+                  value={adminYanitlar[item._id]?.not || ''}
+                  onChange={e => setAdminYanitlar({ 
+                    ...adminYanitlar, 
+                    [item._id]: { ...adminYanitlar[item._id], not: e.target.value } 
+                  })}
+                  style={{ padding: '8px 12px', border: '2px solid #1a1a1a', fontWeight: 'bold', flex: '1', minWidth: '220px' }}
+                />
+
+                <button 
+                  type="button"
+                  onClick={() => handleTradeAction(item._id, 'onaylandi')}
+                  style={{ backgroundColor: '#a7c957', border: '2px solid #1a1a1a', padding: '9px 16px', fontWeight: '900', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}
+                >
+                  ✓ ONAYLA & TEKLİF VER
+                </button>
+
+                <button 
+                  type="button"
+                  onClick={() => handleTradeAction(item._id, 'reddedildi')}
+                  style={{ backgroundColor: '#ff6b6b', color: 'white', border: '2px solid #1a1a1a', padding: '9px 16px', fontWeight: '900', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' }}
+                >
+                  ✕ REDDET
+                </button>
+              </div>
+            )}
+
+            {/* CEVAPLANMIŞSA GEÇMİŞ BİLGİSİ */}
+            {item.durum !== 'beklemede' && (
+              <div style={{ borderTop: '1px solid #ddd', paddingTop: '10px', marginTop: '10px', fontSize: '0.85rem', fontWeight: 'bold', color: '#555' }}>
+                Verilen Teklif: {item.adminTeklifFiyati ? `${item.adminTeklifFiyati} TL` : 'Yok'} | Admin Notu: {item.adminNotu || 'Belirtilmedi'}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
 
       {/* SEKME 1: PLAKLARI YÖNET VE YENİ EKLE */}
       {activeTab === 'products' && (

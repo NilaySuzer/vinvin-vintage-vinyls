@@ -11,6 +11,7 @@ import userRoutes from './routes/userRoutes.js';
 import campaignRoutes from './routes/campaignRoutes.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import tradeRoutes from './routes/tradeRoutes.js';
 
 dotenv.config();
 connectDB();
@@ -31,6 +32,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/campaigns', campaignRoutes);
 app.use('/api/feedbacks', feedbackRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/trade', tradeRoutes);
 app.get('/', (req, res) => {
   res.send('VINtage VINyls API Çalışıyor... 💿');
 });
