@@ -1149,7 +1149,8 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
   >
     TEKLİF FORMU DOLDUR ↓
   </button>
-</div>               
+  </div>    
+      
                 
 {/* 🔍 3. ARAMA VE SIRALAMA BAR */}
           {/* ARAMA BAR (CANLI SONUÇ DROPDOWN'LI) */}
@@ -2386,7 +2387,10 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
         })}
       </div>
     </div>
-  );
+                      );
+                      
+
+                      
                     })()}
 
 {!tumPlaklariGoster && (
@@ -2418,12 +2422,169 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
     </button>
   </div>
 )}
-
+ 
                     </>
 )} 
-   {/* FOOTER ÖNCESİ: PLAK SATIŞ / TAKAS FORMU BÖLÜMÜ */}
-      {!tumPlaklariGoster && (
-        <section
+  
+      
+          {/* SADECE tumPlaklariGoster TRUE OLDUĞUNDA GÖZÜKÜR */}
+                {tumPlaklariGoster && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '25px', marginTop: '20px' }}>
+                    {filtrelenmisPlaklar.map(plak => {
+                      const pId = plak._id || plak.id;
+                      const isFav = favorites.some(f => (f._id || f.id) === pId);
+
+                      return (
+                        <div key={pId} className="brutal-card" style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '15px', boxShadow: '6px 6px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                          <button
+                            onClick={() => toggleFavorite(plak)}
+                            style={{ position: 'absolute', top: '10px', right: '10px', background: 'white', border: '2px solid #1a1a1a', borderRadius: '50%', padding: '6px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          >
+                            <Heart size={18} fill={isFav ? "#ff4d4d" : "none"} color={isFav ? "#ff4d4d" : "#1a1a1a"} />
+                          </button>
+
+                          <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
+                            {/* BÜYÜTÜLMÜŞ GÖRSEL ALANI (280px) */}
+                            <div
+                              className="brutal-img-container"
+                              style={{ position: 'relative', width: '100%', height: '280px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
+                              <img
+                                src={plak.resim || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'}
+                                alt={plak.ad}
+                                referrerPolicy="no-referrer"
+                                onError={(e) => {
+                                  if (!e.target.dataset.fallback) {
+                                    e.target.dataset.fallback = "true";
+                                    e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=500';
+                                  }
+                                }}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              />
+                             {/* TÜKENDİ ROZETİ */}
+      {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 && (
+        <span
+          style={{
+            position: 'absolute',
+            top: '8px',
+            left: '8px',
+            backgroundColor: '#ff4d4d',
+            color: 'white',
+            border: '2px solid #1a1a1a',
+            padding: '4px 12px',
+            fontWeight: '900',
+            fontSize: '1.1rem',
+            boxShadow: '2px 2px 0px #1a1a1a'
+          }}
+        >
+          TÜKENDİ
+        </span>
+      )}
+                            </div>
+                            <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem', textTransform: 'uppercase' }}>{plak.ad}</h3>
+                            <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.9rem' }}>{plak.sanatci}</p>
+                          </Link>
+                         {/* 3. DİNAMİK BUTON (STOK VARSA SEPETE EKLE / BİTTİYSE GELİNCE HABER VER) */}
+      <div style={{  marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'  }}>
+      {/* 1. KARTIN SAĞ/SOL ÜST KÖŞESİNE İNDİRİM ROZETİ */}
+{plak.indirimOrani > 0 && (
+  <span
+    style={{
+      position: 'absolute',
+      top: '25px',
+      left: '5px',
+      backgroundColor: '#db0335',
+      color: 'white',
+      fontWeight: '900',
+      fontSize: '0.85rem',
+      padding: '8px 16px',
+      border: '2px solid #1a1a1a',
+      boxShadow: '3px 3px 0px #1a1a1a',
+      zIndex: 2,
+      transform: 'rotate(-20deg)'
+    }}
+  >
+    %{plak.indirimOrani} İNDİRİM
+  </span>
+)}
+
+{/* 2. FİYAT ALANI (Üstü Çizili Eski Fiyat + İndirimli Fiyat) */}
+<div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+  {plak.indirimOrani > 0 ? (
+    <>
+      {/* İndirimli Fiyat */}
+      <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'red' }}>
+        {(plak.fiyat * (1 - plak.indirimOrani / 100)).toFixed(2)} TL
+      </span>
+      {/* Eski Fiyat (Üstü Çizili) */}
+      <span style={{ fontSize: '1.0rem', color: '#888', textDecoration: 'line-through', textDecorationColor: 'red', fontWeight: 'bold' }}>
+        {plak.fiyat} TL
+      </span>
+    </>
+  ) : (
+    /* Normal Fiyat */
+    <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'orange' }}>
+      {plak.fiyat} TL
+    </span>
+  )}
+</div>
+  {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
+    <button
+      type="button"
+      onClick={async (e) => {
+    e.stopPropagation();
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const userId = currentUser._id || currentUser.id;
+
+    if (!userId) {
+      alert('Stok bildirimlerinden haberdar olmak için lütfen giriş yapın! 🔑');
+      return;
+    }
+
+    try {
+      await API.post('/notifications/subscribe-stock', {
+        userId,
+        plakId: plak._id || plak.id
+      });
+      alert(`"${plak.ad}" stoğa girdiğinde bildirim kutunuza haber vereceğiz! 🔔`);
+    } catch (err) {
+      alert('İşlem gerçekleştirilemedi.');
+    }
+  }}
+
+      className="brutal-btn"
+      style={{
+      backgroundColor: '#06d6a0', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem'
+      }}
+    >
+      <Bell size={22} color="yellow" />
+    </button>
+  ) : (
+    <button
+      type="button"
+      onClick={(e) => {
+        sepeteEkle(plak);
+        e.stopPropagation();
+        handleAddToCart(plak);
+      }}
+      className="brutal-btn"
+      style={{
+        backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px 12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' 
+      }}
+    >
+    SEPETE EKLE
+    </button>
+  )}
+</div>
+                         
+                        </div>
+                      );
+                      
+                    })}
+                    
+                  </div>
+                  
+                )}
+                        <section
           id="trade-in-section"
           style={{
             marginTop: '10px',
@@ -2601,161 +2762,7 @@ const mevcutSlayt = aktifKampanyalar[mevcutIndex];
             </form>
           </div>
         </section>
-      )}
-          {/* SADECE tumPlaklariGoster TRUE OLDUĞUNDA GÖZÜKÜR */}
-                {tumPlaklariGoster && (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '25px', marginTop: '20px' }}>
-                    {filtrelenmisPlaklar.map(plak => {
-                      const pId = plak._id || plak.id;
-                      const isFav = favorites.some(f => (f._id || f.id) === pId);
-
-                      return (
-                        <div key={pId} className="brutal-card" style={{ backgroundColor: 'white', border: '3px solid #1a1a1a', padding: '15px', boxShadow: '6px 6px 0px #1a1a1a', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                          <button
-                            onClick={() => toggleFavorite(plak)}
-                            style={{ position: 'absolute', top: '10px', right: '10px', background: 'white', border: '2px solid #1a1a1a', borderRadius: '50%', padding: '6px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                          >
-                            <Heart size={18} fill={isFav ? "#ff4d4d" : "none"} color={isFav ? "#ff4d4d" : "#1a1a1a"} />
-                          </button>
-
-                          <Link to={`/product/${pId}`} style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
-                            {/* BÜYÜTÜLMÜŞ GÖRSEL ALANI (280px) */}
-                            <div
-                              className="brutal-img-container"
-                              style={{ position: 'relative', width: '100%', height: '280px', overflow: 'hidden', borderBottom: '3px solid #1a1a1a', backgroundColor: '#f0f0f0', marginBottom: '10px' }}>
-                              <img
-                                src={plak.resim || 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=600'}
-                                alt={plak.ad}
-                                referrerPolicy="no-referrer"
-                                onError={(e) => {
-                                  if (!e.target.dataset.fallback) {
-                                    e.target.dataset.fallback = "true";
-                                    e.target.src = 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?w=500';
-                                  }
-                                }}
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                              />
-                             {/* TÜKENDİ ROZETİ */}
-      {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 && (
-        <span
-          style={{
-            position: 'absolute',
-            top: '8px',
-            left: '8px',
-            backgroundColor: '#ff4d4d',
-            color: 'white',
-            border: '2px solid #1a1a1a',
-            padding: '4px 12px',
-            fontWeight: '900',
-            fontSize: '1.1rem',
-            boxShadow: '2px 2px 0px #1a1a1a'
-          }}
-        >
-          TÜKENDİ
-        </span>
-      )}
-                            </div>
-                            <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem', textTransform: 'uppercase' }}>{plak.ad}</h3>
-                            <p style={{ color: '#666', margin: 0, fontWeight: 'bold', fontSize: '0.9rem' }}>{plak.sanatci}</p>
-                          </Link>
-                         {/* 3. DİNAMİK BUTON (STOK VARSA SEPETE EKLE / BİTTİYSE GELİNCE HABER VER) */}
-      <div style={{  marginTop: 'auto', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'  }}>
-      {/* 1. KARTIN SAĞ/SOL ÜST KÖŞESİNE İNDİRİM ROZETİ */}
-{plak.indirimOrani > 0 && (
-  <span
-    style={{
-      position: 'absolute',
-      top: '25px',
-      left: '5px',
-      backgroundColor: '#db0335',
-      color: 'white',
-      fontWeight: '900',
-      fontSize: '0.85rem',
-      padding: '8px 16px',
-      border: '2px solid #1a1a1a',
-      boxShadow: '3px 3px 0px #1a1a1a',
-      zIndex: 2,
-      transform: 'rotate(-20deg)'
-    }}
-  >
-    %{plak.indirimOrani} İNDİRİM
-  </span>
-)}
-
-{/* 2. FİYAT ALANI (Üstü Çizili Eski Fiyat + İndirimli Fiyat) */}
-<div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
-  {plak.indirimOrani > 0 ? (
-    <>
-      {/* İndirimli Fiyat */}
-      <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'red' }}>
-        {(plak.fiyat * (1 - plak.indirimOrani / 100)).toFixed(2)} TL
-      </span>
-      {/* Eski Fiyat (Üstü Çizili) */}
-      <span style={{ fontSize: '1.0rem', color: '#888', textDecoration: 'line-through', textDecorationColor: 'red', fontWeight: 'bold' }}>
-        {plak.fiyat} TL
-      </span>
-    </>
-  ) : (
-    /* Normal Fiyat */
-    <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'orange' }}>
-      {plak.fiyat} TL
-    </span>
-  )}
-</div>
-  {Number(plak?.stok ?? plak?.stock ?? plak?.adet ?? 0) <= 0 ? (
-    <button
-      type="button"
-      onClick={async (e) => {
-    e.stopPropagation();
-    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const userId = currentUser._id || currentUser.id;
-
-    if (!userId) {
-      alert('Stok bildirimlerinden haberdar olmak için lütfen giriş yapın! 🔑');
-      return;
-    }
-
-    try {
-      await API.post('/notifications/subscribe-stock', {
-        userId,
-        plakId: plak._id || plak.id
-      });
-      alert(`"${plak.ad}" stoğa girdiğinde bildirim kutunuza haber vereceğiz! 🔔`);
-    } catch (err) {
-      alert('İşlem gerçekleştirilemedi.');
-    }
-  }}
-
-      className="brutal-btn"
-      style={{
-      backgroundColor: '#06d6a0', border: '2px solid #1a1a1a', padding: '6px 10px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a', fontSize: '0.85rem'
-      }}
-    >
-      <Bell size={22} color="yellow" />
-    </button>
-  ) : (
-    <button
-      type="button"
-      onClick={(e) => {
-        sepeteEkle(plak);
-        e.stopPropagation();
-        handleAddToCart(plak);
-      }}
-      className="brutal-btn"
-      style={{
-        backgroundColor: '#ff9e00', border: '2px solid #1a1a1a', padding: '8px 12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '2px 2px 0px #1a1a1a' 
-      }}
-    >
-    SEPETE EKLE
-    </button>
-  )}
-</div>
-                         
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}</div>
+              </div>
   
   } />  
                               
