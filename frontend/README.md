@@ -6,7 +6,7 @@
   <img src="https://img.shields.io/badge/JWT-Black?style=for-the-badge&logo=JSON%20web%20tokens" alt="JWT" />
   <br/>
   <h1> VinVin</h1>
-  <h3> VinVin Vintage Vinyl E-ticaret Websitesi</h3>
+  <h3> VinVin Vintage Vinyls E-ticaret Websitesi</h3>
   <p>Modern e-ticaret dinamiklerini retro müzik kültürü ve Neo-Brutalist tasarım diliyle birleştiren uçtan uca Full-Stack Web Platformu.</p>
 </div>
 
