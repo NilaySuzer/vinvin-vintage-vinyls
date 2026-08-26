@@ -50,6 +50,7 @@ Sistem, kullanıcıların sadece plak satın almasını değil, sahip oldukları
 - **Kondisyon Derecelendirme (Grading System):** İkinci el piyasası standartlarına uygun olarak plakların kondisyon durumları (*Jelatininde, Kusursuz, Çok İyi, İyi, Çalınabilir*) şeffaf bir şekilde veri setine dahil edildi.
 - **İlişkisel Önerme Algoritması (Benzer Plaklar):** Detay sayfasında, kullanıcının incelediği ürünle aynı kategoride bulunan diğer plaklar; albüm kapakları, sanatçı ve fiyat bilgileriyle yatay kaydırılabilir (horizontal scroll) interaktif bir yapıda listelenir.
 - **Stok & Fiyat Senkronizasyonu:** Gerçek zamanlı stok kontrolü yapılarak, backend üzerinden tükenen ürünler için sepet kısıtlaması getirildi.
+- **Ürün Yorumları:** Misaifir mi? Kullanıcı mı? kontrolü yapılarak puanlama ve yorum yazma alanı içeren, yazılan yorumları veritabanında ürünün yorum array'ine ekleyen yorum yapma alanı entegre edildi.
 
 ### 3. Sepet, Kupon ve Ödeme Akışı
 - **State Persistence (Kalıcı Sepet):** Sepet verileri React State ve Tarayıcı `localStorage` arasında senkronize edilerek sayfa yenilemelerinde veri kaybı önlendi. Miktar (Qty) artırma/azaltma ve ürün çıkarma işlemleri mutasyonsuz (immutable) state güncellemeleriyle yapıldı.
@@ -104,7 +105,7 @@ Tam yetkili kullanıcılar (Role: Admin) için geliştirilen arkaplan yönetim s
 
 Sistem birbiriyle ilişkili 8 temel koleksiyon üzerinden asenkron olarak çalışır:
 1. `users`: Kullanıcı kimlik bilgileri, adresleri ve rolü (User/Admin).
-2. `products`: Plaklara ait katalog verileri, stok, kondisyon ve kategori bilgileri.
+2. `products`: Plaklara ait katalog verileri, stok, kondisyon ve kategori bilgileri, ürün yorumları.
 3. `orders`: Sepet içeriği, uygulanan kupon, toplam tutar, kargo bedeli ve teslimat adresi eşleşmeleri. *(User ile 1:N ilişki)*
 4. `tradeoffers`: Kullanıcıdan gelen takas/satış teklifleri, istenen tutar, admin karşı teklifi ve işlem durumu (State). *(User ile 1:N ilişki)*
 5. `coupons`: İndirim kodları ve tanımlandıkları kategoriler, kullanım limitleri ve geçerlilik tarihleri.
