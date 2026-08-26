@@ -13,20 +13,20 @@
 ---
 
 ## 📖 İçindekiler
-1. [Proje Vizyonu ve Mimari Özeti]
-2. [Sistem Özellikleri ve İş Mantığı (Business Logic)](#-sistem-özellikleri-ve-iş-mantığı-business-logic)
+1. Proje Vizyonu ve Mimari Özeti
+2. Sistem Özellikleri ve İş Mantığı (Business Logic)
    - [Kullanıcı Arayüzü & Keşif Modülü](#1-kullanıcı-arayüzü--keşif-modülü)
    - [Ürün Detay & Etkileşim Yönetimi](#2-ürün-detay--etkileşim-yönetimi)
    - [Sepet, Kupon ve Ödeme Akışı](#3-sepet-kupon-ve-ödeme-akışı)
    - [Plak Takas & Satış Ekosistemi](#4-plak-takas--satış-ekosistemi)
    - [Kullanıcı ve Hesap Yönetimi](#5-kullanıcı-ve-hesap-yönetimi)
    - [Admin Yönetim ve Kontrol Paneli](#6-️-admin-yönetim-ve-kontrol-paneli)
-3. [Teknoloji Yığını ve Altyapı (Tech Stack)](##-teknoloji-yığını-ve-altyapı-tech-stack)
-4. [Veritabanı Tasarımı ve Modeller (Schema Relationships)](#-veritabanı-tasarımı-ve-modeller-schema-relationships)
-5. [Güvenlik ve Performans Optimizasyonları](#-güvenlik-ve-performans-optimizasyonları)
-6. [Dizin Yapısı (Directory Structure)](#-dizin-yapısı-directory-structure)
-7. [Yerel Geliştirme Ortamı Kurulumu (Local Setup)](#-yerel-geliştirme-ortamı-kurulumu-local-setup)
-8. [Geliştirici](#-geliştirici)
+3. Teknoloji Yığını ve Altyapı (Tech Stack)
+4. Veritabanı Tasarımı ve Modeller (Schema Relationships)
+5. Güvenlik ve Performans Optimizasyonları
+6. Dizin Yapısı (Directory Structure)
+7. Yerel Geliştirme Ortamı Kurulumu (Local Setup)
+8. Geliştirici
 
 ---
 
