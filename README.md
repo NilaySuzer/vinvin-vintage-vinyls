@@ -26,7 +26,7 @@
 5. [Güvenlik ve Performans Optimizasyonları](#-güvenlik-ve-performans-optimizasyonları)
 6. [Dizin Yapısı (Directory Structure)](#-dizin-yapısı-directory-structure)
 7. [Yerel Geliştirme Ortamı Kurulumu](#-yerel-geliştirme-ortamı-kurulumu)
-8. [Geliştirici](#--geliştirici)
+8. [Geliştirici](#-geliştirici)
 
 ---
 
@@ -178,7 +178,7 @@ npm run dev
 Uygulama başarıyla derlendiğinde tarayıcınızda http://localhost:5173 veya http://localhost:3000 adresine giderek platformu deneyimleyebilirsiniz.
 
 ---
-## 👩‍💻 Geliştirici
+## Geliştirici
 F. Nilay Süzer, Bilişim sistemleri mühendisliği öğrencisi | Full-Stack Web Developer
 
 Müzik tutkusu ve temiz kod yazma disipliniyle tasarlandı ve geliştirildi.
@@ -187,6 +187,6 @@ Bağlantı kurmak isterseniz:
 
 🔗 LinkedIn: https://www.linkedin.com/in/nilay-suzer-b32387308/
 
-💻 GitHub: @NilaySuzer
+💻 GitHub: [NilaySuzer]
 
 Proje, açık kaynaklı geliştirme pratikleri gözetilerek yazılmıştır. Kod incelemelerine (Code Review) ve yapıcı geri bildirimlere her zaman açıktır.
