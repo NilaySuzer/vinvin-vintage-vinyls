@@ -25,8 +25,8 @@
 4. [Veritabanı Tasarımı ve Modeller (Schema Relationships)](#️-veritabanı-tasarımı-ve-modeller-schema-relationships)
 5. [Güvenlik ve Performans Optimizasyonları](#-güvenlik-ve-performans-optimizasyonları)
 6. [Dizin Yapısı (Directory Structure)](#-dizin-yapısı-directory-structure)
-7. [Yerel Geliştirme Ortamı Kurulumu (Local Setup)](#-yerel-geliştirme-ortamı-kurulumu-local-setup)
-8. [Geliştirici](#-geliştirici)
+7. [Yerel Geliştirme Ortamı Kurulumu (Local Setup)](#yerel-geliştirme-ortamı-kurulumu-local-setup)
+8. [Geliştirici](#geliştirici)
 
 ---
 
