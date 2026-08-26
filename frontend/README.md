@@ -5,8 +5,8 @@
   <img src="https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" />
   <img src="https://img.shields.io/badge/JWT-Black?style=for-the-badge&logo=JSON%20web%20tokens" alt="JWT" />
   <br/>
-  <h1>📻 VinVin</h1>
-  <h3>Vintage Vinyl E-Commerce, Trade-In & Marketplace Ecosystem</h3>
+  <h1> VinVin</h1>
+  <h3> VinVin Vintage Vinyl E-ticaret Websitesi</h3>
   <p>Modern e-ticaret dinamiklerini retro müzik kültürü ve Neo-Brutalist tasarım diliyle birleştiren uçtan uca Full-Stack Web Platformu.</p>
 </div>
 
@@ -143,7 +143,8 @@ vinvin/
     │   └── App.jsx               # Global State, Context Provider'lar ve Routing şeması
 
 
-Yerel Geliştirme Ortamı Kurulumu (Local Setup)
+---
+## Proje Geliştirme Ortamı Kurulumu (Local Setup)
 Projeyi kendi bilgisayarınızda çalıştırmak için aşağıdaki adımları sırasıyla uygulayın.
 
 1. Repoyu Klonlayın
@@ -164,6 +165,7 @@ Sunucuyu geliştirme modunda başlatın:
 
 Bash
 npm run dev
+
 3. Frontend Konfigürasyonu
 Yeni bir terminal sekmesi açarak frontend dizinine geçin:
 
@@ -173,6 +175,7 @@ npm install
 npm run dev
 Uygulama başarıyla derlendiğinde tarayıcınızda http://localhost:5173 veya http://localhost:3000 adresine giderek platformu deneyimleyebilirsiniz.
 
+---
 👩‍💻 Geliştirici
 F. Nilay Süzer, Bilişim sistemleri mühendisliği öğrencisi | Full-Stack Web Developer
 
