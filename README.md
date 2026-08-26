@@ -18,7 +18,7 @@
    - [Kullanıcı Arayüzü & Keşif Modülü](#1-kullanıcı-arayüzü--keşif-modülü)
    - [Ürün Detay & Etkileşim Yönetimi](#2-ürün-detay--etkileşim-yönetimi)
    - [Sepet, Kupon ve Ödeme Akışı](#3-sepet-kupon-ve-ödeme-akışı)
-   - [Plak Takas & Satış Ekosistemi (Trade-In)](#4--plak-takas--satış-ekosistemi)
+   - [Plak Takas & Satış Ekosistemi](#4--plak-takas--satış-ekosistemi)
    - [Kullanıcı ve Hesap Yönetimi](#5-kullanıcı-ve-hesap-yönetimi)
    - [Admin Yönetim ve Kontrol Paneli](#6-️-admin-yönetim-ve-kontrol-paneli)
 3. [Teknoloji Yığını ve Altyapı (Tech Stack)](#️-teknoloji-yığını-ve-altyapı-tech-stack)
@@ -56,7 +56,7 @@ Sistem, kullanıcıların sadece plak satın almasını değil, sahip oldukları
 - **Dinamik Kupon ve Fiyatlandırma Motoru:** Admin tarafından veritabanında oluşturulan kuponların (Yüzdelik oran `%` veya Sabit tutar `₺`) sepette anlık doğrulanmasını sağlayan API servisi yazıldı. İndirim tutarı ve kargo ücreti, genel toplama dinamik olarak yansıtılır.
 - **Sipariş Tamamlama (Checkout):** Kullanıcının sistemde kayıtlı çoklu adresleri arasından seçim yapabilmesi veya anında yeni adres oluşturarak siparişi tamamlaması sağlandı.
 
-### 4. Plak Takas & Satış Ekosistemi (Trade-In)
+### 4. Plak Takas & Satış Ekosistemi
 Sistemin en can alıcı noktası olan Trade-In modülü, kullanıcının dükkanla doğrudan ticaret yapmasına olanak tanır.
 - **Güvenli Teklif Oluşturma:** Kullanıcı; plağın adı, sanatçısı, kondisyonu, görsel URL'si, ek açıklaması (baskı yılı, kusurlar) ve talep ettiği nakit tutar ile teklif formu oluşturur. "Nakit Satış" veya "Plak Takası" işlem tipleri mevcuttur.
 - **Yetkilendirme Kontrolü:** Form, JWT tabanlı kimlik doğrulama duvarı (Auth Guard) arkasındadır. Giriş yapmamış kullanıcılar yakalanarak login'e yönlendirilir.
