@@ -153,7 +153,7 @@ Bash
 git clone https://github.com/NilaySuzer/vinvin-vintage-vinyls.git
 cd vinvin-vintage-vinyls
 
-3. Backend Konfigürasyonu
+2. Backend Konfigürasyonu
    
 Bash
 cd backend
