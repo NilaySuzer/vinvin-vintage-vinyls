@@ -13,7 +13,7 @@
 ---
 
 ## 📖 İçindekiler
-1. [Proje Vizyonu ve Mimari Özeti](#-proje-vizyonu-ve-mimari-özeti)
+1. [Proje Vizyonu ve Mimari Özeti]
 2. [Sistem Özellikleri ve İş Mantığı (Business Logic)](#-sistem-özellikleri-ve-iş-mantığı-business-logic)
    - [Kullanıcı Arayüzü & Keşif Modülü](#1-kullanıcı-arayüzü--keşif-modülü)
    - [Ürün Detay & Etkileşim Yönetimi](#2-ürün-detay--etkileşim-yönetimi)
