@@ -148,10 +148,13 @@ vinvin/
 Projeyi kendi bilgisayarınızda çalıştırmak için aşağıdaki adımları sırasıyla uygulayın.
 
 1. Repoyu Klonlayın
+   
 Bash
 git clone https://github.com/NilaySuzer/vinvin-vintage-vinyls.git
 cd vinvin-vintage-vinyls
-2. Backend Konfigürasyonu
+
+3. Backend Konfigürasyonu
+   
 Bash
 cd backend
 npm install
@@ -165,6 +168,7 @@ Sunucuyu geliştirme modunda başlatın:
 
 Bash
 npm run dev
+
 3. Frontend Konfigürasyonu
 Yeni bir terminal sekmesi açarak frontend dizinine geçin:
 
@@ -172,6 +176,7 @@ Bash
 cd frontend
 npm install
 npm run dev
+
 Uygulama başarıyla derlendiğinde tarayıcınızda http://localhost:5173 veya http://localhost:3000 adresine giderek platformu deneyimleyebilirsiniz.
 
 ## 👩‍💻 Geliştirici
