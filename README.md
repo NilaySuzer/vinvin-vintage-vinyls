@@ -18,7 +18,7 @@
    - [Kullanıcı Arayüzü & Keşif Modülü](#1-kullanıcı-arayüzü--keşif-modülü)
    - [Ürün Detay & Etkileşim Yönetimi](#2-ürün-detay--etkileşim-yönetimi)
    - [Sepet, Kupon ve Ödeme Akışı](#3-sepet-kupon-ve-ödeme-akışı)
-   - [Plak Takas & Satış Ekosistemi (Trade-In)](#4--plak-takas--satış-ekosistemi-trade-in)
+   - [Plak Takas & Satış Ekosistemi (Trade-In)](#4--plak-takas--satış-ekosistemi)
    - [Kullanıcı ve Hesap Yönetimi](#5-kullanıcı-ve-hesap-yönetimi)
    - [Admin Yönetim ve Kontrol Paneli](#6-️-admin-yönetim-ve-kontrol-paneli)
 3. [Teknoloji Yığını ve Altyapı (Tech Stack)](#️-teknoloji-yığını-ve-altyapı-tech-stack)
