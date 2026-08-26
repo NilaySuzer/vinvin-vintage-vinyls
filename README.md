@@ -1,12 +1,12 @@
 <div align="center">
-  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
-  <img src="https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white" alt="NodeJS" />
-  <img src="https://img.shields.io/badge/Express.js-404D59?style=for-the-badge" alt="Express" />
-  <img src="https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" />
-  <img src="https://img.shields.io/badge/JWT-Black?style=for-the-badge&logo=JSON%20web%20tokens" alt="JWT" />
+  <img src="[https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)" alt="React" />
+  <img src="[https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)" alt="NodeJS" />
+  <img src="[https://img.shields.io/badge/Express.js-404D59?style=for-the-badge](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)" alt="Express" />
+  <img src="[https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)" alt="MongoDB" />
+  <img src="[https://img.shields.io/badge/JWT-Black?style=for-the-badge&logo=JSON%20web%20tokens](https://img.shields.io/badge/JWT-Black?style=for-the-badge&logo=JSON%20web%20tokens)" alt="JWT" />
   <br/>
-  <h1> VinVin</h1>
-  <h3> VinVin Vintage Vinyls E-ticaret Websitesi</h3>
+  <h1>VinVin</h1>
+  <h3>VinVin Vintage Vinyls E-ticaret Websitesi</h3>
   <p>Modern e-ticaret dinamiklerini retro müzik kültürü ve Neo-Brutalist tasarım diliyle birleştiren uçtan uca Full-Stack Web Platformu.</p>
 </div>
 
@@ -14,19 +14,19 @@
 
 ## 📖 İçindekiler
 1. [Proje Vizyonu ve Mimari Özeti](#-proje-vizyonu-ve-mimari-özeti)
-2. [Sistem Özellikleri ve İş Mantığı (Business Logic)](#-sistem-özellikleri-ve-iş-mantığı)
+2. [Sistem Özellikleri ve İş Mantığı (Business Logic)](#-sistem-özellikleri-ve-iş-mantığı-business-logic)
    - [Kullanıcı Arayüzü & Keşif Modülü](#1-kullanıcı-arayüzü--keşif-modülü)
    - [Ürün Detay & Etkileşim Yönetimi](#2-ürün-detay--etkileşim-yönetimi)
    - [Sepet, Kupon ve Ödeme Akışı](#3-sepet-kupon-ve-ödeme-akışı)
-   - [Plak Takas & Satış Ekosistemi](#4--plak-takas--satış-ekosistemi)
+   - [Plak Takas & Satış Ekosistemi](#4-plak-takas--satış-ekosistemi)
    - [Kullanıcı ve Hesap Yönetimi](#5-kullanıcı-ve-hesap-yönetimi)
    - [Admin Yönetim ve Kontrol Paneli](#6-️-admin-yönetim-ve-kontrol-paneli)
-3. [Teknoloji Yığını ve Altyapı (Tech Stack)](#️-teknoloji-yığını-ve-altyapı-tech-stack)
-4. [Veritabanı Tasarımı ve Modeller (Schema Relationships)](#️-veritabanı-tasarımı-ve-modeller-schema-relationships)
+3. [Teknoloji Yığını ve Altyapı (Tech Stack)](#-teknoloji-yığını-ve-altyapı-tech-stack)
+4. [Veritabanı Tasarımı ve Modeller (Schema Relationships)](#-veritabanı-tasarımı-ve-modeller-schema-relationships)
 5. [Güvenlik ve Performans Optimizasyonları](#-güvenlik-ve-performans-optimizasyonları)
 6. [Dizin Yapısı (Directory Structure)](#-dizin-yapısı-directory-structure)
-7. [Yerel Geliştirme Ortamı Kurulumu (Local Setup)](#yerel-geliştirme-ortamı-kurulumu-local-setup)
-8. [Geliştirici](#geliştirici)
+7. [Yerel Geliştirme Ortamı Kurulumu (Local Setup)](#-yerel-geliştirme-ortamı-kurulumu-local-setup)
+8. [Geliştirici](#-geliştirici)
 
 ---
 
@@ -66,7 +66,6 @@ Sistemin en can alıcı noktası olan Trade-In modülü, kullanıcının dükkan
 - **Canlı Teklif Takibi (Trade-In Dashboard):** Kullanıcının ilettiği tekliflerin State Machine tabanlı durum takibi (*⏳ İnceleniyor, ✓ Onaylandı, ✕ Reddedildi*), adminin belirlediği karşı teklif tutarı (TL) ve özel notu anlık olarak bu panelde render edilir.
 - **Bildirim (Notification) Sistemi:** Admin, bir teklife veya siparişe yanıt verdiğinde; tetiklenen backend servisi kullanıcının sağ üst köşesindeki bildirim çanına (Notification Bell) okunmamış bir uyarı düşürür.
 
-
 ### 6. ⚙️ Admin Yönetim ve Kontrol Paneli
 Tam yetkili kullanıcılar (Role: Admin) için geliştirilen arkaplan yönetim sistemi:
 - **Ürün Yönetimi (CRUD):** Yeni plak ekleme, detay güncelleme ve silme operasyonları. (Ad, sanatçı, stok, fiyat, görsel linki, tür ve kondisyon parametreleri ile).
@@ -74,7 +73,7 @@ Tam yetkili kullanıcılar (Role: Admin) için geliştirilen arkaplan yönetim s
 - **Kupon ve İndirim Yönetimi:** Belirli kampanya dönemleri için aktiflik süresi ve limiti olan kupon kodları (Promo Codes) tanımlama.
 - **Sipariş İzleme:** Sisteme düşen tüm kullanıcı siparişlerini aşamalarına göre görüntüleme ve yönetme.
 - **Bildirim/Duyuru Gönderme:** Tüm kullanıcılara genel duyuru etiketi ile bildirim yollama.
-- **Görüş&Öneri İnceleme:** Sisteme düşen kullanıcı görüş, istek ve önerilerini görüntüleyebilme.
+- **Görüş & Öneri İnceleme:** Sisteme düşen kullanıcı görüş, istek ve önerilerini görüntüleyebilme.
 
 ---
 
@@ -103,7 +102,7 @@ Tam yetkili kullanıcılar (Role: Admin) için geliştirilen arkaplan yönetim s
 
 ## 🗄️ Veritabanı Tasarımı ve Modeller (Schema Relationships)
 
-Sistem birbiriyle ilişkili 6 temel koleksiyon üzerinden asenkron olarak çalışır:
+Sistem birbiriyle ilişkili 8 temel koleksiyon üzerinden asenkron olarak çalışır:
 1. `users`: Kullanıcı kimlik bilgileri, adresleri ve rolü (User/Admin).
 2. `products`: Plaklara ait katalog verileri, stok, kondisyon ve kategori bilgileri.
 3. `orders`: Sepet içeriği, uygulanan kupon, toplam tutar, kargo bedeli ve teslimat adresi eşleşmeleri. *(User ile 1:N ilişki)*
@@ -118,7 +117,7 @@ Sistem birbiriyle ilişkili 6 temel koleksiyon üzerinden asenkron olarak çalı
 ## 🔒 Güvenlik ve Performans Optimizasyonları
 - **Authentication Guard:** API uç noktalarında (özellikle teklif oluşturma, sipariş verme ve admin route'larında) JWT Token doğrulaması yapılmadan veri dönülmez (401 Unauthorized / 403 Forbidden).
 - **Mobile-First & Cross-Device Uyumluluğu:** Dokunmatik ekranlarda buton ve kart etkileşimlerinin (hover/active state) optimize edilmesi, yatay kaydırma (horizontal scroll) alanlarının mobil cihazlarda akıcı kaydırma (touch-friendly) deneyimi sunması.
-  - **Şifre Güvenliği:** Veritabanında hiçbir şifre plain-text tutulmaz, `bcrypt` ile tuzlanarak (salt & hash) saklanır.
+- **Şifre Güvenliği:** Veritabanında hiçbir şifre plain-text tutulmaz, `bcrypt` ile tuzlanarak (salt & hash) saklanır.
 - **Optimized Re-rendering:** React tarafında gereksiz render'ları önlemek için form state'lerinde kontrollü bileşen (controlled components) mantığı ve güvenli optional chaining (`?.`) veri çekme yöntemleri kullanılmıştır.
 - **Graceful Error Handling:** İsteklerin 404 veya 500 dönmesi durumunda uygulamanın çökmesi (crash) engellenmiş, Try-Catch bloklarıyla kullanıcı dostu UI mesajlarına dönüştürülmüştür.
 
@@ -143,21 +142,19 @@ vinvin/
     │   ├── services/             # Axios API instance yapılandırması
     │   ├── App.css ve index.css  # Global Neo-brutalist tema ayarları
     │   └── App.jsx               # Global State, Context Provider'lar ve Routing şeması
-
-
 ```
-## Yerel Geliştirme Ortamı Kurulumu (Local Setup)
+🚀 Yerel Geliştirme Ortamı Kurulumu (Local Setup)
 Projeyi kendi bilgisayarınızda çalıştırmak için aşağıdaki adımları sırasıyla uygulayın.
 
 1. Repoyu Klonlayın
 Bash
-git clone [https://github.com/kullaniciadi/vinvin-vintage-vinyls.git](https://github.com/kullaniciadi/vinvin-vintage-vinyls.git)
-cd vinvin
+git clone https://github.com/NilaySuzer/vinvin-vintage-vinyls.git
+cd vinvin-vintage-vinyls
 2. Backend Konfigürasyonu
 Bash
 cd backend
 npm install
-backend kök dizininde bir .env dosyası oluşturun ve aşağıdaki environment (ortam) değişkenlerini tanımlayın:
+backend kök dizininde bir .env dosyası oluşturun ve aşağıdaki ortam değişkenlerini tanımlayın:
 
 Kod snippet'i
 PORT=5000
@@ -167,7 +164,6 @@ Sunucuyu geliştirme modunda başlatın:
 
 Bash
 npm run dev
-
 3. Frontend Konfigürasyonu
 Yeni bir terminal sekmesi açarak frontend dizinine geçin:
 
@@ -177,9 +173,8 @@ npm install
 npm run dev
 Uygulama başarıyla derlendiğinde tarayıcınızda http://localhost:5173 veya http://localhost:3000 adresine giderek platformu deneyimleyebilirsiniz.
 
----
-## Geliştirici
-F. Nilay Süzer, Bilişim sistemleri mühendisliği öğrencisi | Full-Stack Web Developer
+👩‍💻 Geliştirici
+F. Nilay Süzer — Bilişim Sistemleri Mühendisliği Öğrencisi | Full-Stack Web Developer
 
 Müzik tutkusu ve temiz kod yazma disipliniyle tasarlandı ve geliştirildi.
 
@@ -187,6 +182,6 @@ Bağlantı kurmak isterseniz:
 
 🔗 LinkedIn: https://www.linkedin.com/in/nilay-suzer-b32387308/
 
-💻 GitHub: [NilaySuzer] [https://github.com/NilaySuzer]
+💻 GitHub: @NilaySuzer
 
 Proje, açık kaynaklı geliştirme pratikleri gözetilerek yazılmıştır. Kod incelemelerine (Code Review) ve yapıcı geri bildirimlere her zaman açıktır.
