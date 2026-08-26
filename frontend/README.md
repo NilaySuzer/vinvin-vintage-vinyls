@@ -143,7 +143,7 @@ vinvin/
     │   └── App.jsx               # Global State, Context Provider'lar ve Routing şeması
 
 
----
+```
 ## Proje Geliştirme Ortamı Kurulumu (Local Setup)
 Projeyi kendi bilgisayarınızda çalıştırmak için aşağıdaki adımları sırasıyla uygulayın.
 
@@ -176,7 +176,7 @@ npm run dev
 Uygulama başarıyla derlendiğinde tarayıcınızda http://localhost:5173 veya http://localhost:3000 adresine giderek platformu deneyimleyebilirsiniz.
 
 ---
-👩‍💻 Geliştirici
+## 👩‍💻 Geliştirici
 F. Nilay Süzer, Bilişim sistemleri mühendisliği öğrencisi | Full-Stack Web Developer
 
 Müzik tutkusu ve temiz kod yazma disipliniyle tasarlandı ve geliştirildi.
