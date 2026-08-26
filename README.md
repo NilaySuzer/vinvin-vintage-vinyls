@@ -1,12 +1,12 @@
 <div align="center">
-  <img src="[https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)" alt="React" />
-  <img src="[https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)" alt="NodeJS" />
-  <img src="[https://img.shields.io/badge/Express.js-404D59?style=for-the-badge](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)" alt="Express" />
-  <img src="[https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)" alt="MongoDB" />
-  <img src="[https://img.shields.io/badge/JWT-Black?style=for-the-badge&logo=JSON%20web%20tokens](https://img.shields.io/badge/JWT-Black?style=for-the-badge&logo=JSON%20web%20tokens)" alt="JWT" />
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
+  <img src="https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white" alt="NodeJS" />
+  <img src="https://img.shields.io/badge/Express.js-404D59?style=for-the-badge" alt="Express" />
+  <img src="https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" />
+  <img src="https://img.shields.io/badge/JWT-Black?style=for-the-badge&logo=JSON%20web%20tokens" alt="JWT" />
   <br/>
-  <h1>VinVin</h1>
-  <h3>VinVin Vintage Vinyls E-ticaret Websitesi</h3>
+  <h1> VinVin</h1>
+  <h3> VinVin Vintage Vinyls E-ticaret Websitesi</h3>
   <p>Modern e-ticaret dinamiklerini retro müzik kültürü ve Neo-Brutalist tasarım diliyle birleştiren uçtan uca Full-Stack Web Platformu.</p>
 </div>
 
