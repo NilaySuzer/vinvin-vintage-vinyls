@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Link, useLocation, useParams, u
 import Sidebar from './components/Sidebar'
 import { LucideHandMetal, Music2Icon, LucideCreditCard, User2Icon, KeyIcon, Bell, ChevronLeft, ChevronRight, Search, X, Disc, Star, ShoppingCart, ShoppingBag, Heart, CheckCircle, ShieldCheck, Truck, CreditCard, User, LogOut, Filter, ArrowUpDown, ChessQueenIcon, Tv2Icon, RadioIcon, LucideTv2, Music4Icon } from 'lucide-react';
 import API from './services/api';
-import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
 import CampaignsPage from './pages/CampaignsPage.jsx';
 import AccountPage from './pages/AccountPage.jsx';
