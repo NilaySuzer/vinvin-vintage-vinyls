@@ -13,20 +13,20 @@
 ---
 
 ## 📖 İçindekiler
-1. [Proje Vizyonu ve Mimari Özeti](#-proje-vizyonu-ve-mimari-özeti)
-2. [Sistem Özellikleri ve İş Mantığı (Business Logic)](#-sistem-özellikleri-ve-iş-mantığı)
+1. Proje Vizyonu ve Mimari Özeti
+2. Sistem Özellikleri ve İş Mantığı (Business Logic)
    - [Kullanıcı Arayüzü & Keşif Modülü](#1-kullanıcı-arayüzü--keşif-modülü)
    - [Ürün Detay & Etkileşim Yönetimi](#2-ürün-detay--etkileşim-yönetimi)
    - [Sepet, Kupon ve Ödeme Akışı](#3-sepet-kupon-ve-ödeme-akışı)
-   - [Plak Takas & Satış Ekosistemi (Trade-In)](#4--plak-takas--satış-ekosistemi-trade-in)
+   - [Plak Takas & Satış Ekosistemi](#4-plak-takas--satış-ekosistemi)
    - [Kullanıcı ve Hesap Yönetimi](#5-kullanıcı-ve-hesap-yönetimi)
-   - [Admin Yönetim ve Kontrol Paneli](#6--admin-yönetim-ve-kontrol-paneli)
-3. [Teknoloji Yığını ve Altyapı (Tech Stack)](#-teknoloji-yığını-ve-altyapı-tech-stack)
-4. [Veritabanı Tasarımı (Schema Relationships)](#-veritabanı-tasarımı-ve-modeller)
-5. [Güvenlik ve Performans Optimizasyonları](#-güvenlik-ve-performans-optimizasyonları)
-6. [Dizin Yapısı (Directory Structure)](#-dizin-yapısı-directory-structure)
-7. [Yerel Geliştirme Ortamı Kurulumu](#-yerel-geliştirme-ortamı-kurulumu-local-setup)
-8. [Geliştirici](#-geliştirici)
+   - [Admin Yönetim ve Kontrol Paneli](#6-️-admin-yönetim-ve-kontrol-paneli)
+3. Teknoloji Yığını ve Altyapı (Tech Stack)
+4. Veritabanı Tasarımı ve Modeller (Schema Relationships)
+5. Güvenlik ve Performans Optimizasyonları
+6. Dizin Yapısı (Directory Structure)
+7. Yerel Geliştirme Ortamı Kurulumu (Local Setup)
+8. Geliştirici
 
 ---
 
@@ -38,7 +38,7 @@ Sistem, kullanıcıların sadece plak satın almasını değil, sahip oldukları
 
 ---
 
-## ⚙️ Sistem Özellikleri ve İş Mantığı
+## ⚙️ Sistem Özellikleri ve İş Mantığı (Business Logic)
 
 ### 1. Kullanıcı Arayüzü & Keşif Modülü
 - **Neo-Brutalist Tasarım Sistemi:** Kullanıcı deneyimini (UX) retro bir hissiyatla sunmak için endüstriyel tasarım standartları uygulandı. Keskin kenarlıklar (3px-4px solid black border), sert kutu gölgeleri (`box-shadow: 4px 4px 0px`), kutu kalabalığından arındırılmış akıcı layout ve yüksek kontrastlı renk paleti kullanıldı.
@@ -50,13 +50,14 @@ Sistem, kullanıcıların sadece plak satın almasını değil, sahip oldukları
 - **Kondisyon Derecelendirme (Grading System):** İkinci el piyasası standartlarına uygun olarak plakların kondisyon durumları (*Jelatininde, Kusursuz, Çok İyi, İyi, Çalınabilir*) şeffaf bir şekilde veri setine dahil edildi.
 - **İlişkisel Önerme Algoritması (Benzer Plaklar):** Detay sayfasında, kullanıcının incelediği ürünle aynı kategoride bulunan diğer plaklar; albüm kapakları, sanatçı ve fiyat bilgileriyle yatay kaydırılabilir (horizontal scroll) interaktif bir yapıda listelenir.
 - **Stok & Fiyat Senkronizasyonu:** Gerçek zamanlı stok kontrolü yapılarak, backend üzerinden tükenen ürünler için sepet kısıtlaması getirildi.
+- **Ürün Yorumları:** Misaifir mi? Kullanıcı mı? kontrolü yapılarak puanlama ve yorum yazma alanı içeren, yazılan yorumları veritabanında ürünün yorum array'ine ekleyen yorum yapma alanı entegre edildi.
 
 ### 3. Sepet, Kupon ve Ödeme Akışı
 - **State Persistence (Kalıcı Sepet):** Sepet verileri React State ve Tarayıcı `localStorage` arasında senkronize edilerek sayfa yenilemelerinde veri kaybı önlendi. Miktar (Qty) artırma/azaltma ve ürün çıkarma işlemleri mutasyonsuz (immutable) state güncellemeleriyle yapıldı.
 - **Dinamik Kupon ve Fiyatlandırma Motoru:** Admin tarafından veritabanında oluşturulan kuponların (Yüzdelik oran `%` veya Sabit tutar `₺`) sepette anlık doğrulanmasını sağlayan API servisi yazıldı. İndirim tutarı ve kargo ücreti, genel toplama dinamik olarak yansıtılır.
 - **Sipariş Tamamlama (Checkout):** Kullanıcının sistemde kayıtlı çoklu adresleri arasından seçim yapabilmesi veya anında yeni adres oluşturarak siparişi tamamlaması sağlandı.
 
-### 4. Plak Takas & Satış Ekosistemi (Trade-In) *[Core Feature]*
+### 4. Plak Takas & Satış Ekosistemi
 Sistemin en can alıcı noktası olan Trade-In modülü, kullanıcının dükkanla doğrudan ticaret yapmasına olanak tanır.
 - **Güvenli Teklif Oluşturma:** Kullanıcı; plağın adı, sanatçısı, kondisyonu, görsel URL'si, ek açıklaması (baskı yılı, kusurlar) ve talep ettiği nakit tutar ile teklif formu oluşturur. "Nakit Satış" veya "Plak Takası" işlem tipleri mevcuttur.
 - **Yetkilendirme Kontrolü:** Form, JWT tabanlı kimlik doğrulama duvarı (Auth Guard) arkasındadır. Giriş yapmamış kullanıcılar yakalanarak login'e yönlendirilir.
@@ -66,7 +67,6 @@ Sistemin en can alıcı noktası olan Trade-In modülü, kullanıcının dükkan
 - **Canlı Teklif Takibi (Trade-In Dashboard):** Kullanıcının ilettiği tekliflerin State Machine tabanlı durum takibi (*⏳ İnceleniyor, ✓ Onaylandı, ✕ Reddedildi*), adminin belirlediği karşı teklif tutarı (TL) ve özel notu anlık olarak bu panelde render edilir.
 - **Bildirim (Notification) Sistemi:** Admin, bir teklife veya siparişe yanıt verdiğinde; tetiklenen backend servisi kullanıcının sağ üst köşesindeki bildirim çanına (Notification Bell) okunmamış bir uyarı düşürür.
 
-
 ### 6. ⚙️ Admin Yönetim ve Kontrol Paneli
 Tam yetkili kullanıcılar (Role: Admin) için geliştirilen arkaplan yönetim sistemi:
 - **Ürün Yönetimi (CRUD):** Yeni plak ekleme, detay güncelleme ve silme operasyonları. (Ad, sanatçı, stok, fiyat, görsel linki, tür ve kondisyon parametreleri ile).
@@ -74,7 +74,7 @@ Tam yetkili kullanıcılar (Role: Admin) için geliştirilen arkaplan yönetim s
 - **Kupon ve İndirim Yönetimi:** Belirli kampanya dönemleri için aktiflik süresi ve limiti olan kupon kodları (Promo Codes) tanımlama.
 - **Sipariş İzleme:** Sisteme düşen tüm kullanıcı siparişlerini aşamalarına göre görüntüleme ve yönetme.
 - **Bildirim/Duyuru Gönderme:** Tüm kullanıcılara genel duyuru etiketi ile bildirim yollama.
-- **Görüş&Öneri İnceleme:** Sisteme düşen kullanıcı görüş, istek ve önerilerini görüntüleyebilme.
+- **Görüş & Öneri İnceleme:** Sisteme düşen kullanıcı görüş, istek ve önerilerini görüntüleyebilme.
 
 ---
 
@@ -103,20 +103,22 @@ Tam yetkili kullanıcılar (Role: Admin) için geliştirilen arkaplan yönetim s
 
 ## 🗄️ Veritabanı Tasarımı ve Modeller (Schema Relationships)
 
-Sistem birbiriyle ilişkili 6 temel koleksiyon üzerinden asenkron olarak çalışır:
-1. `User`: Kullanıcı kimlik bilgileri, adresleri ve rolü (User/Admin).
-2. `Product`: Plaklara ait katalog verileri, stok, kondisyon ve kategori bilgileri.
-3. `Order`: Sepet içeriği, uygulanan kupon, toplam tutar, kargo bedeli ve teslimat adresi eşleşmeleri. *(User ile 1:N ilişki)*
-4. `TradeOffer`: Kullanıcıdan gelen takas/satış teklifleri, istenen tutar, admin karşı teklifi ve işlem durumu (State). *(User ile 1:N ilişki)*
-5. `Coupon`: İndirim kodları, kullanım limitleri ve geçerlilik tarihleri.
-6. `Notification`: Kullanıcı aksiyonlarına (sipariş onay, teklif yanıtı) bağlı oluşturulan anlık bildirim kayıtları.
+Sistem birbiriyle ilişkili 8 temel koleksiyon üzerinden asenkron olarak çalışır:
+1. `users`: Kullanıcı kimlik bilgileri, adresleri ve rolü (User/Admin).
+2. `products`: Plaklara ait katalog verileri, stok, kondisyon ve kategori bilgileri, ürün yorumları.
+3. `orders`: Sepet içeriği, uygulanan kupon, toplam tutar, kargo bedeli ve teslimat adresi eşleşmeleri. *(User ile 1:N ilişki)*
+4. `tradeoffers`: Kullanıcıdan gelen takas/satış teklifleri, istenen tutar, admin karşı teklifi ve işlem durumu (State). *(User ile 1:N ilişki)*
+5. `coupons`: İndirim kodları ve tanımlandıkları kategoriler, kullanım limitleri ve geçerlilik tarihleri.
+6. `notifications`: Kullanıcı aksiyonlarına (sipariş onay, teklif yanıtı) bağlı oluşturulan anlık bildirim kayıtları.
+7. `campaigns`: Vitrin banner'ları, dönemsel indirim duyuruları ve öne çıkan vitrin kampanyalarını dinamik olarak yöneten veri şeması.
+8. `feedbacks`: Kullanıcıların platform deneyimi, sipariş süreci veya dükkan hizmeti hakkında ilettiği geri bildirim ve değerlendirmeleri tutan koleksiyon.
 
 ---
 
 ## 🔒 Güvenlik ve Performans Optimizasyonları
 - **Authentication Guard:** API uç noktalarında (özellikle teklif oluşturma, sipariş verme ve admin route'larında) JWT Token doğrulaması yapılmadan veri dönülmez (401 Unauthorized / 403 Forbidden).
 - **Mobile-First & Cross-Device Uyumluluğu:** Dokunmatik ekranlarda buton ve kart etkileşimlerinin (hover/active state) optimize edilmesi, yatay kaydırma (horizontal scroll) alanlarının mobil cihazlarda akıcı kaydırma (touch-friendly) deneyimi sunması.
-  - **Şifre Güvenliği:** Veritabanında hiçbir şifre plain-text tutulmaz, `bcrypt` ile tuzlanarak (salt & hash) saklanır.
+- **Şifre Güvenliği:** Veritabanında hiçbir şifre plain-text tutulmaz, `bcrypt` ile tuzlanarak (salt & hash) saklanır.
 - **Optimized Re-rendering:** React tarafında gereksiz render'ları önlemek için form state'lerinde kontrollü bileşen (controlled components) mantığı ve güvenli optional chaining (`?.`) veri çekme yöntemleri kullanılmıştır.
 - **Graceful Error Handling:** İsteklerin 404 veya 500 dönmesi durumunda uygulamanın çökmesi (crash) engellenmiş, Try-Catch bloklarıyla kullanıcı dostu UI mesajlarına dönüştürülmüştür.
 
@@ -141,21 +143,22 @@ vinvin/
     │   ├── services/             # Axios API instance yapılandırması
     │   ├── App.css ve index.css  # Global Neo-brutalist tema ayarları
     │   └── App.jsx               # Global State, Context Provider'lar ve Routing şeması
-
-
 ```
-## Proje Geliştirme Ortamı Kurulumu (Local Setup)
+## 🚀 Yerel Geliştirme Ortamı Kurulumu (Local Setup)
 Projeyi kendi bilgisayarınızda çalıştırmak için aşağıdaki adımları sırasıyla uygulayın.
 
 1. Repoyu Klonlayın
+   
 Bash
-git clone [https://github.com/kullaniciadi/vinvin-vintage-vinyls.git](https://github.com/kullaniciadi/vinvin-vintage-vinyls.git)
-cd vinvin
+git clone https://github.com/NilaySuzer/vinvin-vintage-vinyls.git
+cd vinvin-vintage-vinyls
+
 2. Backend Konfigürasyonu
+   
 Bash
 cd backend
 npm install
-backend kök dizininde bir .env dosyası oluşturun ve aşağıdaki environment (ortam) değişkenlerini tanımlayın:
+backend kök dizininde bir .env dosyası oluşturun ve aşağıdaki ortam değişkenlerini tanımlayın:
 
 Kod snippet'i
 PORT=5000
@@ -173,11 +176,11 @@ Bash
 cd frontend
 npm install
 npm run dev
+
 Uygulama başarıyla derlendiğinde tarayıcınızda http://localhost:5173 veya http://localhost:3000 adresine giderek platformu deneyimleyebilirsiniz.
 
----
 ## 👩‍💻 Geliştirici
-F. Nilay Süzer, Bilişim sistemleri mühendisliği öğrencisi | Full-Stack Web Developer
+F. Nilay Süzer — Bilişim Sistemleri Mühendisliği Öğrencisi | Full-Stack Web Developer
 
 Müzik tutkusu ve temiz kod yazma disipliniyle tasarlandı ve geliştirildi.
 
