@@ -18,14 +18,14 @@
    - [Kullanıcı Arayüzü & Keşif Modülü](#1-kullanıcı-arayüzü--keşif-modülü)
    - [Ürün Detay & Etkileşim Yönetimi](#2-ürün-detay--etkileşim-yönetimi)
    - [Sepet, Kupon ve Ödeme Akışı](#3-sepet-kupon-ve-ödeme-akışı)
-   - [Plak Takas & Satış Ekosistemi (Trade-In)](#4--plak-takas--satış-ekosistemi-trade-in)
+   - [Plak Takas & Satış Ekosistemi (Trade-In)](#4--plak-takas--satış-ekosistemi-trade-in-core-feature)
    - [Kullanıcı ve Hesap Yönetimi](#5-kullanıcı-ve-hesap-yönetimi)
-   - [Admin Yönetim ve Kontrol Paneli](#6--admin-yönetim-ve-kontrol-paneli)
-3. [Teknoloji Yığını ve Altyapı (Tech Stack)](#-teknoloji-yığını-ve-altyapı-tech-stack)
-4. [Veritabanı Tasarımı (Schema Relationships)](#-veritabanı-tasarımı)
+   - [Admin Yönetim ve Kontrol Paneli](#6-️-admin-yönetim-ve-kontrol-paneli)
+3. [Teknoloji Yığını ve Altyapı (Tech Stack)](#️-teknoloji-yığını-ve-altyapı-tech-stack)
+4. [Veritabanı Tasarımı ve Modeller (Schema Relationships)](#️-veritabanı-tasarımı-ve-modeller-schema-relationships)
 5. [Güvenlik ve Performans Optimizasyonları](#-güvenlik-ve-performans-optimizasyonları)
 6. [Dizin Yapısı (Directory Structure)](#-dizin-yapısı-directory-structure)
-7. [Yerel Geliştirme Ortamı Kurulumu](#-yerel-geliştirme-ortamı-kurulumu)
+7. [Yerel Geliştirme Ortamı Kurulumu (Local Setup)](#-yerel-geliştirme-ortamı-kurulumu-local-setup)
 8. [Geliştirici](#-geliştirici)
 
 ---
@@ -38,7 +38,7 @@ Sistem, kullanıcıların sadece plak satın almasını değil, sahip oldukları
 
 ---
 
-## ⚙️ Sistem Özellikleri ve İş Mantığı
+## ⚙️ Sistem Özellikleri ve İş Mantığı (Business Logic)
 
 ### 1. Kullanıcı Arayüzü & Keşif Modülü
 - **Neo-Brutalist Tasarım Sistemi:** Kullanıcı deneyimini (UX) retro bir hissiyatla sunmak için endüstriyel tasarım standartları uygulandı. Keskin kenarlıklar (3px-4px solid black border), sert kutu gölgeleri (`box-shadow: 4px 4px 0px`), kutu kalabalığından arındırılmış akıcı layout ve yüksek kontrastlı renk paleti kullanıldı.
@@ -101,7 +101,7 @@ Tam yetkili kullanıcılar (Role: Admin) için geliştirilen arkaplan yönetim s
 
 ---
 
-## 🗄️ Veritabanı Tasarımı (Schema Relationships)
+## 🗄️ Veritabanı Tasarımı ve Modeller (Schema Relationships)
 
 Sistem birbiriyle ilişkili 6 temel koleksiyon üzerinden asenkron olarak çalışır:
 1. `users`: Kullanıcı kimlik bilgileri, adresleri ve rolü (User/Admin).
@@ -146,7 +146,7 @@ vinvin/
 
 
 ```
-## Yerel Geliştirme Ortamı Kurulumu
+## Yerel Geliştirme Ortamı Kurulumu (Local Setup)
 Projeyi kendi bilgisayarınızda çalıştırmak için aşağıdaki adımları sırasıyla uygulayın.
 
 1. Repoyu Klonlayın
@@ -187,6 +187,6 @@ Bağlantı kurmak isterseniz:
 
 🔗 LinkedIn: https://www.linkedin.com/in/nilay-suzer-b32387308/
 
-💻 GitHub: [NilaySuzer]
+💻 GitHub: [NilaySuzer] [https://github.com/NilaySuzer]
 
 Proje, açık kaynaklı geliştirme pratikleri gözetilerek yazılmıştır. Kod incelemelerine (Code Review) ve yapıcı geri bildirimlere her zaman açıktır.
