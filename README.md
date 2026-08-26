@@ -101,7 +101,7 @@ Tam yetkili kullanıcılar (Role: Admin) için geliştirilen arkaplan yönetim s
 
 ---
 
-## 🗄️ Veritabanı Tasarımı ve Modeller (Schema Relationships)
+## 🗄️ Veritabanı Tasarımı (Schema Relationships)
 
 Sistem birbiriyle ilişkili 6 temel koleksiyon üzerinden asenkron olarak çalışır:
 1. `User`: Kullanıcı kimlik bilgileri, adresleri ve rolü (User/Admin).
@@ -144,7 +144,7 @@ vinvin/
 
 
 ```
-## Proje Geliştirme Ortamı Kurulumu (Local Setup)
+## Yerel Geliştirme Ortamı Kurulumu (Local Setup)
 Projeyi kendi bilgisayarınızda çalıştırmak için aşağıdaki adımları sırasıyla uygulayın.
 
 1. Repoyu Klonlayın
