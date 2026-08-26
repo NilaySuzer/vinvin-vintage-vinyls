@@ -22,11 +22,11 @@
    - [Kullanıcı ve Hesap Yönetimi](#5-kullanıcı-ve-hesap-yönetimi)
    - [Admin Yönetim ve Kontrol Paneli](#6--admin-yönetim-ve-kontrol-paneli)
 3. [Teknoloji Yığını ve Altyapı (Tech Stack)](#-teknoloji-yığını-ve-altyapı-tech-stack)
-4. [Veritabanı Tasarımı (Schema Relationships)](#-veritabanı-tasarımı-ve-modeller)
+4. [Veritabanı Tasarımı (Schema Relationships)](#-veritabanı-tasarımı)
 5. [Güvenlik ve Performans Optimizasyonları](#-güvenlik-ve-performans-optimizasyonları)
 6. [Dizin Yapısı (Directory Structure)](#-dizin-yapısı-directory-structure)
-7. [Yerel Geliştirme Ortamı Kurulumu](#-yerel-geliştirme-ortamı-kurulumu-local-setup)
-8. [Geliştirici](#-geliştirici)
+7. [Yerel Geliştirme Ortamı Kurulumu](#-yerel-geliştirme-ortamı-kurulumu)
+8. [Geliştirici](#--geliştirici)
 
 ---
 
@@ -104,12 +104,14 @@ Tam yetkili kullanıcılar (Role: Admin) için geliştirilen arkaplan yönetim s
 ## 🗄️ Veritabanı Tasarımı (Schema Relationships)
 
 Sistem birbiriyle ilişkili 6 temel koleksiyon üzerinden asenkron olarak çalışır:
-1. `User`: Kullanıcı kimlik bilgileri, adresleri ve rolü (User/Admin).
-2. `Product`: Plaklara ait katalog verileri, stok, kondisyon ve kategori bilgileri.
-3. `Order`: Sepet içeriği, uygulanan kupon, toplam tutar, kargo bedeli ve teslimat adresi eşleşmeleri. *(User ile 1:N ilişki)*
-4. `TradeOffer`: Kullanıcıdan gelen takas/satış teklifleri, istenen tutar, admin karşı teklifi ve işlem durumu (State). *(User ile 1:N ilişki)*
-5. `Coupon`: İndirim kodları, kullanım limitleri ve geçerlilik tarihleri.
-6. `Notification`: Kullanıcı aksiyonlarına (sipariş onay, teklif yanıtı) bağlı oluşturulan anlık bildirim kayıtları.
+1. `users`: Kullanıcı kimlik bilgileri, adresleri ve rolü (User/Admin).
+2. `products`: Plaklara ait katalog verileri, stok, kondisyon ve kategori bilgileri.
+3. `orders`: Sepet içeriği, uygulanan kupon, toplam tutar, kargo bedeli ve teslimat adresi eşleşmeleri. *(User ile 1:N ilişki)*
+4. `tradeoffers`: Kullanıcıdan gelen takas/satış teklifleri, istenen tutar, admin karşı teklifi ve işlem durumu (State). *(User ile 1:N ilişki)*
+5. `coupons`: İndirim kodları ve tanımlandıkları kategoriler, kullanım limitleri ve geçerlilik tarihleri.
+6. `notifications`: Kullanıcı aksiyonlarına (sipariş onay, teklif yanıtı) bağlı oluşturulan anlık bildirim kayıtları.
+7. `campaigns`: Vitrin banner'ları, dönemsel indirim duyuruları ve öne çıkan vitrin kampanyalarını dinamik olarak yöneten veri şeması.
+8. `feedbacks`: Kullanıcıların platform deneyimi, sipariş süreci veya dükkan hizmeti hakkında ilettiği geri bildirim ve değerlendirmeleri tutan koleksiyon.
 
 ---
 
@@ -144,7 +146,7 @@ vinvin/
 
 
 ```
-## Yerel Geliştirme Ortamı Kurulumu (Local Setup)
+## Yerel Geliştirme Ortamı Kurulumu
 Projeyi kendi bilgisayarınızda çalıştırmak için aşağıdaki adımları sırasıyla uygulayın.
 
 1. Repoyu Klonlayın
