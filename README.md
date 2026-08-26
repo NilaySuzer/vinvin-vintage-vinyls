@@ -21,7 +21,7 @@
    - [Plak Takas & Satış Ekosistemi](#4-plak-takas--satış-ekosistemi)
    - [Kullanıcı ve Hesap Yönetimi](#5-kullanıcı-ve-hesap-yönetimi)
    - [Admin Yönetim ve Kontrol Paneli](#6-️-admin-yönetim-ve-kontrol-paneli)
-3. [Teknoloji Yığını ve Altyapı (Tech Stack)](#-teknoloji-yığını-ve-altyapı-tech-stack)
+3. [Teknoloji Yığını ve Altyapı (Tech Stack)](##-teknoloji-yığını-ve-altyapı-tech-stack)
 4. [Veritabanı Tasarımı ve Modeller (Schema Relationships)](#-veritabanı-tasarımı-ve-modeller-schema-relationships)
 5. [Güvenlik ve Performans Optimizasyonları](#-güvenlik-ve-performans-optimizasyonları)
 6. [Dizin Yapısı (Directory Structure)](#-dizin-yapısı-directory-structure)
@@ -143,7 +143,7 @@ vinvin/
     │   ├── App.css ve index.css  # Global Neo-brutalist tema ayarları
     │   └── App.jsx               # Global State, Context Provider'lar ve Routing şeması
 ```
-🚀 Yerel Geliştirme Ortamı Kurulumu (Local Setup)
+## 🚀 Yerel Geliştirme Ortamı Kurulumu (Local Setup)
 Projeyi kendi bilgisayarınızda çalıştırmak için aşağıdaki adımları sırasıyla uygulayın.
 
 1. Repoyu Klonlayın
@@ -173,7 +173,7 @@ npm install
 npm run dev
 Uygulama başarıyla derlendiğinde tarayıcınızda http://localhost:5173 veya http://localhost:3000 adresine giderek platformu deneyimleyebilirsiniz.
 
-👩‍💻 Geliştirici
+## 👩‍💻 Geliştirici
 F. Nilay Süzer — Bilişim Sistemleri Mühendisliği Öğrencisi | Full-Stack Web Developer
 
 Müzik tutkusu ve temiz kod yazma disipliniyle tasarlandı ve geliştirildi.
