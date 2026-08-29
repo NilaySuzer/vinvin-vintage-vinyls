@@ -177,7 +177,7 @@ cd frontend
 npm install
 npm run dev
 
-Uygulama başarıyla derlendiğinde tarayıcınızda http://localhost:5173 veya http://localhost:3000 adresine giderek platformu deneyimleyebilirsiniz.
+Uygulama başarıyla derlendiğinde tarayıcınızda http://localhost:5173 veya http://localhost:5000 adresine giderek platformu deneyimleyebilirsiniz.
 
 ## 👩‍💻 Geliştirici
 F. Nilay Süzer — Bilişim Sistemleri Mühendisliği Öğrencisi | Full-Stack Web Developer
