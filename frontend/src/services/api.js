@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Backend URL
 const API = axios.create({
-  baseURL: '/api',
+  baseURL: 'http://localhost:5000/api',
 });
 
 API.interceptors.request.use((req) => {
